@@ -1,106 +1,78 @@
-"""URL extraction and lexical feature analysis."""
+"""URL chain resolution and lexical analysis (deterministic)."""
 
 from __future__ import annotations
 
 import re
-from typing import Dict, List
+from typing import Iterable
 from urllib.parse import urlparse
 
-from schemas.email_schema import EmailSchema
+import tldextract
 
-URL_RE = re.compile(r"https?://[^\s]+", re.IGNORECASE)
-OBFUSCATED_DOT_RE = re.compile(r"\[(?:\.)\]|\((?:\.)\)|\{(?:\.)\}")
-OBFUSCATED_HTTP_RE = re.compile(r"hxxps?://", re.IGNORECASE)
-IP_HOST_RE = re.compile(r"^(?:\d{1,3}\.){3}\d{1,3}$")
-SUSPICIOUS_DOMAIN_KEYWORDS = {"login", "verify", "secure", "account", "update"}
-BRAND_KEYWORDS = {
-    "microsoft",
-    "office365",
-    "outlook",
-    "paypal",
-    "google",
-    "apple",
-    "amazon",
-    "icloud",
-    "netflix",
-    "dhl",
-    "ups",
-    "fedex",
-    "bank",
-}
+from schemas.evidence_schema import UrlChainHop, UrlChainItem, UrlChainResult
+
+_IP_RE = re.compile(r"^(?:\d{1,3}\.){3}\d{1,3}$")
+_SUSPICIOUS_TLDS = {"zip", "mov", "click", "xyz", "top", "quest", "gq"}
+_SHORTENERS = {"bit.ly", "tinyurl.com", "t.co", "goo.gl", "ow.ly", "is.gd"}
+_LOGIN_KEYWORDS = {"login", "signin", "verify", "account", "password", "secure"}
+_EXTRACT = tldextract.TLDExtract(suffix_list_urls=None)
 
 
-def _extract_urls(text: str | None) -> List[str]:
-    if not text:
-        return []
-    return URL_RE.findall(text)
-
-
-def _deobfuscate(text: str) -> str:
-    text = OBFUSCATED_HTTP_RE.sub("https://", text)
-    text = OBFUSCATED_DOT_RE.sub(".", text)
-    return text
-
-
-def _clean_url(url: str) -> str:
-    return url.strip(")>].,;\"'")
-
-
-def _normalize_host(host: str) -> str:
-    normalized = host.lower()
-    normalized = (
-        normalized.replace("0", "o")
-        .replace("1", "l")
-        .replace("3", "e")
-        .replace("5", "s")
-        .replace("7", "t")
-    )
-    return normalized
-
-
-def _host_from_url(url: str) -> str:
+def _domain_from_url(url: str) -> str:
     parsed = urlparse(url)
     host = parsed.netloc.split("@")[-1].split(":")[0].lower()
+    if not host:
+        return ""
+    extracted = _EXTRACT(host)
+    if extracted.suffix:
+        return f"{extracted.domain}.{extracted.suffix}"
     return host
 
 
-def analyze_urls(email: EmailSchema) -> Dict[str, object]:
-    raw_body = email.body or ""
-    deobfuscated_body = _deobfuscate(raw_body)
-    raw_urls = email.urls or _extract_urls(raw_body)
-    urls = [_clean_url(url) for url in (_extract_urls(deobfuscated_body) or raw_urls)]
-    findings = []
-    score = 0.0
+def _has_ip_host(url: str) -> bool:
+    parsed = urlparse(url)
+    host = parsed.netloc.split("@")[-1].split(":")[0]
+    return bool(_IP_RE.match(host))
 
-    if urls:
-        score += 0.2
-    if OBFUSCATED_HTTP_RE.search(raw_body) or OBFUSCATED_DOT_RE.search(raw_body):
-        findings.append("obfuscated_url")
-        score += 0.2
-    for url in urls:
-        if "@" in url:
-            findings.append("suspicious_at_symbol")
-            score += 0.2
-        host = _host_from_url(url)
-        if not host:
+
+def _suspicious_tld(domain: str) -> bool:
+    parts = domain.rsplit(".", 1)
+    if len(parts) < 2:
+        return False
+    return parts[-1] in _SUSPICIOUS_TLDS
+
+
+def _contains_login_keywords(url: str) -> bool:
+    lowered = url.lower()
+    return any(keyword in lowered for keyword in _LOGIN_KEYWORDS)
+
+
+def url_chain_resolve(urls: Iterable[str]) -> UrlChainResult:
+    """Resolve URL chains deterministically without network access."""
+
+    chains: list[UrlChainItem] = []
+    errors: list[str] = []
+
+    for raw_url in urls:
+        url = (raw_url or "").strip()
+        if not url:
             continue
-        if IP_HOST_RE.match(host):
-            findings.append("ip_address_url")
-            score += 0.2
-        if "xn--" in host:
-            findings.append("punycode_domain")
-            score += 0.2
-        if host.count("-") >= 2:
-            findings.append("excessive_hyphens")
-            score += 0.1
-        if any(keyword in host for keyword in SUSPICIOUS_DOMAIN_KEYWORDS):
-            findings.append("suspicious_domain_keyword")
-            score += 0.1
-        normalized_host = _normalize_host(host)
-        for brand in BRAND_KEYWORDS:
-            if brand in normalized_host and brand not in host:
-                findings.append("brand_lookalike")
-                score += 0.3
-                break
+        try:
+            final_url = url
+            final_domain = _domain_from_url(final_url)
+            has_ip = _has_ip_host(final_url)
+            chains.append(
+                UrlChainItem(
+                    input=url,
+                    hops=[UrlChainHop(url=url)],
+                    final_url=final_url,
+                    final_domain=final_domain,
+                    has_ip=has_ip,
+                    suspicious_tld=_suspicious_tld(final_domain),
+                    shortener=final_domain in _SHORTENERS,
+                    contains_login_keywords=_contains_login_keywords(final_url),
+                )
+            )
+        except Exception as exc:  # pragma: no cover - defensive
+            errors.append(f"failed:{url}:{exc}")
 
-    return {"score": min(score, 1.0), "urls": urls, "findings": findings}
+    return UrlChainResult(chains=chains, errors=errors)

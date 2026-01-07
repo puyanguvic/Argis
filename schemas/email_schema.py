@@ -1,23 +1,35 @@
-"""Unified email schema."""
+"""Email input schema."""
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
+from datetime import datetime
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
 
-class EmailSchema(BaseModel):
-    subject: Optional[str] = None
-    sender: Optional[str] = None
-    to: List[str] = Field(default_factory=list)
-    cc: List[str] = Field(default_factory=list)
-    body: Optional[str] = None
-    raw_headers: Dict[str, str] = Field(default_factory=dict)
+class AttachmentMeta(BaseModel):
+    """Attachment metadata supplied with the email input."""
+
+    filename: str
+    mime: str
+    size: int
+    sha256: str
+    flags: Optional[List[str]] = None
+
+
+class EmailInput(BaseModel):
+    """Normalized email input required by the detection agent."""
+
+    raw_headers: str
+    subject: str
+    sender: str
+    reply_to: Optional[str] = None
+    body_text: Optional[str] = None
+    body_html: Optional[str] = None
     urls: List[str] = Field(default_factory=list)
-    attachments: List[str] = Field(default_factory=list)
+    attachments: List[AttachmentMeta] = Field(default_factory=list)
+    received_ts: datetime
 
     def summary(self) -> str:
-        subject = self.subject or "(no subject)"
-        sender = self.sender or "(unknown sender)"
-        return f"{subject} from {sender}"
+        return f"{self.subject} from {self.sender}"

@@ -1,42 +1,73 @@
-"""Configuration models for the agent."""
+"""Configuration models for routing and scoring."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Any, Mapping
+from dataclasses import dataclass, field
+from typing import Dict, Mapping, Any
+
+from scoring.fusion import DEFAULT_WEIGHTS
 
 
 @dataclass
-class LLMConfig:
-    enabled: bool = False
-    provider: str = "huggingface_local"
-    model: str = "Qwen/Qwen2.5-1.5B-Instruct"
-    endpoint: str | None = None
-    api_token_env: str = "HF_API_TOKEN"
-    temperature: float = 0.2
-    max_tokens: int = 256
-    timeout_s: float = 20.0
-    llm_weight: float = 0.5
-    use_tao: bool = False
-    tao_max_cycles: int = 6
-    tao_actions: tuple[str, ...] = ("headers", "urls", "content", "attachments")
+class RouterConfig:
+    """Thresholds for routing."""
+
+    t_fast: float = 20.0
+    t_deep: float = 60.0
+    fast_tools: tuple[str, ...] = ("header_auth_check", "semantic_extract")
+    standard_tools: tuple[str, ...] = (
+        "header_auth_check",
+        "semantic_extract",
+        "url_chain_resolve",
+    )
+    deep_tools: tuple[str, ...] = (
+        "header_auth_check",
+        "semantic_extract",
+        "url_chain_resolve",
+        "domain_risk_assess",
+        "attachment_static_scan",
+    )
+    budget_ms: int = 1500
+    timeout_s: float = 2.0
+    fallback: str = "STANDARD"
+
+
+@dataclass
+class ScoringConfig:
+    """Scoring weights configuration."""
+
+    weights: Dict[str, float] = field(default_factory=lambda: dict(DEFAULT_WEIGHTS))
+
+
+@dataclass
+class AgentConfig:
+    """Top-level agent configuration."""
+
+    router: RouterConfig = field(default_factory=RouterConfig)
+    scoring: ScoringConfig = field(default_factory=ScoringConfig)
 
     @classmethod
-    def from_dict(cls, data: Mapping[str, Any] | None) -> "LLMConfig":
+    def from_mapping(cls, data: Mapping[str, Any] | None) -> "AgentConfig":
         if not data:
             return cls()
-
-        return cls(
-            enabled=bool(data.get("enabled", False)),
-            provider=str(data.get("provider", "huggingface_local")),
-            model=str(data.get("model", cls.model)),
-            endpoint=data.get("endpoint"),
-            api_token_env=str(data.get("api_token_env", "HF_API_TOKEN")),
-            temperature=float(data.get("temperature", cls.temperature)),
-            max_tokens=int(data.get("max_tokens", cls.max_tokens)),
-            timeout_s=float(data.get("timeout_s", cls.timeout_s)),
-            llm_weight=float(data.get("llm_weight", cls.llm_weight)),
-            use_tao=bool(data.get("use_tao", cls.use_tao)),
-            tao_max_cycles=int(data.get("tao_max_cycles", cls.tao_max_cycles)),
-            tao_actions=tuple(data.get("tao_actions", cls.tao_actions)),
+        router_data = data.get("router", {})
+        scoring_data = data.get("scoring", {})
+        router = RouterConfig(
+            t_fast=float(router_data.get("t_fast", RouterConfig.t_fast)),
+            t_deep=float(router_data.get("t_deep", RouterConfig.t_deep)),
+            fast_tools=tuple(router_data.get("fast_tools", RouterConfig.fast_tools)),
+            standard_tools=tuple(
+                router_data.get("standard_tools", RouterConfig.standard_tools)
+            ),
+            deep_tools=tuple(router_data.get("deep_tools", RouterConfig.deep_tools)),
+            budget_ms=int(router_data.get("budget_ms", RouterConfig.budget_ms)),
+            timeout_s=float(router_data.get("timeout_s", RouterConfig.timeout_s)),
+            fallback=str(router_data.get("fallback", RouterConfig.fallback)),
         )
+        weights = dict(DEFAULT_WEIGHTS)
+        custom_weights = scoring_data.get("weights")
+        if isinstance(custom_weights, dict):
+            for key, value in custom_weights.items():
+                weights[key] = float(value)
+        scoring = ScoringConfig(weights=weights)
+        return cls(router=router, scoring=scoring)

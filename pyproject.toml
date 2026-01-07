@@ -12,12 +12,9 @@ license = { text = "TBD" }
 authors = [{ name = "Your Name" }]
 
 dependencies = [
-  "langgraph>=0.2.0",
   "pydantic>=2.6",
   "pyyaml>=6.0",
-  "email-validator>=2.1",
   "tldextract>=5.1",
-  "requests>=2.31",
 ]
 
 [project.optional-dependencies]
@@ -33,11 +30,6 @@ dev = [
   "ruff>=0.3",
 ]
 
-local-llm = [
-  "transformers>=4.39",
-  "torch>=2.1",
-]
-
 [tool.pytest.ini_options]
 addopts = "-q"
 testpaths = ["tests"]
@@ -46,4 +38,7 @@ testpaths = ["tests"]
 line-length = 100
 
 [tool.setuptools.packages.find]
-include = ["agent", "schemas", "tools", "models*"]
+include = ["agent", "schemas", "tools", "models*", "scoring"]
+
+[project.scripts]
+phish-agent = "agent.cli:main"

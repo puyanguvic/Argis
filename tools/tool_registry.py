@@ -1,16 +1,17 @@
-"""Tool registry and classes for the agent."""
+"""Tool registry for optional integrations."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Dict, Iterable
 
-from agent.config import LLMConfig
-from schemas.email_schema import EmailSchema
-from tools.attachment_analyzer import analyze_attachments
-from tools.content_analyzer import analyze_content
-from tools.header_analyzer import analyze_headers
-from tools.url_analyzer import analyze_urls
+from schemas.email_schema import EmailInput
+from tools.attachment_analyzer import attachment_static_scan
+from tools.content_analyzer import semantic_extract
+from tools.domain_risk import domain_risk_assess
+from tools.header_analyzer import header_auth_check
+from tools.url_analyzer import url_chain_resolve
+from tools.url_utils import extract_urls
 
 
 @dataclass(frozen=True)
@@ -18,56 +19,55 @@ class Tool:
     name: str
     description: str
 
-    def run(self, email: EmailSchema, llm_config: LLMConfig | None = None) -> Dict[str, object]:
+    def run(self, email: EmailInput) -> object:
         raise NotImplementedError
 
 
 class HeadersTool(Tool):
     def __init__(self) -> None:
-        super().__init__(
-            name="headers",
-            description="Check sender/subject and header mismatches.",
-        )
+        super().__init__(name="header_auth", description="Check SPF/DKIM/DMARC results.")
 
-    def run(self, email: EmailSchema, llm_config: LLMConfig | None = None) -> Dict[str, object]:
-        return analyze_headers(email)
+    def run(self, email: EmailInput) -> object:
+        return header_auth_check(email.raw_headers)
 
 
 class UrlsTool(Tool):
     def __init__(self) -> None:
-        super().__init__(
-            name="urls",
-            description="Analyze links for obfuscation, lookalikes, and risky patterns.",
-        )
+        super().__init__(name="url_chain", description="Resolve and analyze URLs.")
 
-    def run(self, email: EmailSchema, llm_config: LLMConfig | None = None) -> Dict[str, object]:
-        return analyze_urls(email)
+    def run(self, email: EmailInput) -> object:
+        urls = email.urls or extract_urls([email.body_text, email.body_html])
+        return url_chain_resolve(urls)
 
 
-class ContentTool(Tool):
+class SemanticTool(Tool):
     def __init__(self) -> None:
-        super().__init__(
-            name="content",
-            description="Scan text for phishing language and pressure tactics.",
-        )
+        super().__init__(name="semantic", description="Extract intent and urgency.")
 
-    def run(self, email: EmailSchema, llm_config: LLMConfig | None = None) -> Dict[str, object]:
-        return analyze_content(email, llm_config=llm_config)
+    def run(self, email: EmailInput) -> object:
+        return semantic_extract(email.subject, email.body_text, email.body_html)
 
 
-class AttachmentsTool(Tool):
+class DomainRiskTool(Tool):
     def __init__(self) -> None:
-        super().__init__(
-            name="attachments",
-            description="Inspect attachment names for suspicious extensions.",
-        )
+        super().__init__(name="domain_risk", description="Assess lookalike domains.")
 
-    def run(self, email: EmailSchema, llm_config: LLMConfig | None = None) -> Dict[str, object]:
-        return analyze_attachments(email)
+    def run(self, email: EmailInput) -> object:
+        urls = email.urls or extract_urls([email.body_text, email.body_html])
+        domains = [item.final_domain for item in url_chain_resolve(urls).chains if item.final_domain]
+        return domain_risk_assess(domains)
+
+
+class AttachmentTool(Tool):
+    def __init__(self) -> None:
+        super().__init__(name="attachment_scan", description="Scan attachment metadata.")
+
+    def run(self, email: EmailInput) -> object:
+        return attachment_static_scan(email.attachments)
 
 
 def default_tool_registry() -> Dict[str, Tool]:
-    tools = [HeadersTool(), UrlsTool(), ContentTool(), AttachmentsTool()]
+    tools = [HeadersTool(), UrlsTool(), SemanticTool(), DomainRiskTool(), AttachmentTool()]
     return {tool.name: tool for tool in tools}
 
 

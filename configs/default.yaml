@@ -1,24 +1,36 @@
-policy:
-  threshold: 0.7
+router:
+  t_fast: 20
+  t_deep: 60
+  fast_tools:
+    - header_auth_check
+    - semantic_extract
+  standard_tools:
+    - header_auth_check
+    - semantic_extract
+    - url_chain_resolve
+  deep_tools:
+    - header_auth_check
+    - semantic_extract
+    - url_chain_resolve
+    - domain_risk_assess
+    - attachment_static_scan
+  budget_ms: 1500
+  timeout_s: 2.0
+  fallback: STANDARD
+scoring:
   weights:
-    headers: 0.20
-    urls: 0.30
-    content: 0.45
-    attachments: 0.05
-llm:
-  enabled: true
-  provider: huggingface_local
-  model: Qwen/Qwen2.5-1.5B-Instruct
-  endpoint: null
-  api_token_env: HF_API_TOKEN
-  temperature: 0.2
-  max_tokens: 256
-  timeout_s: 20.0
-  llm_weight: 0.8
-  use_tao: true
-  tao_max_cycles: 10
-  tao_actions:
-    - headers
-    - urls
-    - content
-    - attachments
+    spf_fail: 12
+    dkim_fail: 6
+    dmarc_fail: 12
+    reply_to_mismatch: 8
+    from_domain_mismatch: 6
+    url_present: 4
+    url_login_keywords: 8
+    url_shortener: 4
+    url_ip_host: 6
+    url_suspicious_tld: 4
+    lookalike_domain: 10
+    semantic_credential_intent: 10
+    semantic_urgency: 4
+    attachment_macro: 3
+    attachment_executable: 3

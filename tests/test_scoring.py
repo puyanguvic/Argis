@@ -26,7 +26,7 @@ def test_hard_rule_triggers() -> None:
         ),
         semantic=SemanticResult(
             intent="credential_theft",
-            urgency=2,
+            urgency_level=2,
             brand_entities=["microsoft"],
             requested_actions=["click"],
             confidence=0.8,
@@ -63,7 +63,7 @@ def test_score_maps_to_verdict() -> None:
         ),
         semantic=SemanticResult(
             intent="credential_theft",
-            urgency=3,
+            urgency_level=3,
             brand_entities=["paypal"],
             requested_actions=["click"],
             confidence=0.9,

@@ -1,0 +1,24 @@
+policy:
+  threshold: 0.7
+  weights:
+    headers: 0.20
+    urls: 0.30
+    content: 0.45
+    attachments: 0.05
+llm:
+  enabled: true
+  provider: huggingface_local
+  model: Qwen/Qwen2.5-1.5B-Instruct
+  endpoint: null
+  api_token_env: HF_API_TOKEN
+  temperature: 0.2
+  max_tokens: 256
+  timeout_s: 20.0
+  llm_weight: 0.8
+  use_tao: true
+  tao_max_cycles: 10
+  tao_actions:
+    - headers
+    - urls
+    - content
+    - attachments

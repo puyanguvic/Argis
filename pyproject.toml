@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "phish-email-detection-agent"
+version = "0.1.0"
+description = "Agent-style phishing email analysis pipeline"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "TBD" }
+authors = [{ name = "Your Name" }]
+
+dependencies = [
+  "langgraph>=0.2.0",
+  "pydantic>=2.6",
+  "pyyaml>=6.0",
+  "email-validator>=2.1",
+  "tldextract>=5.1",
+  "requests>=2.31",
+]
+
+[project.optional-dependencies]
+ui = [
+  "gradio>=4.0",
+]
+
+test = [
+  "pytest>=7.4",
+]
+
+dev = [
+  "ruff>=0.3",
+]
+
+local-llm = [
+  "transformers>=4.39",
+  "torch>=2.1",
+]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.setuptools.packages.find]
+include = ["agent", "schemas", "tools", "models*"]

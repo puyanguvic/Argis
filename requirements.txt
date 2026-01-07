@@ -1,0 +1,7 @@
+gradio>=4.0
+langgraph>=0.2.0
+pydantic>=2.6
+pyyaml>=6.0
+email-validator>=2.1
+tldextract>=5.1
+requests>=2.31

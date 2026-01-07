@@ -17,7 +17,7 @@ def test_explanation_structure_and_safety() -> None:
         ),
         semantic=SemanticResult(
             intent="benign",
-            urgency=0,
+            urgency_level=0,
             brand_entities=[],
             requested_actions=[],
             confidence=0.4,

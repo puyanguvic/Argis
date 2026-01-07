@@ -10,6 +10,10 @@ A minimal, deterministic phishing detection agent built around evidence-first de
 - All tool outputs live in a single `EvidenceStore` (Pydantic model).
 - Explanations cite evidence keys and include a score breakdown (no chain-of-thought).
 
+## Contextual escalation signals
+
+Some collaboration/OAuth workflows are low-noise and do not trip classic hard signals. The agent therefore includes contextual escalation signals that *only* route FAST → STANDARD for deeper evidence collection (URL analysis, domain risk checks) without adding risk points by themselves. These are non-risk triggers tied to semantic intent + collaboration brands/keywords and external/untrusted senders.
+
 ## Layered reasoning
 
 - Plan (orchestration): decides what to check, tool set, budget, timeouts, and fallback.
@@ -116,6 +120,7 @@ This plan is recorded to JSONL when `--record` is enabled.
 ## Configuration
 
 Tune routing thresholds and scoring weights in `configs/default.yaml`.
+Contextual escalation signals (brands, intents, keywords) and allowlisted domains also live in `configs/default.yaml`.
 
 ## How to add real tool backends
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class HeaderAuthResult(BaseModel):
@@ -63,10 +63,15 @@ class SemanticResult(BaseModel):
     """Semantic signal extraction."""
 
     intent: str
-    urgency: int
+    model_config = ConfigDict(populate_by_name=True)
+    urgency_level: int = Field(alias="urgency")
     brand_entities: List[str] = Field(default_factory=list)
     requested_actions: List[str] = Field(default_factory=list)
     confidence: float
+
+    @property
+    def urgency(self) -> int:
+        return self.urgency_level
 
 
 class AttachmentScanItem(BaseModel):
@@ -116,3 +121,4 @@ class EvidenceStore(BaseModel):
     path: Optional[str] = None
     plan: Optional[PlanSpec] = None
     hard_rule_matches: List[str] = Field(default_factory=list)
+    degradations: List[str] = Field(default_factory=list)

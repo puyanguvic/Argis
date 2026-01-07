@@ -17,8 +17,12 @@ class PolicyEngine:
     def decide(self, evidence: EvidenceStore) -> tuple[str, int, list[dict[str, float]]]:
         evidence.hard_rule_matches = apply_hard_rules(evidence)
         risk_score, breakdown = compute_risk_score(evidence, self.config.scoring.weights)
-        verdict = map_score_to_verdict(risk_score)
+        verdict = map_score_to_verdict(
+            risk_score,
+            block_threshold=int(self.config.thresholds.block_threshold),
+            escalate_threshold=int(self.config.thresholds.escalate_threshold),
+        )
         if evidence.hard_rule_matches:
             verdict = "phishing"
-            risk_score = max(risk_score, 70)
+            risk_score = max(risk_score, int(self.config.thresholds.block_threshold))
         return verdict, risk_score, breakdown

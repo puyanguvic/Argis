@@ -20,6 +20,7 @@ DEFAULT_WEIGHTS: Dict[str, float] = {
     "lookalike_domain": 10.0,
     "semantic_credential_intent": 10.0,
     "semantic_urgency": 4.0,
+    "collaboration_oauth_intent": 10.0,
     "attachment_macro": 3.0,
     "attachment_executable": 3.0,
 }
@@ -57,6 +58,12 @@ def compute_risk_score(
     quick = evidence.quick_features
     semantic = evidence.semantic
 
+    oauth_intents = {
+        "delegated_access",
+        "permission_change",
+        "access_review",
+        "oauth_consent",
+    }
     factors: Dict[str, float] = {
         "spf_fail": 1.0 if header and header.spf == "fail" else 0.0,
         "dkim_fail": 1.0 if header and header.dkim == "fail" else 0.0,
@@ -72,7 +79,10 @@ def compute_risk_score(
         "semantic_credential_intent": 1.0
         if semantic and semantic.intent == "credential_theft"
         else 0.0,
-        "semantic_urgency": (semantic.urgency / 3.0) if semantic else 0.0,
+        "semantic_urgency": (semantic.urgency_level / 3.0) if semantic else 0.0,
+        "collaboration_oauth_intent": 1.0
+        if semantic and semantic.intent in oauth_intents
+        else 0.0,
         "attachment_macro": 1.0 if _any_attachment(evidence.attachment_scan, "has_macro") else 0.0,
         "attachment_executable": 1.0
         if _any_attachment(evidence.attachment_scan, "is_executable")
@@ -92,11 +102,16 @@ def compute_risk_score(
     return int(round(score)), breakdown
 
 
-def map_score_to_verdict(score: int) -> str:
+def map_score_to_verdict(
+    score: int,
+    *,
+    block_threshold: int = 70,
+    escalate_threshold: int = 30,
+) -> str:
     """Map a score to a discrete verdict."""
 
-    if score < 30:
-        return "benign"
-    if score < 70:
+    if score >= block_threshold:
+        return "phishing"
+    if score >= escalate_threshold:
         return "suspicious"
-    return "phishing"
+    return "benign"

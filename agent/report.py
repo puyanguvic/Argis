@@ -29,11 +29,11 @@ def _verdict_label(verdict: str) -> str:
     if verdict == "phishing":
         return "QUARANTINE"
     if verdict == "suspicious":
-        return "WARN"
+        return "ESCALATE"
     return "ALLOW"
 
 
-def _recommended_actions(verdict: str) -> list[str]:
+def _recommended_actions(verdict: str, confidence: str) -> list[str]:
     if verdict == "phishing":
         return [
             "Quarantine this email and block external links.",
@@ -42,10 +42,15 @@ def _recommended_actions(verdict: str) -> list[str]:
         ]
     if verdict == "suspicious":
         return [
+            "Escalate for security review before approval.",
             "Warn the user and disable external links.",
-            "Request user confirmation before action.",
         ]
-    return ["Allow the email with normal delivery.", "No escalation required."]
+    actions = ["Allow the email with normal delivery.", "No escalation required."]
+    if confidence == "LOW":
+        actions.append(
+            "Limited evidence collected in this profile. If this request is unexpected, verify with the sender via an internal channel."
+        )
+    return actions
 
 
 def _evidence_lines(evidence: EvidenceStore) -> list[EvidenceLine]:
@@ -147,7 +152,7 @@ def _evidence_lines(evidence: EvidenceStore) -> list[EvidenceLine]:
                     score_hint=10.0,
                 )
             )
-        if semantic.urgency >= 2:
+        if semantic.urgency_level >= 2:
             lines.append(
                 EvidenceLine(
                     section="Content",
@@ -222,10 +227,12 @@ def build_report(result) -> str:
         for idx, item in enumerate(top_reasons, start=1):
             report_lines.append(f"{idx}. {item.message}")
     else:
-        report_lines.append("1. No significant risk signals detected.")
+        report_lines.append(
+            "1. Limited evidence collected; no material risk indicators observed in this profile."
+        )
     report_lines.append("")
     report_lines.append("## Recommended actions")
-    for action in _recommended_actions(result.verdict):
+    for action in _recommended_actions(result.verdict, confidence):
         report_lines.append(f"- {action}")
     report_lines.append("")
     report_lines.append("## Evidence (details)")

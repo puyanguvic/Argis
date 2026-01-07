@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from email.utils import parseaddr
 from hashlib import sha256
 from pathlib import Path
 import time
@@ -74,6 +75,7 @@ class AgentOrchestrator:
             )
 
         tool_map = _build_tool_map(email, evidence)
+        executed_tools: set[str] = set()
         if evidence.plan:
             for tool_name in evidence.plan.tools:
                 tool = tool_map.get(tool_name)
@@ -81,8 +83,19 @@ class AgentOrchestrator:
                     continue
                 observation = tool()
                 _assign_observation(evidence, tool_name, observation)
+                executed_tools.add(tool_name)
                 if recorder:
                     recorder.record(tool_name, {"email": email}, observation)
+
+        if _should_escalate_contextually(email, evidence, self.config):
+            _apply_contextual_escalation(
+                email,
+                evidence,
+                self.config,
+                tool_map,
+                executed_tools,
+                recorder,
+            )
 
         verdict, risk_score, breakdown = self.policy.decide(evidence)
         explanation = build_explanation(evidence, verdict, risk_score, breakdown)
@@ -177,3 +190,84 @@ def _assign_observation(evidence: EvidenceStore, tool_name: str, observation: ob
         evidence.domain_risk = observation
     elif tool_name == "attachment_static_scan":
         evidence.attachment_scan = observation
+
+
+def _domain_from_sender(sender: str) -> str:
+    _, address = parseaddr(sender or "")
+    if "@" not in address:
+        return ""
+    return address.split("@", 1)[-1].lower()
+
+
+def _body_and_subject(email: EmailInput) -> str:
+    parts = [email.subject or ""]
+    if email.body_text:
+        parts.append(email.body_text)
+    if email.body_html:
+        parts.append(email.body_html)
+    return "\n".join(parts).lower()
+
+
+def _should_escalate_contextually(
+    email: EmailInput,
+    evidence: EvidenceStore,
+    config: AgentConfig,
+) -> bool:
+    if not config.contextual_escalation.enabled:
+        return False
+    if evidence.path != "FAST":
+        return False
+    semantic = evidence.semantic
+    if not semantic:
+        return False
+    sender_domain = _domain_from_sender(email.sender)
+    allowlist = {domain.lower() for domain in config.allowlist_domains}
+    sender_external = not allowlist or sender_domain not in allowlist
+    if not sender_external:
+        return False
+
+    intents = {intent.lower() for intent in config.contextual_escalation.intents}
+    if semantic.intent.lower() not in intents:
+        return False
+
+    brands = {brand.lower() for brand in semantic.brand_entities}
+    contextual_brands = {brand.lower() for brand in config.contextual_escalation.brands}
+    brand_match = bool(brands & contextual_brands)
+
+    keywords = [keyword.lower() for keyword in config.contextual_escalation.keywords]
+    text = _body_and_subject(email)
+    keyword_match = any(keyword in text for keyword in keywords)
+
+    return brand_match or keyword_match
+
+
+def _apply_contextual_escalation(
+    email: EmailInput,
+    evidence: EvidenceStore,
+    config: AgentConfig,
+    tool_map: dict[str, callable],
+    executed_tools: set[str],
+    recorder: RunRecorder | None,
+) -> None:
+    if not evidence.plan:
+        return
+    if evidence.plan.path != "FAST":
+        return
+
+    evidence.degradations.append("profile_escalated_contextual_signal")
+    evidence.path = "STANDARD"
+    evidence.plan.path = "STANDARD"
+    standard_tools = list(config.router.standard_tools)
+    evidence.plan.tools = standard_tools
+
+    for tool_name in standard_tools:
+        if tool_name in executed_tools:
+            continue
+        tool = tool_map.get(tool_name)
+        if tool is None:
+            continue
+        observation = tool()
+        _assign_observation(evidence, tool_name, observation)
+        executed_tools.add(tool_name)
+        if recorder:
+            recorder.record(tool_name, {"email": email}, observation)

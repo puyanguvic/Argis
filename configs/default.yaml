@@ -17,6 +17,31 @@ router:
   budget_ms: 1500
   timeout_s: 2.0
   fallback: STANDARD
+allowlist_domains: []
+contextual_escalation:
+  enabled: true
+  brands:
+    - SharePoint
+    - OneDrive
+    - Google Drive
+    - DocuSign
+    - Microsoft
+    - Google
+  intents:
+    - delegated_access
+    - permission_change
+    - access_review
+    - oauth_consent
+  keywords:
+    - permission scope
+    - access review
+    - confirm access
+    - sync across devices
+    - authorize
+    - consent
+thresholds:
+  block_threshold: 70
+  escalate_threshold: 30
 scoring:
   weights:
     spf_fail: 12
@@ -32,5 +57,6 @@ scoring:
     lookalike_domain: 10
     semantic_credential_intent: 10
     semantic_urgency: 4
+    collaboration_oauth_intent: 10
     attachment_macro: 3
     attachment_executable: 3

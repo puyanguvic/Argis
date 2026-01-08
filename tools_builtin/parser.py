@@ -8,7 +8,7 @@ from email.message import Message
 from email.utils import parsedate_to_datetime
 
 from schemas.email_schema import EmailInput
-from tools.url_utils import extract_urls
+from tools_builtin.url_utils import extract_urls
 
 
 def _extract_body(msg: Message, content_type: str) -> str:

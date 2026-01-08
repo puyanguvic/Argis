@@ -17,11 +17,11 @@
 
 | Skill | 主要证据 | 主要实现 |
 |---|---|---|
-| Header Forensics | SPF/DKIM/DMARC、aligned、anomalies | `tools/header_analyzer.py`, `agent/router.py` |
-| URL Analysis | final_domain、shortener、suspicious_tld、login_keywords、ip_host | `tools/url_analyzer.py`, `tools/url_utils.py` |
-| Brand Impersonation | lookalike/homoglyph/punycode、品牌近似 | `tools/domain_risk.py`, `scoring/rules.py` |
-| Attachment Analysis | macro/executable 扩展名 | `tools/attachment_analyzer.py` |
-| BEC Detection | Reply-To mismatch、付款/转账意图、紧迫度 | `agent/router.py`, `tools/content_analyzer.py` |
+| Header Forensics | SPF/DKIM/DMARC、aligned、anomalies | `tools_builtin/header_analyzer.py`, `engine/router.py` |
+| URL Analysis | final_domain、shortener、suspicious_tld、login_keywords、ip_host | `tools_builtin/url_analyzer.py`, `tools_builtin/url_utils.py` |
+| Brand Impersonation | lookalike/homoglyph/punycode、品牌近似 | `tools_builtin/domain_risk.py`, `scoring/rules.py` |
+| Attachment Analysis | macro/executable 扩展名 | `tools_builtin/attachment_analyzer.py` |
+| BEC Detection | Reply-To mismatch、付款/转账意图、紧迫度 | `engine/router.py`, `tools_builtin/content_analyzer.py` |
 
 ## 组合与路由（FAST/STANDARD/DEEP）
 
@@ -29,7 +29,7 @@
 - STANDARD：补齐 URL 证据
 - DEEP：补齐域名相似与附件风险
 
-路径与工具集合可在 `configs/default.yaml` 中配置（见 `agent/config.py`）。
+路径与工具集合可在 `configs/profiles/balanced.yaml` 中配置（见 `engine/config.py`）。
 
 ## 未来扩展建议
 

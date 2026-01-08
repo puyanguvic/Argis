@@ -38,7 +38,17 @@ testpaths = ["tests"]
 line-length = 100
 
 [tool.setuptools.packages.find]
-include = ["agent", "schemas", "tools", "models*", "scoring"]
+include = [
+  "apps",
+  "connectors",
+  "engine",
+  "models*",
+  "protocol",
+  "providers",
+  "schemas",
+  "scoring",
+  "tools_builtin",
+]
 
 [project.scripts]
-phish-agent = "agent.cli:main"
+phish-agent = "apps.cli.main:main"

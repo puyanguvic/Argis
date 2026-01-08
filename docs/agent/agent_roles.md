@@ -12,7 +12,7 @@
 
 对应实现：
 
-- `agent/router.py`（`quick_features()`、`preliminary_score()`、`plan_routes()`）
+- `engine/router.py`（`quick_features()`、`preliminary_score()`、`plan_routes()`）
 
 ## 2) Executor（工具执行/取证）
 
@@ -23,8 +23,8 @@
 
 对应实现：
 
-- `agent/orchestrator.py`（工具执行、上下文升级）
-- `tools/`（各类确定性证据源）
+- `engine/orchestrator.py`（工具执行、上下文升级）
+- `tools_builtin/`（各类确定性证据源）
 
 ## 3) Verifier（裁决/解释/输出）
 
@@ -36,9 +36,9 @@
 
 对应实现：
 
-- `agent/policy.py` + `scoring/`
-- `agent/explanation.py` + `schemas/explanation_schema.py`
-- `agent/report.py`、`agent/cli.py`
+- `engine/policy.py` + `scoring/`
+- `engine/explanation.py` + `schemas/explanation_schema.py`
+- `engine/report.py`、`apps/cli/main.py`
 
 ## 为什么要拆角色
 

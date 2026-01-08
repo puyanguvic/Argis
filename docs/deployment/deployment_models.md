@@ -12,7 +12,7 @@
 方式：
 
 - CLI：`phish-agent detect ...`
-- Gradio：`python apps/gradio_demo/app.py`
+- Gradio：`python apps/demo/gradio_app.py`
 
 ## 2) Cloud（服务化）
 

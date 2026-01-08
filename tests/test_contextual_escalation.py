@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from agent.orchestrator import AgentOrchestrator
-from agent.report import build_report
+from engine.orchestrator import AgentOrchestrator
+from engine.report import build_report
 from schemas.email_schema import EmailInput
 
 

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from agent.config import AgentConfig
+from engine.config import AgentConfig
 from schemas.evidence_schema import EvidenceStore
 from scoring.fusion import compute_risk_score, map_score_to_verdict
 from scoring.rules import apply_hard_rules

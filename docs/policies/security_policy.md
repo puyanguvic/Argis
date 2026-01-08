@@ -4,9 +4,9 @@
 
 ## 1) 默认安全边界
 
-- **无网络依赖（默认）**：URL/域名分析不发起在线请求（`tools/url_analyzer.py`）。
-- **不执行不解包**：附件分析仅基于元信息（`tools/attachment_analyzer.py`）。
-- **可审计**：支持 JSONL 记录与回放（`agent/recorder.py`, `agent/player.py`）。
+- **无网络依赖（默认）**：URL/域名分析不发起在线请求（`tools_builtin/url_analyzer.py`）。
+- **不执行不解包**：附件分析仅基于元信息（`tools_builtin/attachment_analyzer.py`）。
+- **可审计**：支持 JSONL 记录与回放（`engine/recorder.py`, `engine/player.py`）。
 
 ## 2) 权限与隔离建议（生产化）
 
@@ -31,7 +31,7 @@
 
 ## 4) 安全输出原则
 
-- 解释输出不包含邮件全文与敏感正文（`agent/explanation.py` 只引用结构化证据）
+- 解释输出不包含邮件全文与敏感正文（`engine/explanation.py` 只引用结构化证据）
 - 报告面向人类读者，应避免直接展示可执行链接（生产环境可做 link redaction）
 - 对 `phishing` 结果建议默认阻断外链与附件下载
 

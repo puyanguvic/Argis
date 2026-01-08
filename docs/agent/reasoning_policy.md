@@ -13,13 +13,13 @@
 ## 2) 输出约束（Explanation & Report）
 
 - 不输出 chain-of-thought：解释以 `top_signals`、`score_breakdown` 为主（`schemas/explanation_schema.py`）。
-- 推荐动作固定在 `allow / warn / quarantine` 三类（`agent/explanation.py`）。
-- 人类报告避免过度技术细节，但保留可审计证据编号（`agent/report.py` 内部有 `evidence_id`）。
+- 推荐动作固定在 `allow / warn / quarantine` 三类（`engine/explanation.py`）。
+- 人类报告避免过度技术细节，但保留可审计证据编号（`engine/report.py` 内部有 `evidence_id`）。
 
 ## 3) 工具约束（Tool Safety）
 
 - 默认离线与确定性：避免因网络/上游波动影响结果稳定性。
-- 工具输出必须可序列化：确保 JSONL 录制与回放可靠（`agent/recorder.py`）。
+- 工具输出必须可序列化：确保 JSONL 录制与回放可靠（`engine/recorder.py`）。
 - 工具的异常应被记录为“降级/缺失证据”（建议写入 `evidence.degradations`；当前实现保留字段）。
 
 ## 4) 风险控制（避免误判/过判）

@@ -12,7 +12,7 @@ phish-agent detect --input examples/email_sample.json
 
 相关实现：
 
-- `agent/cli.py`：读取 JSON 并校验为 `EmailInput`
+- `apps/cli/main.py`：读取 JSON 并校验为 `EmailInput`
 - `schemas/email_schema.py`：输入契约
 
 适用于：
@@ -24,8 +24,8 @@ phish-agent detect --input examples/email_sample.json
 
 `AgentOrchestrator.detect_raw(raw_email)` 会调用解析器把 raw email 转为 `EmailInput`：
 
-- 解析器：`tools/parser.py`（基于 Python `email` 标准库）
-- Gradio demo：`apps/gradio_demo/app.py` 会接收 raw email 文本
+- 解析器：`tools_builtin/parser.py`（基于 Python `email` 标准库）
+- Gradio demo：`apps/demo/gradio_app.py` 会接收 raw email 文本
 
 注意：当前解析器不提取附件，仅提取正文与 headers。
 

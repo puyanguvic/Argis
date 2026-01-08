@@ -9,26 +9,32 @@ import time
 
 import yaml
 
-from agent.config import AgentConfig
-from agent.explanation import build_explanation
-from agent.policy import PolicyEngine
-from agent.recorder import RunRecorder
-from agent.router import plan_routes
-from agent.state import DetectionResult
+from engine.config import AgentConfig
+from engine.explanation import build_explanation
+from engine.policy import PolicyEngine
+from engine.recorder import RunRecorder
+from engine.router import plan_routes
+from engine.state import DetectionResult
 from schemas.email_schema import EmailInput
 from schemas.evidence_schema import EvidenceStore
-from tools.attachment_analyzer import attachment_static_scan
-from tools.content_analyzer import semantic_extract
-from tools.domain_risk import domain_risk_assess
-from tools.parser import parse_raw_email
-from tools.url_analyzer import url_chain_resolve
-from tools.url_utils import extract_urls
+from tools_builtin.attachment_analyzer import attachment_static_scan
+from tools_builtin.content_analyzer import semantic_extract
+from tools_builtin.domain_risk import domain_risk_assess
+from tools_builtin.parser import parse_raw_email
+from tools_builtin.url_analyzer import url_chain_resolve
+from tools_builtin.url_utils import extract_urls
+
+
+DEFAULT_CONFIG_PATHS = (
+    Path("configs/profiles/balanced.yaml"),
+    Path("configs/default.yaml"),
+)
 
 
 class AgentOrchestrator:
     """Coordinates routing, tools, scoring, and explanations."""
 
-    def __init__(self, config_path: str | Path | None = "configs/default.yaml") -> None:
+    def __init__(self, config_path: str | Path | None = None) -> None:
         self.config = self._load_config(config_path)
         self.policy = PolicyEngine(self.config)
 
@@ -122,6 +128,11 @@ class AgentOrchestrator:
 
     @staticmethod
     def _load_config(config_path: str | Path | None) -> AgentConfig:
+        if not config_path:
+            for candidate in DEFAULT_CONFIG_PATHS:
+                if candidate.exists():
+                    config_path = candidate
+                    break
         if not config_path:
             return AgentConfig()
         path = Path(config_path)

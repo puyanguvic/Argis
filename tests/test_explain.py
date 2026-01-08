@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 
 from schemas.evidence_schema import EvidenceStore, HeaderAuthResult, SemanticResult
-from agent.explanation import build_explanation
+from engine.explanation import build_explanation
 
 
 def test_explanation_structure_and_safety() -> None:

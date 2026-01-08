@@ -19,6 +19,7 @@
 ### 2) Architecture
 
 - [系统总览（Codex-style）](architecture/system_overview.md)
+- [Protocol v1（UI <-> Engine 契约）](protocol_v1.md)
 - [Agent 组件划分](architecture/agent_components.md)
 - [端到端工作流](architecture/workflow_pipeline.md)
 - [工具链与外部信号](architecture/toolchain.md)
@@ -26,10 +27,10 @@
 
 ### 3) Agent
 
-- [角色划分：Reasoner / Executor / Verifier](agent/agent_roles.md)
-- [决策逻辑与风险评分](agent/decision_logic.md)
-- [推理约束与 Guardrails](agent/reasoning_policy.md)
-- [已知失败模式与风险](agent/failure_modes.md)
+- [角色划分：Reasoner / Executor / Verifier](engine/agent_roles.md)
+- [决策逻辑与风险评分](engine/decision_logic.md)
+- [推理约束与 Guardrails](engine/reasoning_policy.md)
+- [已知失败模式与风险](engine/failure_modes.md)
 
 ### 4) Skills（检测“技能/剧本”）
 
@@ -102,4 +103,3 @@
 2. `architecture/system_overview.md`
 3. `detection_pipeline/evidence_collection.md`
 4. `reporting/report_overview.md`
-

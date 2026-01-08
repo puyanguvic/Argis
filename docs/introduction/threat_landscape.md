@@ -18,7 +18,7 @@
 
 - 诱导用户授予第三方应用权限、添加委派访问、共享邮箱访问等
 - 特点：传统恶意信号可能较少，但**语义意图**与“协作品牌”高度相关
-- 本项目将这类信号用于**上下文升级（FAST → STANDARD）**，而非直接加分（见 `agent/orchestrator.py`）
+- 本项目将这类信号用于**上下文升级（FAST → STANDARD）**，而非直接加分（见 `engine/orchestrator.py`）
 
 ### 恶意附件投递（Malware Delivery）
 
@@ -32,11 +32,11 @@
 
 ## 2) 可观测证据维度（对应系统工具）
 
-- **Header 认证**：SPF/DKIM/DMARC 结果、对齐情况、异常（`tools/header_analyzer.py`）
-- **URL/域名**：短链、可疑 TLD、IP Host、登录关键词、（可扩展）跳转链（`tools/url_analyzer.py`）
-- **域名相似性**：品牌近似、同形字、punycode（`tools/domain_risk.py`）
-- **语义意图**：credential / invoice / oauth / malware 等意图与紧迫度（`tools/content_analyzer.py`）
-- **附件元信息**：宏扩展名、可执行扩展名（`tools/attachment_analyzer.py`）
+- **Header 认证**：SPF/DKIM/DMARC 结果、对齐情况、异常（`tools_builtin/header_analyzer.py`）
+- **URL/域名**：短链、可疑 TLD、IP Host、登录关键词、（可扩展）跳转链（`tools_builtin/url_analyzer.py`）
+- **域名相似性**：品牌近似、同形字、punycode（`tools_builtin/domain_risk.py`）
+- **语义意图**：credential / invoice / oauth / malware 等意图与紧迫度（`tools_builtin/content_analyzer.py`）
+- **附件元信息**：宏扩展名、可执行扩展名（`tools_builtin/attachment_analyzer.py`）
 
 ## 3) 防守视角：为什么要“证据优先”
 

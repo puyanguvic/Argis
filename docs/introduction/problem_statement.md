@@ -26,7 +26,7 @@
 
 ### 输出（DetectionResult）
 
-系统输出 `DetectionResult`（见 `agent/state.py`），核心包括：
+系统输出 `DetectionResult`（见 `engine/state.py`），核心包括：
 
 - `verdict`：`benign` / `suspicious` / `phishing`
 - `risk_score`：0–100
@@ -36,9 +36,9 @@
 
 ## 约束与假设
 
-- **默认离线**：URL 解析与域名风险评估采用确定性、无网络访问的策略（示例工具在 `tools/`）。
-- **证据可审计**：工具输出聚合到 `EvidenceStore`；可通过 JSONL 录制与回放实现审计（`agent/recorder.py`、`agent/player.py`）。
-- **解释非“思维链”**：解释输出引用证据键与评分分解，不输出模型推理过程（`agent/explanation.py`）。
+- **默认离线**：URL 解析与域名风险评估采用确定性、无网络访问的策略（示例工具在 `tools_builtin/`）。
+- **证据可审计**：工具输出聚合到 `EvidenceStore`；可通过 JSONL 录制与回放实现审计（`engine/recorder.py`、`engine/player.py`）。
+- **解释非“思维链”**：解释输出引用证据键与评分分解，不输出模型推理过程（`engine/explanation.py`）。
 
 ## 术语
 

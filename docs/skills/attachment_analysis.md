@@ -9,7 +9,7 @@
 
 ## 当前实现
 
-工具：`attachment_static_scan(attachments)`（`tools/attachment_analyzer.py`）
+工具：`attachment_static_scan(attachments)`（`tools_builtin/attachment_analyzer.py`）
 
 - 输入：`EmailInput.attachments`（`schemas/email_schema.py` 的 `AttachmentMeta`）
 - 输出：`AttachmentScanResult(items=[AttachmentScanItem...])`

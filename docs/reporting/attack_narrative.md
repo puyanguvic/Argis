@@ -25,7 +25,7 @@
 - Top reasons（最多 3 条）
 - 分类证据列表
 
-（见 `agent/report.py`），尚未单独生成“叙事段落”。如需叙事输出，建议：
+（见 `engine/report.py`），尚未单独生成“叙事段落”。如需叙事输出，建议：
 
 - 基于 `EvidenceStore` + `score_breakdown` 生成可模板化 narrative
 - 保证每句叙事可回指到证据字段或硬规则 code

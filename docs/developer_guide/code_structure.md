@@ -4,21 +4,24 @@
 
 ```
 .
-├── agent/                 # 编排、裁决、解释与 CLI
+├── protocol/              # UI <-> Engine 稳定契约
+├── engine/                # 核心引擎（session/task/turn + 检测流水线）
+├── tools_builtin/         # 确定性证据源
+├── providers/             # 模型适配层
+├── connectors/            # 外部系统接入
+├── apps/                  # CLI/Gradio 等入口
 ├── schemas/               # 输入/证据/解释 schema（Pydantic）
-├── tools/                 # 确定性证据源
 ├── scoring/               # 风险融合与硬规则
-├── configs/               # 默认配置（YAML）
+├── configs/               # Profiles / providers / connectors
 ├── examples/              # 示例输入
 ├── tests/                 # 单元测试
-├── apps/gradio_demo/      # 手工测试 UI
 └── docs/                  # 本文档集
 ```
 
 关键入口：
 
-- CLI：`agent/cli.py`（`phish-agent`）
-- 主编排：`agent/orchestrator.py`
-- 路由：`agent/router.py`
-- 裁决：`agent/policy.py` + `scoring/`
-
+- CLI：`apps/cli/main.py`（`phish-agent`）
+- Engine loop：`engine/argis.py`
+- 主编排：`engine/orchestrator.py`
+- 路由：`engine/router.py`
+- 裁决：`engine/policy.py` + `scoring/`

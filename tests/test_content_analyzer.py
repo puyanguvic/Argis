@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from tools.content_analyzer import semantic_extract
+from tools_builtin.content_analyzer import semantic_extract
 
 
 def test_intent_delegated_access() -> None:

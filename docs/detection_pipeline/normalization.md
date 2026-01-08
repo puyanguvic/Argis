@@ -6,9 +6,9 @@
 
 仓库当前在以下位置做了轻量标准化：
 
-- URL 提取后去掉常见尾部标点（`tools/url_utils.py`）
-- 语义抽取将 subject/body 合并并统一为小写（`tools/content_analyzer.py`）
-- URL 域名提取使用 `tldextract`（`tools/url_analyzer.py`）
+- URL 提取后去掉常见尾部标点（`tools_builtin/url_utils.py`）
+- 语义抽取将 subject/body 合并并统一为小写（`tools_builtin/content_analyzer.py`）
+- URL 域名提取使用 `tldextract`（`tools_builtin/url_analyzer.py`）
 
 ## 推荐的标准化清单（可逐步引入）
 

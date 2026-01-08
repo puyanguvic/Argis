@@ -8,16 +8,16 @@
 2. 扩展 `EvidenceStore`
    - 在 `schemas/evidence_schema.py` 新增字段与结果模型
 3. 实现证据源工具
-   - 在 `tools/` 新增 `*_analyzer.py`
+   - 在 `tools_builtin/` 新增 `*_analyzer.py`
    - 保证输出可序列化（Pydantic model 或 dict）
 4. 将工具接入编排器与路由
-   - 在 `agent/orchestrator.py` 的 `_build_tool_map()` 增加工具
-   - 在 `agent/router.py` 的 profile tools 列表里配置（建议通过 `configs/default.yaml`）
+   - 在 `engine/orchestrator.py` 的 `_build_tool_map()` 增加工具
+   - 在 `engine/router.py` 的 profile tools 列表里配置（建议通过 `configs/profiles/balanced.yaml`）
 5. 更新评分/硬规则
-   - 在 `scoring/fusion.py` 增加 factor，并在 `configs/default.yaml` 配置权重
+   - 在 `scoring/fusion.py` 增加 factor，并在 `configs/profiles/balanced.yaml` 配置权重
    - 或在 `scoring/rules.py` 增加 hard rule code
 6. 更新报告/解释（如需要）
-   - `agent/report.py` 增加证据条目（EvidenceLine）
+   - `engine/report.py` 增加证据条目（EvidenceLine）
 7. 补测试与文档
    - `tests/` 增加回归
    - `docs/skills/<your_skill>.md` 记录信号、证据字段与限制

@@ -11,16 +11,16 @@
    - 便于测试、可复现、可审计。
 
 3. **分层职责清晰（Router / Tools / Policy）**
-   - Router 负责路径选择与计划（`agent/router.py`）。
-   - Tools 负责把原始输入转为结构化证据（`tools/`）。
-   - Policy 负责规则与评分融合后裁决（`agent/policy.py`、`scoring/`）。
+   - Router 负责路径选择与计划（`engine/router.py`）。
+   - Tools 负责把原始输入转为结构化证据（`tools_builtin/`）。
+   - Policy 负责规则与评分融合后裁决（`engine/policy.py`、`scoring/`）。
 
 4. **可审计与可回放（Audit & Replay）**
-   - 每一步工具输出可录制为 JSONL（`agent/recorder.py`）。
-   - 支持回放并重新计算 verdict（`agent/player.py`）。
+   - 每一步工具输出可录制为 JSONL（`engine/recorder.py`）。
+   - 支持回放并重新计算 verdict（`engine/player.py`）。
 
 5. **输出面向“行动”（Actionable Outputs）**
-   - 给出 `allow / warn / quarantine` 的建议动作（`agent/explanation.py`、`agent/report.py`）。
+   - 给出 `allow / warn / quarantine` 的建议动作（`engine/explanation.py`、`engine/report.py`）。
    - 报告同时服务人类读者与机器系统（CLI JSON 输出）。
 
 ## 非目标（Non-goals）
@@ -34,5 +34,5 @@
 
 - 对常见钓鱼/仿冒/短链/可疑 TLD/宏附件等场景，能稳定产出高风险分数与可审计证据。
 - 对协作/OAuth 诱导等低噪音场景，能触发“上下文升级”以收集更多证据，而不随意加分。
-- 规则与权重可通过 `configs/default.yaml` 调参，且能被测试覆盖（`tests/`）。
+- 规则与权重可通过 `configs/profiles/balanced.yaml` 调参，且能被测试覆盖（`tests/`）。
 

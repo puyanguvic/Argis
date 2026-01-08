@@ -19,5 +19,5 @@
 - 在集成层补充组织上下文证据（allowlist、联系人、线程、财务系统）
 - 对扩展的在线工具启用 sandbox 与配额/超时控制
 
-更细粒度的失败模式见 `agent/failure_modes.md`。
+更细粒度的失败模式见 `engine/failure_modes.md`。
 

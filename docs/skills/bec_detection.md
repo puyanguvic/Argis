@@ -13,13 +13,13 @@ BEC 的核心不是“技术恶意载荷”，而是**冒充与业务流程诱�
 
 ### 1) Reply-To mismatch（快速特征）
 
-- 位置：`agent/router.py`
+- 位置：`engine/router.py`
 - 特征：`QuickFeatures.reply_to_mismatch`
 - 用途：参与路由初筛与风险融合评分（`reply_to_mismatch`）
 
 ### 2) 语义意图与紧迫度（规则式）
 
-工具：`semantic_extract()`（`tools/content_analyzer.py`）
+工具：`semantic_extract()`（`tools_builtin/content_analyzer.py`）
 
 - `intent` 可能为：
   - `invoice_payment`（发票/付款）
@@ -43,5 +43,5 @@ BEC 的核心不是“技术恶意载荷”，而是**冒充与业务流程诱�
    - 线程上下文（In-Reply-To/References）
 2. 将 `invoice_payment` 纳入风险融合：
    - 在 `scoring/fusion.py` 增加因子（如 `semantic_invoice_intent`）
-   - 在 `configs/default.yaml` 配置权重并补测试
+   - 在 `configs/profiles/balanced.yaml` 配置权重并补测试
 

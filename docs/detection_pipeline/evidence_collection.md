@@ -19,7 +19,7 @@
 
 ## 工具执行与赋值
 
-工具执行发生在 `agent/orchestrator.py`，并通过 `_assign_observation()` 写入正确字段。
+工具执行发生在 `engine/orchestrator.py`，并通过 `_assign_observation()` 写入正确字段。
 
 建议扩展时保持：
 
@@ -28,8 +28,8 @@
 
 ## 审计：Record & Replay
 
-- 录制：`RunRecorder.record(node_name, input_state, tool_outputs)` 写 JSONL（`agent/recorder.py`）
-- 回放：`replay_run()` 合并 JSONL 输出为 `EvidenceStore`（`agent/player.py`）
+- 录制：`RunRecorder.record(node_name, input_state, tool_outputs)` 写 JSONL（`engine/recorder.py`）
+- 回放：`replay_run()` 合并 JSONL 输出为 `EvidenceStore`（`engine/player.py`）
 
 这使得你可以：
 

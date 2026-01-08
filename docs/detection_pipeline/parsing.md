@@ -4,7 +4,7 @@
 
 ## 当前实现
 
-解析器：`parse_raw_email(raw_email: str) -> EmailInput`（`tools/parser.py`）
+解析器：`parse_raw_email(raw_email: str) -> EmailInput`（`tools_builtin/parser.py`）
 
 主要步骤：
 
@@ -17,7 +17,7 @@
 4. 读取常用字段：
    - `Subject`, `From`, `Reply-To`, `Date`
 5. 从正文提取 URL：
-   - `extract_urls([body_text, body_html])`（`tools/url_utils.py`）
+   - `extract_urls([body_text, body_html])`（`tools_builtin/url_utils.py`）
 
 ## 已知边界
 

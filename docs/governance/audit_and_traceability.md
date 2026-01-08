@@ -4,11 +4,11 @@
 
 ## 1) Trace ID
 
-`agent/orchestrator.py` 会基于 `sender/subject/received_ts` 生成 `trace_id`（哈希截断），用于关联事件与日志。
+`engine/orchestrator.py` 会基于 `sender/subject/received_ts` 生成 `trace_id`（哈希截断），用于关联事件与日志。
 
 ## 2) JSONL 录制
 
-`RunRecorder`（`agent/recorder.py`）记录：
+`RunRecorder`（`engine/recorder.py`）记录：
 
 - `timestamp`
 - `node_name`（router/tool/final）
@@ -19,7 +19,7 @@
 
 ## 3) 回放与再裁决
 
-`agent/player.py` 会：
+`engine/player.py` 会：
 
 - 读取 JSONL
 - 合并工具输出为 `EvidenceStore`

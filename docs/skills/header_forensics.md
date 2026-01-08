@@ -10,7 +10,7 @@ Header 取证用于评估“发件人身份是否可信”，以及是否存在�
 
 ## 当前实现
 
-工具：`header_auth_check(raw_headers)`（`tools/header_analyzer.py`）
+工具：`header_auth_check(raw_headers)`（`tools_builtin/header_analyzer.py`）
 
 - 使用正则抽取 `spf|dkim|dmarc=(pass|fail|none)`
 - `aligned` 规则（简化）：
@@ -21,7 +21,7 @@ Header 取证用于评估“发件人身份是否可信”，以及是否存在�
 
 ## 与路由/评分的关系
 
-- Router 会先执行 Header 检查，并把结果计入 `preliminary_score`（`agent/router.py`）
+- Router 会先执行 Header 检查，并把结果计入 `preliminary_score`（`engine/router.py`）
 - 融合评分因子：`spf_fail`、`dkim_fail`、`dmarc_fail`（`scoring/fusion.py`）
 
 ## 报告建议

@@ -5,7 +5,7 @@ A minimal web UI for manual testing of the phishing email detection agent.
 ## Try it locally
 
 ```
-python apps/gradio_demo/app.py
+python apps/demo/gradio_app.py
 ```
 
 ## Example input

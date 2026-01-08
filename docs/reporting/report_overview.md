@@ -8,12 +8,12 @@
 
 当前仓库提供两种输出：
 
-- **Markdown 报告**：面向人类读者（`agent/report.py`）
-- **JSON 输出**：面向系统集成（`agent/cli.py --format json`）
+- **Markdown 报告**：面向人类读者（`engine/report.py`）
+- **JSON 输出**：面向系统集成（`apps/cli/main.py --format json`）
 
 ## Markdown 报告结构（当前实现）
 
-`agent/report.py` 输出的报告包含：
+`engine/report.py` 输出的报告包含：
 
 1. 标题与概要：
    - Verdict label（ALLOW / ESCALATE / QUARANTINE）
@@ -27,7 +27,7 @@
 
 ## 解释输出（结构化）
 
-结构化解释由 `agent/explanation.py` 生成，适用于：
+结构化解释由 `engine/explanation.py` 生成，适用于：
 
 - API 返回
 - SIEM 事件字段

@@ -21,6 +21,6 @@
 
 ## 与当前实现的映射
 
-- Markdown 报告的头部已经包含上述大部分字段（`agent/report.py`）
-- JSON 输出包含 `verdict/risk_score/trace_id/profile/explanation`（`agent/cli.py`）
+- Markdown 报告的头部已经包含上述大部分字段（`engine/report.py`）
+- JSON 输出包含 `verdict/risk_score/trace_id/profile/explanation`（`apps/cli/main.py`）
 

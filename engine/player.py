@@ -6,10 +6,10 @@ import json
 from pathlib import Path
 from typing import Any
 
-from agent.config import AgentConfig
-from agent.explanation import build_explanation
-from agent.policy import PolicyEngine
-from agent.state import DetectionResult
+from engine.config import AgentConfig
+from engine.explanation import build_explanation
+from engine.policy import PolicyEngine
+from engine.state import DetectionResult
 from schemas.evidence_schema import (
     AttachmentScanResult,
     DomainRiskResult,

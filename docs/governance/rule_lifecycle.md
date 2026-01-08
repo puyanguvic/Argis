@@ -4,8 +4,8 @@
 
 ## 1) 变更类型
 
-- 路由阈值：影响取证成本与证据完备度（`configs/default.yaml` 的 `router.*`）
-- 评分权重：影响分数与 top_signals（`scoring/fusion.py` + `configs/default.yaml`）
+- 路由阈值：影响取证成本与证据完备度（`configs/profiles/balanced.yaml` 的 `router.*`）
+- 评分权重：影响分数与 top_signals（`scoring/fusion.py` + `configs/profiles/balanced.yaml`）
 - 硬规则：影响强制拦截（`scoring/rules.py`）
 
 ## 2) 变更流程（建议）

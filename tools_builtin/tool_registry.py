@@ -6,12 +6,12 @@ from dataclasses import dataclass
 from typing import Dict, Iterable
 
 from schemas.email_schema import EmailInput
-from tools.attachment_analyzer import attachment_static_scan
-from tools.content_analyzer import semantic_extract
-from tools.domain_risk import domain_risk_assess
-from tools.header_analyzer import header_auth_check
-from tools.url_analyzer import url_chain_resolve
-from tools.url_utils import extract_urls
+from tools_builtin.attachment_analyzer import attachment_static_scan
+from tools_builtin.content_analyzer import semantic_extract
+from tools_builtin.domain_risk import domain_risk_assess
+from tools_builtin.header_analyzer import header_auth_check
+from tools_builtin.url_analyzer import url_chain_resolve
+from tools_builtin.url_utils import extract_urls
 
 
 @dataclass(frozen=True)

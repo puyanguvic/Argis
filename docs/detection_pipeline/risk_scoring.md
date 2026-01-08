@@ -13,7 +13,7 @@
 
 ## 2) 默认因子与来源
 
-下表对应 `scoring/fusion.py` 中的 factors（权重可在 `configs/default.yaml` 修改）：
+下表对应 `scoring/fusion.py` 中的 factors（权重可在 `configs/profiles/balanced.yaml` 修改）：
 
 - Header：
   - `spf_fail` / `dkim_fail` / `dmarc_fail`：来自 `evidence.header_auth`
@@ -38,7 +38,7 @@
 - `score >= escalate_threshold` → `suspicious`
 - else → `benign`
 
-阈值配置：`configs/default.yaml` → `thresholds.*`
+阈值配置：`configs/profiles/balanced.yaml` → `thresholds.*`
 
 ## 4) 硬规则（Hard Rules）覆盖
 
@@ -50,7 +50,7 @@
 
 ## 5) 如何调参
 
-优先在 `configs/default.yaml` 调整：
+优先在 `configs/profiles/balanced.yaml` 调整：
 
 - Router：`t_fast` / `t_deep` 与 tools 集合（影响取证成本与证据完备度）
 - Weights：控制各信号贡献

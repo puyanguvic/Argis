@@ -13,7 +13,7 @@
 
 ### 域名风险评估
 
-- 工具：`domain_risk_assess(domains)`（`tools/domain_risk.py`）
+- 工具：`domain_risk_assess(domains)`（`tools_builtin/domain_risk.py`）
 - 输出：`DomainRiskResult(items=[DomainRiskItem...])`（`schemas/evidence_schema.py`）
 - 机制：
   - 用 Levenshtein 距离与静态品牌词表 `_BRANDS` 比较
@@ -25,7 +25,7 @@
 
 相关快速特征：
 
-- `from_domain_mismatch` / `reply_to_mismatch`（`agent/router.py`）
+- `from_domain_mismatch` / `reply_to_mismatch`（`engine/router.py`）
 
 相关评分因子（`scoring/fusion.py`）：
 

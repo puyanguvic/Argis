@@ -10,7 +10,7 @@
 phish-agent detect --input examples/email_sample.json --format json
 ```
 
-输出结构由 `agent/cli.py` 生成，字段包括：
+输出结构由 `apps/cli/main.py` 生成，字段包括：
 
 - `verdict`：`benign` / `suspicious` / `phishing`
 - `risk_score`：0–100

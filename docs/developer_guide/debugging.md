@@ -25,7 +25,7 @@ phish-agent replay --record run.jsonl
 回放会：
 
 - 合并 JSONL 中的工具输出为 `EvidenceStore`
-- 使用当前配置重新计算 verdict/score（`agent/player.py`）
+- 使用当前配置重新计算 verdict/score（`engine/player.py`）
 
 适用于：
 

@@ -4,7 +4,7 @@
 
 ## 执行边界
 
-- 默认无网络访问：URL/域名工具不进行在线解析（`tools/url_analyzer.py`）。
+- 默认无网络访问：URL/域名工具不进行在线解析（`tools_builtin/url_analyzer.py`）。
 - 工具应被视为**纯函数**：输入为 `EmailInput` 或其派生数据，输出为可序列化的结构化对象。
 - 所有中间结果进入 `EvidenceStore`，用于审计与回放（`schemas/evidence_schema.py`）。
 
@@ -16,14 +16,14 @@ Router 在 `PlanSpec` 中给出：
 - `timeout_s`：单次执行超时（逻辑预算，用于未来扩展）
 - `fallback`：降级策略（默认 `STANDARD`）
 
-当前实现未强制中断工具执行，但保留该结构以支持未来的并发/隔离执行（见 `agent/router.py`、`agent/config.py`）。
+当前实现未强制中断工具执行，但保留该结构以支持未来的并发/隔离执行（见 `engine/router.py`、`engine/config.py`）。
 
 ## 执行路径与降级（Degradations）
 
 - 正常情况下按 `plan.tools` 顺序执行。
 - 当出现“上下文升级”（FAST → STANDARD）时，系统会：
   - 写入 `evidence.degradations += ["profile_escalated_contextual_signal"]`
-  - 扩展 `plan.tools` 并补执行缺失工具（`agent/orchestrator.py`）
+  - 扩展 `plan.tools` 并补执行缺失工具（`engine/orchestrator.py`）
 
 在未来引入外部工具/网络情报时，建议把以下信息也写入 `degradations`：
 
@@ -33,8 +33,8 @@ Router 在 `PlanSpec` 中给出：
 
 ## 审计与回放
 
-- `RunRecorder` 将每个节点输出记录为 JSONL，包含 `node_name` 与输入状态 hash（`agent/recorder.py`）
-- `replay_run()` 从 JSONL 合并出 `EvidenceStore` 并重算 verdict（`agent/player.py`）
+- `RunRecorder` 将每个节点输出记录为 JSONL，包含 `node_name` 与输入状态 hash（`engine/recorder.py`）
+- `replay_run()` 从 JSONL 合并出 `EvidenceStore` 并重算 verdict（`engine/player.py`）
 
 审计目标：
 

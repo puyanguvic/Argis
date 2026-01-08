@@ -14,12 +14,12 @@ URL 是钓鱼邮件最常见的落地点。该技能关注：URL 是否存在、
 
 ### URL 提取
 
-- `extract_urls([body_text, body_html])`（`tools/url_utils.py`）
+- `extract_urls([body_text, body_html])`（`tools_builtin/url_utils.py`）
 - 简化正则：提取 `http(s)://...` 并做少量尾部标点清理
 
 ### URL 解析与词法风险
 
-- `url_chain_resolve(urls)`（`tools/url_analyzer.py`）
+- `url_chain_resolve(urls)`（`tools_builtin/url_analyzer.py`）
 - 输出：`UrlChainResult(chains=[UrlChainItem...])`
 - 约束：不进行网络跳转；每个 URL 仅产出“单跳”链（`hops=[input]`）
 

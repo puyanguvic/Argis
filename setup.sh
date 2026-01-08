@@ -14,4 +14,4 @@ uv venv
 uv pip install -e ".[ui]"
 echo "Installed core deps with UI extras."
 
-echo "Run: python apps/gradio_demo/app.py"
+echo "Run: python apps/demo/gradio_app.py"

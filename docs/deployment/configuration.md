@@ -4,9 +4,18 @@
 
 ## 1) YAML 配置（当前实现）
 
-默认配置：`configs/default.yaml`，由 `AgentOrchestrator` 加载（`agent/orchestrator.py`）。
+入口配置：`configs/app.yaml`，用于选择 profile/provider/connector。
 
-主要配置块（对应 `agent/config.py`）：
+默认 profile：`configs/profiles/balanced.yaml`，由 `AgentOrchestrator` 加载（`engine/orchestrator.py`）。
+兼容路径：若 profile 配置不存在，将回退到 `configs/default.yaml`。
+
+provider/connector 示例：
+
+- `configs/providers/ollama.yaml`
+- `configs/connectors/gmail.yaml`
+- `configs/connectors/imap.yaml`
+
+主要配置块（对应 `engine/config.py`）：
 
 - `router`：`t_fast/t_deep`、各 profile 的 tools、预算与 fallback
 - `thresholds`：`block_threshold/escalate_threshold`
@@ -29,4 +38,3 @@
 - `config_hash`（对 YAML 规范化后 hash）
 
 这样可以对比不同配置下的误报/漏报变化，并快速回滚。
-

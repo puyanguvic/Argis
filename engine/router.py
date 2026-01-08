@@ -6,11 +6,11 @@ import re
 from email.utils import parseaddr
 from typing import Iterable
 
-from agent.config import RouterConfig
+from engine.config import RouterConfig
 from schemas.email_schema import EmailInput
 from schemas.evidence_schema import EvidenceStore, PlanSpec, QuickFeatures
-from tools.header_analyzer import header_auth_check
-from tools.url_utils import extract_urls
+from tools_builtin.header_analyzer import header_auth_check
+from tools_builtin.url_utils import extract_urls
 
 _SUBJECT_SUSPICIOUS = {"urgent", "verify", "password", "invoice", "payment", "action required"}
 _DOMAIN_RE = re.compile(r"\b[a-z0-9.-]+\.[a-z]{2,}\b", re.IGNORECASE)

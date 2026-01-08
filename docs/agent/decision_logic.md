@@ -4,7 +4,7 @@
 
 ## 1) 路由（FAST / STANDARD / DEEP）
 
-路由逻辑在 `agent/router.py`：
+路由逻辑在 `engine/router.py`：
 
 1. 计算 `QuickFeatures`：
    - `from_domain_mismatch`
@@ -18,11 +18,11 @@
    - `>= t_deep` → `DEEP`
    - else → `STANDARD`
 
-默认阈值与工具集合见 `configs/default.yaml`。
+默认阈值与工具集合见 `configs/profiles/balanced.yaml`。
 
 ## 2) 上下文升级（FAST → STANDARD）
 
-当同时满足以下条件时触发（`agent/orchestrator.py`）：
+当同时满足以下条件时触发（`engine/orchestrator.py`）：
 
 - 当前路径为 `FAST`
 - 发件人域名不在 allowlist（`AgentConfig.allowlist_domains`）
@@ -36,7 +36,7 @@
 
 ## 3) 裁决（Hard Rules + Risk Fusion）
 
-裁决入口：`agent/policy.py`。
+裁决入口：`engine/policy.py`。
 
 ### 3.1 硬规则（Hard Rules）
 
@@ -55,7 +55,7 @@
 - 累加并截断到 0–100
 - 输出 `breakdown`（包含每个因子的 value/weight/contribution）
 
-默认权重在 `configs/default.yaml`（可覆盖 `DEFAULT_WEIGHTS`）。
+默认权重在 `configs/profiles/balanced.yaml`（可覆盖 `DEFAULT_WEIGHTS`）。
 
 ### 3.3 分数映射（Verdict Mapping）
 
@@ -63,11 +63,11 @@
 - `score >= escalate_threshold` → `suspicious`
 - else → `benign`
 
-阈值由 `configs/default.yaml` 配置（`thresholds.block_threshold`、`thresholds.escalate_threshold`）。
+阈值由 `configs/profiles/balanced.yaml` 配置（`thresholds.block_threshold`、`thresholds.escalate_threshold`）。
 
 ## 4) 解释输出（为什么这样判）
 
-`agent/explanation.py` 生成 `Explanation`：
+`engine/explanation.py` 生成 `Explanation`：
 
 - 若命中硬规则：`top_signals` 优先输出 `hard_rule:<code>`
 - 否则：按贡献度排序输出 `score_factor:<factor>`

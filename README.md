@@ -24,44 +24,21 @@ Some collaboration/OAuth workflows are low-noise and do not trip classic hard si
 
 ```
 phish-agent/
-├── agent/
-│   ├── cli.py               # CLI entrypoints
-│   ├── config.py            # Router + scoring config
-│   ├── explanation.py       # Structured explanation
-│   ├── orchestrator.py      # Plan + tool execution runner
-│   ├── policy.py            # Hard rules + fusion policy
-│   ├── player.py            # Replay from JSONL
-│   ├── recorder.py          # Audit log recorder
-│   └── router.py            # FAST/STANDARD/DEEP routing
-│
-├── schemas/
-│   ├── email_schema.py      # EmailInput + AttachmentMeta
-│   ├── evidence_schema.py   # EvidenceStore + tool results
-│   └── explanation_schema.py
-│
-├── scoring/
-│   ├── fusion.py            # Weighted score fusion
-│   └── rules.py             # Hard rule triggers
-│
-├── tools/
-│   ├── header_analyzer.py   # SPF/DKIM/DMARC parsing
-│   ├── url_analyzer.py      # URL chain + lexical checks
-│   ├── domain_risk.py       # Lookalike detection
-│   ├── content_analyzer.py  # Semantic extraction
-│   ├── attachment_analyzer.py
-│   └── parser.py            # Raw email -> EmailInput
-│
-├── configs/
-│   └── default.yaml         # Router + scoring weights
-│
-├── examples/
-│   └── email_sample.json    # Sample EmailInput payload
-│
-└── tests/
-    ├── test_router.py
-    ├── test_scoring.py
-    └── test_explain.py
+├── protocol/                # Stable UI <-> Engine contract (Op/Event)
+├── engine/                  # Core engine (session/task/turn + detection pipeline)
+├── tools_builtin/           # Deterministic evidence tools (offline by default)
+├── providers/               # Model adapters (Ollama, etc.)
+├── connectors/              # Gmail/IMAP connectors (pluggable)
+├── apps/                    # Entry points (CLI, Gradio)
+├── schemas/                 # Input/decision schemas (Pydantic)
+├── scoring/                 # Fusion + hard rules
+├── configs/                 # Profiles + provider/connector configs
+├── docs/                    # Architecture + protocol docs
+├── examples/                # Sample inputs
+└── tests/                   # Unit tests
 ```
+
+Protocol details: `docs/protocol_v1.md`.
 
 ## Quick start
 
@@ -92,7 +69,7 @@ pytest
 5) Optional: launch the Gradio demo:
 
 ```
-python apps/gradio_demo/app.py
+python apps/demo/gradio_app.py
 ```
 
 ## EmailInput schema
@@ -119,15 +96,17 @@ This plan is recorded to JSONL when `--record` is enabled.
 
 ## Configuration
 
-Tune routing thresholds and scoring weights in `configs/default.yaml`.
-Contextual escalation signals (brands, intents, keywords) and allowlisted domains also live in `configs/default.yaml`.
+App-level selectors (profile/provider/connector) live in `configs/app.yaml`.
+Tune routing thresholds and scoring weights in `configs/profiles/balanced.yaml`.
+Legacy config fallback remains in `configs/default.yaml`.
+Contextual escalation signals (brands, intents, keywords) and allowlisted domains also live in the profile config.
 
 ## How to add real tool backends
 
 Default tools are deterministic and offline by design. To add real integrations:
 
 1) Implement a backend that returns the same result models (e.g., `HeaderAuthResult`).
-2) Swap the function used in `agent/orchestrator.py` for your backend call.
+2) Swap the function used in `engine/orchestrator.py` for your backend call.
 3) Keep the output schema stable so scoring and explanations remain unchanged.
 
 ## CLI output format

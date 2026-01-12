@@ -1,37 +1,37 @@
 ---
 layout: default
+title: Integration
 ---
 
-# 集成：SIEM / Email Gateway
+# Integration: SIEM / email gateway
 
-本页描述与邮件网关、SIEM/SOAR 的集成模式与字段建议。
+This page describes integration patterns and recommended fields.
 
-## 1) 典型集成流程
+## 1) Typical integration flow
 
-1. 邮件网关/平台捕获邮件事件（含 Message-ID、收件人等元数据）
-2. 接入层解析邮件并生成 `EmailInput`
-3. 调用检测核心（本项目）得到 JSON 输出
-4. 根据 `recommended_action` 执行动作：
-   - `allow`：放行
-   - `warn`：提示用户 + 进入复核队列
-   - `quarantine`：隔离/阻断
-5. 将事件写入 SIEM 并关联工单
+1. Gateway/platform captures email event (Message-ID, recipients, metadata).
+2. Ingestion layer parses email and builds `EmailInput`.
+3. Detection core returns JSON output.
+4. Execute actions based on `recommended_action`:
+   - `allow`: deliver
+   - `warn`: notify user + review queue
+   - `quarantine`: isolate/block
+5. Write event to SIEM and correlate with tickets.
 
-## 2) 字段建议
+## 2) Suggested fields
 
-最小集合：
+Minimum set:
 
 - `verdict`, `risk_score`, `recommended_action`, `top_signals`, `trace_id`, `profile`
 
-增强集合（由接入层提供）：
+Enhanced set (from ingestion layer):
 
 - `message_id`, `thread_id`, `tenant_id`
 - `sender`, `sender_domain`, `reply_to`, `recipient`
-- `urls`（原始与规范化）、`attachments`（sha256/mime/size）
-- `delivery_action`（网关动作）与最终处置结果
+- `urls` (raw + normalized), `attachments` (sha256/mime/size)
+- `delivery_action` (gateway action) and final disposition
 
-## 3) 安全建议
+## 3) Safety guidance
 
-- 在工单/告警系统中避免直接展示可点击 URL（或默认禁用）
-- 对 `suspicious` 与 BEC 相关 intent 设置更严格的人工审批流程
-
+- Avoid clickable URLs in tickets/alerts (or disable by default).
+- For `suspicious` and BEC intents, require stricter human approval workflows.

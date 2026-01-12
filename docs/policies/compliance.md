@@ -1,29 +1,29 @@
 ---
 layout: default
+title: Compliance (SOC2 / GDPR)
 ---
 
-# 合规性（SOC2 / GDPR 视角）
+# Compliance (SOC2 / GDPR perspective)
 
-本页提供将系统纳入合规体系的建议视角，并不构成法律意见或自动满足 SOC2/GDPR 的声明。
+This page provides engineering guidance for compliance alignment. It is not legal advice nor a certification claim.
 
-## 1) SOC2（安全/可用性/机密性）要点
+## 1) SOC2 (security / availability / confidentiality)
 
-- **安全**：最小权限运行、网络 egress 控制、依赖供应链管理
-- **可用性**：服务健康检查、超时与退避、容量规划
-- **机密性**：敏感数据分类、存储加密、访问审计与保留策略
-- **变更管理**：规则/权重/模型更新走审查流程，具备回滚机制
+- **Security**: least-privilege runtime, egress controls, dependency/supply-chain management
+- **Availability**: health checks, timeouts, backoff, capacity planning
+- **Confidentiality**: data classification, encryption at rest, access audits, retention policies
+- **Change management**: review workflow for rules/weights/models with rollback
 
-## 2) GDPR（数据保护）要点
+## 2) GDPR (data protection)
 
-- **数据最小化**：默认不保留邮件全文；只保留用于检测所需的结构化证据
-- **目的限制**：仅用于安全检测与响应，不二次滥用
-- **保留期限**：按事件等级设置 retention（见 `policies/privacy_policy.md`）
-- **访问控制与可审计**：对审计记录（JSONL/事件）实行访问审计
+- **Data minimization**: do not retain full email bodies by default; store only evidence needed for detection
+- **Purpose limitation**: use data solely for security detection and response
+- **Retention**: set retention by incident severity (see `policies/privacy.md`)
+- **Access control and audit**: audit access to JSONL/events and enforce least privilege
 
-## 3) 建议的工程落地清单
+## 3) Suggested engineering checklist
 
-- 在集成层加入 `schema_version` 与 `config_version/config_hash`
-- 记录规则与权重的变更日志（见 `governance/rule_lifecycle.md`）
-- 为敏感字段提供脱敏策略（URL、邮箱地址、正文摘要等）
-- 定义 DPA/供应商评估（若接入外部情报/模型）
-
+- Add `schema_version` and `config_version/config_hash` in integrations
+- Track rule/weight changes (see `governance/rule-lifecycle.md`)
+- Provide redaction strategies for sensitive fields (URLs, email addresses, body excerpts)
+- Define DPAs/vendor assessments if external intel/models are used

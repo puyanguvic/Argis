@@ -17,6 +17,8 @@ from engine.router import plan_routes
 from engine.state import DetectionResult
 from schemas.email_schema import EmailInput
 from schemas.evidence_schema import EvidenceStore
+from connectors.base import Connector
+from providers.model.base import ModelProvider
 from tools_builtin.attachment_analyzer import attachment_static_scan
 from tools_builtin.content_analyzer import semantic_extract
 from tools_builtin.domain_risk import domain_risk_assess
@@ -34,9 +36,16 @@ DEFAULT_CONFIG_PATHS = (
 class AgentOrchestrator:
     """Coordinates routing, tools, scoring, and explanations."""
 
-    def __init__(self, config_path: str | Path | None = None) -> None:
+    def __init__(
+        self,
+        config_path: str | Path | None = None,
+        provider: ModelProvider | None = None,
+        connector: Connector | None = None,
+    ) -> None:
         self.config = self._load_config(config_path)
         self.policy = PolicyEngine(self.config)
+        self.provider = provider
+        self.connector = connector
 
     def detect(self, email: EmailInput, record_path: str | Path | None = None) -> DetectionResult:
         recorder = RunRecorder(record_path) if record_path else None

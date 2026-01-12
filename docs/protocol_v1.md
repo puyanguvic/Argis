@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Protocol v1 (UI <-> Engine)
 
 本协议定义 UI 与 Engine 的稳定交互边界：**Op → Engine → EventMsg**。核心目标是让 UI/入口与 Engine 解耦，使引擎长期演进时无需重构入口层。

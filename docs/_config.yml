@@ -1,3 +1,6 @@
 title: Argis Docs
-theme: minima
+description: Phish Email Detection Agent documentation.
+theme: null
 markdown: kramdown
+kramdown:
+  input: GFM

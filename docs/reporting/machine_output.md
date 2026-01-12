@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # JSON / API 输出规范
 
 本页定义机器可读输出的字段与稳定性原则，便于与 SIEM、SOAR、邮件网关等系统集成。

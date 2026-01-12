@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # 如何新增 Skill
 
 “Skill”在本项目中最终落地为：新的证据源（tools）+ 新的证据字段（schemas）+ 新的评分/规则（scoring/policy）+ 文档与测试。

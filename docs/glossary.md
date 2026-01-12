@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # 术语表（Glossary）
 
 ## Email / Threat

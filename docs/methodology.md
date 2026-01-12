@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Methodology (Legacy entry)
 
 本文件保留用于向后兼容。方法论/流水线相关文档已迁移至：

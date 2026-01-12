@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Tools / External signals
 
 本项目默认工具链强调“离线、确定性、可复现”。工具返回结构化结果并写入 `EvidenceStore`，供评分与规则使用。

@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # 高层摘要结构（Executive Summary）
 
 面向管理层/非技术读者的摘要应回答四个问题：

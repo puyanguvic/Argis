@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # 测试场景（Benchmark Scenarios）
 
 本页给出一组建议的基准场景，用于回归测试与权重/规则调参。

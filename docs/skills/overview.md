@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Skill / Playbook 机制说明
 
 本项目将“技能（Skill）/剧本（Playbook）”理解为：**围绕某类攻击目标的一组取证步骤（tools）+ 证据结构（schemas）+ 裁决策略（policy）**。

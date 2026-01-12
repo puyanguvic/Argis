@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # 系统总览（Codex-style）
 
 ## 一句话概括

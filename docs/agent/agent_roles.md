@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Reasoner / Executor / Verifier
 
 虽然当前实现是单进程内的多个函数/模块，但系统在职责上可以拆解为三类角色，便于扩展到更复杂的代理架构。

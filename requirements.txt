@@ -1,4 +1,6 @@
 gradio>=4.0
+datasets>=2.18
+pyarrow>=14.0
 pydantic>=2.6
 pyyaml>=6.0
 tldextract>=5.1

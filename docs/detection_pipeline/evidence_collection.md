@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # 证据收集机制
 
 系统的“证据总线”是 `EvidenceStore`（`schemas/evidence_schema.py`）。所有工具输出必须写入该对象，裁决层只依赖证据而不直接依赖原始输入文本。

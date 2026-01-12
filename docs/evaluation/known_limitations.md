@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # 当前系统边界（Known Limitations）
 
 本页从评估角度汇总当前系统的主要局限，便于设置正确的使用预期。

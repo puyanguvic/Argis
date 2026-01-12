@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # MIME / Header / Body 解析
 
 本页解释 raw email → `EmailInput` 的解析逻辑与边界。

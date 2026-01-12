@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # 输入接入：EML / MSG / API
 
 本页描述系统如何接收邮件输入并转为统一的 `EmailInput`。

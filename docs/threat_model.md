@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Threat Model (Legacy entry)
 
 本文件保留用于向后兼容。威胁与安全/隐私相关文档已迁移至：

@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # 集成：SIEM / Email Gateway
 
 本页描述与邮件网关、SIEM/SOAR 的集成模式与字段建议。

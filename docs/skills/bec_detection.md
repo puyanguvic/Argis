@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Business Email Compromise（BEC）检测
 
 BEC 的核心不是“技术恶意载荷”，而是**冒充与业务流程诱导**。因此该技能更依赖上下文与组织数据；在缺少上下文时，系统应倾向于 `suspicious` 并触发人工复核。

@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # 响应建议（Recommendations）
 
 本页给出不同 verdict 下的默认处置建议，并提示哪些情况需要更强的人工流程。

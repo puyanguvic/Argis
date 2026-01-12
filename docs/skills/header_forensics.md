@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # 邮件头取证（Header Forensics）
 
 Header 取证用于评估“发件人身份是否可信”，以及是否存在伪造/未对齐等迹象。

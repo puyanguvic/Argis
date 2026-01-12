@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # 部署模型：Local / Cloud / Hybrid
 
 本项目可以以多种形态部署，核心建议是把“接入层”与“检测核心”解耦。

@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # End-to-end 工作流
 
 本页描述一次检测任务从输入到输出的完整流程，以及 FAST/STANDARD/DEEP 的运行差异。

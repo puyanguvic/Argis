@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # 评估指标（Precision / Recall / Risk）
 
 本项目不仅关心分类准确率，也关心“风险分数是否可用”与“取证成本是否合理”。

@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Architecture (Legacy entry)
 
 本文件保留用于向后兼容。最新架构文档已迁移到分层目录：

@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # 设计目标 & 非目标
 
 ## 设计目标（Goals）

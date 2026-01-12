@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # 证据表定义（Evidence Table）
 
 证据表用于把复杂检测结果拆成可审计的“证据条目”，用于报告、SIEM 或工单系统。

@@ -30,10 +30,14 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      - name: Sync docs content
+        run: |
+          mkdir -p docs-site
+          rsync -a ./docs/ ./docs-site/
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
-          source: ./docs
+          source: ./docs-site
           destination: ./_site
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

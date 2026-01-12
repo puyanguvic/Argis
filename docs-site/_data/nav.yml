@@ -1,26 +1,26 @@
 - title: Overview
   url: /
 - title: Introduction
-  url: /introduction/problem_statement.html
+  url: /overview/
 - title: Architecture
-  url: /architecture/system_overview.html
+  url: /architecture/
 - title: Agent
-  url: /engine/agent_roles.html
+  url: /agent/
 - title: Skills
-  url: /skills/overview.html
+  url: /skills/
 - title: Detection Pipeline
-  url: /detection_pipeline/ingestion.html
+  url: /pipeline/
 - title: Reporting
-  url: /reporting/report_overview.html
+  url: /reporting/
 - title: Policies
-  url: /policies/security_policy.html
+  url: /policies/
 - title: Evaluation
-  url: /evaluation/evaluation_metrics.html
+  url: /evaluation/
 - title: Deployment
-  url: /deployment/deployment_models.html
+  url: /deployment/
 - title: Developer Guide
-  url: /developer_guide/code_structure.html
+  url: /developer/
 - title: Governance
-  url: /governance/model_updates.html
+  url: /governance/
 - title: Glossary
   url: /glossary.html

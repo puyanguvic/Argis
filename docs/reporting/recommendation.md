@@ -1,45 +1,45 @@
 ---
 layout: default
+title: Recommendations
 ---
 
-# 响应建议（Recommendations）
+# Recommendations
 
-本页给出不同 verdict 下的默认处置建议，并提示哪些情况需要更强的人工流程。
+This page outlines default handling per verdict and when stronger human workflows are required.
 
-## 1) `benign`（ALLOW）
+## 1) `benign` (ALLOW)
 
-建议动作：
+Recommended actions:
 
-- 正常投递
-- 若 profile 为 FAST 且证据不足，可提示用户：若该请求非预期，请通过内部渠道核验
+- deliver normally
+- if profile is FAST with limited evidence, remind users to verify unexpected requests out-of-band
 
-适用场景：
+Typical scenarios:
 
-- 无明显认证失败、无可疑 URL、无恶意意图与附件风险
+- no auth failures, no suspicious URLs, no malicious intent, no attachment risk
 
-## 2) `suspicious`（ESCALATE / WARN）
+## 2) `suspicious` (ESCALATE / WARN)
 
-建议动作：
+Recommended actions:
 
-- 触发人工复核（安全团队或二线）
-- 对用户提示风险：不要点击外链、不要提供凭据、不要执行附件
-- 对 BEC 类请求：要求业务方通过非邮件渠道核验（电话/IM/工单系统）
+- trigger human review (security team or tier-2)
+- warn users: do not click links, share credentials, or execute attachments
+- for BEC: verify via non-email channels (phone/IM/ticketing)
 
-适用场景：
+Typical scenarios:
 
-- 存在部分风险信号但不足以强拦截
-- 需要更多上下文（联系人关系/历史线程/财务流程）
+- partial risk signals without hard-rule confidence
+- insufficient org context (contacts, threads, finance workflow)
 
-## 3) `phishing`（QUARANTINE）
+## 3) `phishing` (QUARANTINE)
 
-建议动作：
+Recommended actions:
 
-- 隔离邮件、禁用外链点击、阻断附件下载/执行
-- 生成事件并通知用户与安全团队
-- 若涉及组织品牌仿冒/认证失败，考虑添加网关规则与 IOC
+- quarantine email, block link clicks, prevent attachment execution
+- raise an incident and notify users and security team
+- if brand impersonation or auth failure: consider gateway rules/IOCs
 
-适用场景：
+Typical scenarios:
 
-- 命中硬规则（`EvidenceStore.hard_rule_matches` 非空）
-- 或风险分数超过 block threshold
-
+- hard rules matched (`EvidenceStore.hard_rule_matches` not empty)
+- risk score exceeds `block_threshold`

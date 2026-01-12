@@ -1,45 +1,43 @@
 ---
 layout: default
+title: Skills and Playbooks Overview
 ---
 
-# Skill / Playbook 机制说明
+# Skill / playbook mechanism
 
-本项目将“技能（Skill）/剧本（Playbook）”理解为：**围绕某类攻击目标的一组取证步骤（tools）+ 证据结构（schemas）+ 裁决策略（policy）**。
+A **skill/playbook** is a bundle of *evidence steps (tools) + evidence schema + decision policy* focused on a specific attack class.
 
-当前仓库的实现更接近“固定的 playbook 集合”（由 Router 选择 FAST/STANDARD/DEEP），但文档仍以 Skill 的方式组织，便于后续扩展为可组合的技能库。
+Today the repository behaves more like a fixed set of playbooks selected by the Router (FAST/STANDARD/DEEP), but the docs keep the skill framing for future composition.
 
-## Skill 的最小构成
+## Minimum components of a skill
 
-一个可落地的 Skill 通常包含：
+1. **Trigger conditions**: when it runs (route thresholds, contextual escalation, manual trigger)
+2. **Evidence sources**: tools to execute and fields to collect (`EvidenceStore`)
+3. **Scoring/rules**: scoring factors or hard rules contributed by this skill
+4. **Presentation**: how the report explains and recommends actions
 
-1. **触发条件**：何时运行该技能（路由阈值、上下文升级、手工触发）
-2. **证据源**：要执行哪些工具、收集哪些字段（写入 `EvidenceStore`）
-3. **评分/规则**：该技能贡献哪些评分因子或硬规则
-4. **输出呈现**：报告中应如何解释与行动建议
+## Mapping skills to code
 
-## 当前系统中 Skill 与代码的映射
+| Skill | Primary evidence | Primary implementation |
+| --- | --- | --- |
+| Header Forensics | SPF/DKIM/DMARC, alignment, anomalies | `tools_builtin/header_analyzer.py`, `engine/router.py` |
+| URL Analysis | final_domain, shortener, suspicious_tld, login_keywords, ip_host | `tools_builtin/url_analyzer.py`, `tools_builtin/url_utils.py` |
+| Brand Impersonation | lookalike/homoglyph/punycode | `tools_builtin/domain_risk.py`, `scoring/rules.py` |
+| Attachment Analysis | macro/executable extensions | `tools_builtin/attachment_analyzer.py` |
+| BEC Detection | Reply-To mismatch, payment intent, urgency | `engine/router.py`, `tools_builtin/content_analyzer.py` |
 
-| Skill | 主要证据 | 主要实现 |
-|---|---|---|
-| Header Forensics | SPF/DKIM/DMARC、aligned、anomalies | `tools_builtin/header_analyzer.py`, `engine/router.py` |
-| URL Analysis | final_domain、shortener、suspicious_tld、login_keywords、ip_host | `tools_builtin/url_analyzer.py`, `tools_builtin/url_utils.py` |
-| Brand Impersonation | lookalike/homoglyph/punycode、品牌近似 | `tools_builtin/domain_risk.py`, `scoring/rules.py` |
-| Attachment Analysis | macro/executable 扩展名 | `tools_builtin/attachment_analyzer.py` |
-| BEC Detection | Reply-To mismatch、付款/转账意图、紧迫度 | `engine/router.py`, `tools_builtin/content_analyzer.py` |
+## Composition and routing (FAST/STANDARD/DEEP)
 
-## 组合与路由（FAST/STANDARD/DEEP）
+- FAST: minimal evidence set for low-risk or resource-constrained cases
+- STANDARD: adds URL evidence
+- DEEP: adds domain similarity and attachment risk
 
-- FAST：最小取证集（通常用于低风险或资源受限）
-- STANDARD：补齐 URL 证据
-- DEEP：补齐域名相似与附件风险
+Profiles and tool sets are configured in `configs/profiles/balanced.yaml` (`engine/config.py`).
 
-路径与工具集合可在 `configs/profiles/balanced.yaml` 中配置（见 `engine/config.py`）。
+## Extension guidance
 
-## 未来扩展建议
+For new skills (e.g., account takeover, historical behavior anomalies):
 
-若要引入新的 Skill（例如“账号接管检测”“历史行为异常”），推荐遵循：
-
-- 先定义输出证据结构（扩展 `schemas/evidence_schema.py`）
-- 将外部信号适配为确定性“证据源”接口（写入 `EvidenceStore`）
-- 在 `scoring/fusion.py` 增加因子并在配置里赋权（或在 `scoring/rules.py` 增加硬规则）
-
+- Define the output evidence structure first (`schemas/evidence_schema.py`).
+- Adapt external signals into deterministic evidence sources (write into `EvidenceStore`).
+- Add factors to `scoring/fusion.py` and weights in config, or add hard rules in `scoring/rules.py`.

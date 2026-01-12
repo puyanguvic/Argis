@@ -1,0 +1,72 @@
+name: 🪲 Bug Report
+description: Report an issue in Argis that should be fixed
+labels:
+  - bug
+  - needs triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for submitting a bug report! It helps make Argis better for everyone.
+
+        Please avoid sharing sensitive email content or headers. Redact PII and secrets.
+
+        If possible, try the latest code to see if the issue is already fixed.
+
+        Please try to include as much information as possible.
+
+  - type: input
+    id: version
+    attributes:
+      label: What version is running?
+      description: Provide `phish-agent --version`, `pip show phish-email-detection-agent`, or the git commit hash.
+    validations:
+      required: true
+  - type: input
+    id: plan
+    attributes:
+      label: How did you install/run Argis?
+      description: pip editable, pip wheel, source checkout, etc.
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Which model/provider (if any) were you using?
+      description: e.g., offline deterministic only, Ollama + model name, etc.
+  - type: input
+    id: platform
+    attributes:
+      label: What platform is your computer?
+      description: |
+        For MacOS and Linux: copy the output of `uname -mprs`
+        For Windows: copy the output of `"$([Environment]::OSVersion | ForEach-Object VersionString) $(if ([Environment]::Is64BitOperatingSystem) { "x64" } else { "x86" })"` in the PowerShell console
+  - type: textarea
+    id: steps
+    attributes:
+      label: What steps can reproduce the bug?
+      description: Explain the bug and provide a minimal, redacted repro (CLI command or snippet).
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What issue are you seeing?
+      description: Include full error messages with PII redacted. Prefer text over screenshots.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What is the expected behavior?
+      description: If possible, please provide text instead of a screenshot.
+  - type: textarea
+    id: record
+    attributes:
+      label: Optional record output
+      description: If you ran with `--record`, paste a short, redacted JSONL snippet or attach the file.
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional information
+      description: Is there anything else you think we should know?

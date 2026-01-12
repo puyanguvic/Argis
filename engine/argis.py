@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Dict, Iterable, Optional
 import uuid
 
-import yaml
+from engine.bootstrap import AppConfig, load_app_config, load_connector, load_provider
 from engine.orchestrator import AgentOrchestrator
 from engine.queuepair import QueuePair
 from engine.report import build_report
@@ -31,6 +31,7 @@ class ArgisEngine:
         self.queues = queues or QueuePair()
         self.sessions: Dict[str, Session] = {}
         self.default_config_path = Path(default_config_path) if default_config_path else None
+        self.app_config: AppConfig = load_app_config()
 
     def submit(self, op: Op) -> list[EventMsg]:
         """Submit an op and return emitted events."""
@@ -69,11 +70,23 @@ class ArgisEngine:
 
     def _configure_session(self, op: ConfigureSession) -> None:
         config_path = self._resolve_config_path(op.config)
-        orchestrator = AgentOrchestrator(config_path=config_path)
+        provider_name = self._resolve_provider_name(op.config)
+        connector_name = self._resolve_connector_name(op.config)
+        provider = load_provider(provider_name)
+        connector = load_connector(connector_name)
+        orchestrator = AgentOrchestrator(
+            config_path=config_path,
+            provider=provider,
+            connector=connector,
+        )
         session = Session(
             session_id=op.session_id,
             config=orchestrator.config,
             orchestrator=orchestrator,
+            provider=provider,
+            connector=connector,
+            provider_name=provider_name,
+            connector_name=connector_name,
         )
         self.sessions[op.session_id] = session
         self.queues.emit(
@@ -96,18 +109,13 @@ class ArgisEngine:
                 return profile_path
         if config.config_path:
             return Path(config.config_path)
-        app_path = Path("configs/app.yaml")
-        if app_path.exists():
-            data = yaml.safe_load(app_path.read_text()) or {}
-            profile_path = data.get("profile_path")
-            profile = data.get("profile")
-            candidate: Optional[Path] = None
-            if profile_path:
-                candidate = Path(profile_path)
-            elif profile:
-                candidate = Path("configs/profiles") / f"{profile}.yaml"
-            if candidate and candidate.exists():
-                return candidate
+        candidate: Optional[Path] = None
+        if self.app_config.profile_path:
+            candidate = Path(self.app_config.profile_path)
+        elif self.app_config.profile:
+            candidate = Path("configs/profiles") / f"{self.app_config.profile}.yaml"
+        if candidate and candidate.exists():
+            return candidate
         if self.default_config_path:
             return self.default_config_path
         for candidate in (
@@ -123,11 +131,23 @@ class ArgisEngine:
         if session:
             return session
         config_path = self._resolve_config_path(SessionConfig())
-        orchestrator = AgentOrchestrator(config_path=config_path)
+        provider_name = self._resolve_provider_name(SessionConfig())
+        connector_name = self._resolve_connector_name(SessionConfig())
+        provider = load_provider(provider_name)
+        connector = load_connector(connector_name)
+        orchestrator = AgentOrchestrator(
+            config_path=config_path,
+            provider=provider,
+            connector=connector,
+        )
         session = Session(
             session_id=session_id,
             config=orchestrator.config,
             orchestrator=orchestrator,
+            provider=provider,
+            connector=connector,
+            provider_name=provider_name,
+            connector_name=connector_name,
         )
         self.sessions[session_id] = session
         return session
@@ -146,12 +166,15 @@ class ArgisEngine:
         task.turns.append(turn)
 
         try:
-            result = run_turn(
-                session.orchestrator,
-                op.input_kind,
-                op.payload,
-                op.options,
-            )
+            if op.input_kind == "connector":
+                result = self._run_connector_turn(session, op.payload, op.options)
+            else:
+                result = run_turn(
+                    session.orchestrator,
+                    op.input_kind,
+                    op.payload,
+                    op.options,
+                )
             turn.result = result
             turn.status = "completed"
             turn.finished_at = datetime.now(timezone.utc)
@@ -190,6 +213,25 @@ class ArgisEngine:
                 )
             )
 
+    def _resolve_provider_name(self, config: SessionConfig) -> Optional[str]:
+        return config.provider or self.app_config.provider
+
+    def _resolve_connector_name(self, config: SessionConfig) -> Optional[str]:
+        return config.connector or self.app_config.connector
+
+    def _run_connector_turn(
+        self,
+        session: Session,
+        payload: object,
+        options: Dict[str, object],
+    ):
+        if session.connector is None:
+            raise ValueError("Connector input requested, but no connector is configured.")
+        message_id = _extract_message_id(payload)
+        email = session.connector.fetch_email(message_id)
+        record_path = options.get("record_path")
+        return session.orchestrator.detect(email, record_path=record_path)
+
 
 def _build_artifacts(result) -> Iterable[Artifact]:
     profile = result.evidence.plan.path if result.evidence.plan else result.evidence.path
@@ -205,3 +247,11 @@ def _build_artifacts(result) -> Iterable[Artifact]:
     }
     yield Artifact(kind="detection_result", payload=payload)
     yield Artifact(kind="report_md", payload={"text": build_report(result)})
+
+
+def _extract_message_id(payload: object) -> str:
+    if isinstance(payload, str):
+        return payload
+    if isinstance(payload, dict) and "message_id" in payload:
+        return str(payload["message_id"])
+    raise ValueError("Connector input payload must include message_id.")

@@ -20,6 +20,8 @@ dependencies = [
 [project.optional-dependencies]
 ui = [
   "gradio>=4.0",
+  "datasets>=2.18",
+  "pyarrow>=14.0",
 ]
 
 test = [

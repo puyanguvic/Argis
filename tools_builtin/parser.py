@@ -31,7 +31,10 @@ def _parse_received_ts(msg: Message) -> datetime:
     raw_date = msg.get("Date")
     if not raw_date:
         return datetime.now(timezone.utc)
-    parsed = parsedate_to_datetime(raw_date)
+    try:
+        parsed = parsedate_to_datetime(raw_date)
+    except (TypeError, ValueError):
+        return datetime.now(timezone.utc)
     if parsed is None:
         return datetime.now(timezone.utc)
     if parsed.tzinfo is None:

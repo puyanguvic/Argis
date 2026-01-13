@@ -221,3 +221,11 @@ docs/node_modules/
 
 # OS
 .DS_Store
+
+# Node
+node_modules/
+docs/node_modules/
+
+# Build outputs (optional)
+dist/
+build/

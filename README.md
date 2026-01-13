@@ -1,3 +1,11 @@
+---
+title: Argis Phish Email Detection
+sdk: gradio
+app_file: apps/demo/gradio_app.py
+python_version: "3.10"
+---
+
+
 # Argis: Phish Email Detection Agent
 
 A minimal, deterministic phishing detection agent built around evidence-first design. The system collects structured evidence, quantifies risk, fuses evidence with policy rules, and only then produces a verdict. Models (if added later) are just evidence sources, never the final judge.

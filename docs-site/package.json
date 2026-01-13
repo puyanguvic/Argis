@@ -8,6 +8,7 @@
     "docs:preview": "vitepress preview"
   },
   "devDependencies": {
+    "@vue/server-renderer": "^3.5.0",
     "vitepress": "^1.2.0"
   }
 }

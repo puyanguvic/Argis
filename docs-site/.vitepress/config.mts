@@ -6,6 +6,13 @@ export default defineConfig({
   srcDir: "../docs",
   outDir: "dist",
   cleanUrls: true,
+  vite: {
+    resolve: {
+      alias: {
+        "vue/server-renderer": "@vue/server-renderer"
+      }
+    }
+  },
   themeConfig: {
     search: {
       provider: "local"

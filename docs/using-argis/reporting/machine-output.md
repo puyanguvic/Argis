@@ -1,5 +1,4 @@
 ---
-layout: default
 title: JSON / API Output
 redirect_from:
   - /reporting/machine-output.html

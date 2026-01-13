@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Architecture (Legacy)
 redirect_from:
   - /legacy/architecture.html

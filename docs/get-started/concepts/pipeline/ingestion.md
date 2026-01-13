@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Ingestion
 redirect_from:
   - /pipeline/ingestion.html

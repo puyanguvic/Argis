@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Configuration
 ---
 
@@ -9,13 +8,13 @@ How to tune Argis behavior without changing code, and how to extend it safely.
 
 ## Pages
 
-- [Config file](config-file.html)
-- [Rules and weights](rules.html)
-- [AGENTS.md](agents-md.html)
-- [Custom prompts](custom-prompts.html)
-- [MCP](mcp.html)
-- [Skills](skills/index.html)
-- [Extending Argis](extending/index.html)
+- [Config file](config-file.md)
+- [Rules and weights](rules.md)
+- [AGENTS.md](agents-md.md)
+- [Custom prompts](custom-prompts.md)
+- [MCP](mcp.md)
+- [Skills](skills/index.md)
+- [Extending Argis](extending/index.md)
 
 ## Config locations
 

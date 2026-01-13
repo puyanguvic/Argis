@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Normalization and Deobfuscation
 redirect_from:
   - /pipeline/normalization.html

@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Detection Pipeline
 redirect_from:
   - /pipeline/
@@ -12,8 +11,8 @@ Ingestion, parsing, normalization, evidence collection, and scoring flow.
 
 ## Pages
 
-- [Ingestion](ingestion.html)
-- [Parsing](parsing.html)
-- [Normalization](normalization.html)
-- [Evidence collection](evidence-collection.html)
-- [Risk scoring](risk-scoring.html)
+- [Ingestion](ingestion.md)
+- [Parsing](parsing.md)
+- [Normalization](normalization.md)
+- [Evidence collection](evidence-collection.md)
+- [Risk scoring](risk-scoring.md)

@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Get Started
 ---
 
@@ -9,9 +8,9 @@ Start here if you are new to Argis.
 
 ## Pages
 
-- [Overview](overview/index.html)
-- [Quickstart](quickstart.html)
-- [Concepts](concepts/index.html)
+- [Overview](overview/index.md)
+- [Quickstart](quickstart.md)
+- [Concepts](concepts/index.md)
 
 ## Suggested reading order
 

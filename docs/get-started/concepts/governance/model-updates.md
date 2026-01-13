@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Model Update Policy
 redirect_from:
   - /governance/model-updates.html

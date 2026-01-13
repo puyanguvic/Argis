@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Adding Skills
 redirect_from:
   - /developer/adding-skills.html

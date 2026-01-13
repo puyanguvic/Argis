@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Threat Model (Legacy)
 redirect_from:
   - /legacy/threat-model.html

@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Agent Components
 redirect_from:
   - /architecture/agent-components.html

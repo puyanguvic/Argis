@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Using Argis
 ---
 
@@ -9,11 +8,11 @@ Hands-on guides for running Argis and integrating it into workflows.
 
 ## Pages
 
-- [CLI usage](cli.html)
-- [Gradio demo](gradio-demo.html)
-- [Connectors (IMAP/Gmail)](connectors/index.html)
-- [Deployment and operations](deployment/index.html)
-- [Reporting](reporting/index.html)
+- [CLI usage](cli.md)
+- [Gradio demo](gradio-demo.md)
+- [Connectors (IMAP/Gmail)](connectors/index.md)
+- [Deployment and operations](deployment/index.md)
+- [Reporting](reporting/index.md)
 
 ## Notes
 

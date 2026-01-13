@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Releases
 ---
 
@@ -9,6 +8,6 @@ Project status notes and release artifacts.
 
 ## Pages
 
-- [Changelog](changelog.html)
-- [Feature maturity](feature-maturity.html)
-- [Open source](open-source.html)
+- [Changelog](changelog.md)
+- [Feature maturity](feature-maturity.md)
+- [Open source](open-source.md)

@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Protocol
 redirect_from:
   - /protocol/
@@ -12,4 +11,4 @@ UI-to-engine contract and message flow definitions.
 
 ## Pages
 
-- [Protocol v1](v1.html)
+- [Protocol v1](v1.md)

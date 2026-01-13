@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Phish Email Detection Agent Docs
 ---
 
@@ -17,34 +16,34 @@ Core principles:
 
 ### 1) Get started
 
-- [Get started](get-started/index.html)
-- [Overview](get-started/overview/index.html)
-- [Quickstart](get-started/quickstart.html)
-- [Concepts](get-started/concepts/index.html)
+- [Get started](get-started/index.md)
+- [Overview](get-started/overview/index.md)
+- [Quickstart](get-started/quickstart.md)
+- [Concepts](get-started/concepts/index.md)
 
 ### 2) Using Argis
 
-- [Using Argis](using-argis/index.html)
-- [CLI](using-argis/cli.html)
-- [Gradio demo](using-argis/gradio-demo.html)
-- [Connectors: IMAP/Gmail](using-argis/connectors/index.html)
-- [Deployment](using-argis/deployment/index.html)
-- [Reporting](using-argis/reporting/index.html)
+- [Using Argis](using-argis/index.md)
+- [CLI](using-argis/cli.md)
+- [Gradio demo](using-argis/gradio-demo.md)
+- [Connectors: IMAP/Gmail](using-argis/connectors/index.md)
+- [Deployment](using-argis/deployment/index.md)
+- [Reporting](using-argis/reporting/index.md)
 
 ### 3) Configuration
 
-- [Configuration](configuration/index.html)
-- [Config file](configuration/config-file.html)
-- [Rules and weights](configuration/rules.html)
-- [Skills](configuration/skills/index.html)
-- [Extending Argis](configuration/extending/index.html)
+- [Configuration](configuration/index.md)
+- [Config file](configuration/config-file.md)
+- [Rules and weights](configuration/rules.md)
+- [Skills](configuration/skills/index.md)
+- [Extending Argis](configuration/extending/index.md)
 
 ### 4) Releases
 
-- [Releases](releases/index.html)
-- [Changelog](releases/changelog.html)
-- [Feature maturity](releases/feature-maturity.html)
-- [Open source](releases/open-source.html)
+- [Releases](releases/index.md)
+- [Changelog](releases/changelog.md)
+- [Feature maturity](releases/feature-maturity.md)
+- [Open source](releases/open-source.md)
 
 ## Start here
 

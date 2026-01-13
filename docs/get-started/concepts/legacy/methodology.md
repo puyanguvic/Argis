@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Methodology (Legacy)
 redirect_from:
   - /legacy/methodology.html

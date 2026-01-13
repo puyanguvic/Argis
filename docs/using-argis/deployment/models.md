@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Deployment Models
 redirect_from:
   - /deployment/models.html

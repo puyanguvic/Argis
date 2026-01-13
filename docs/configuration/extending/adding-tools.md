@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Adding Tools
 redirect_from:
   - /developer/adding-tools.html

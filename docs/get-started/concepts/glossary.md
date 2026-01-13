@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Glossary
 redirect_from:
   - /glossary.html

@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Parsing
 redirect_from:
   - /pipeline/parsing.html

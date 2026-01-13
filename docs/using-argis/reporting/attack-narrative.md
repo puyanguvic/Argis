@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Attack Narrative
 redirect_from:
   - /reporting/attack-narrative.html

@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Benchmark Scenarios
 redirect_from:
   - /evaluation/benchmarks.html

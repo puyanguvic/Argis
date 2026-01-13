@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Risk Fusion and Scoring
 redirect_from:
   - /pipeline/risk-scoring.html

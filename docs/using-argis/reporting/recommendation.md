@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Recommendations
 redirect_from:
   - /reporting/recommendation.html

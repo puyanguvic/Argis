@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Legacy Notes
 ---
 
@@ -9,6 +8,6 @@ Historical design notes kept for reference.
 
 ## Pages
 
-- [Architecture (legacy)](architecture.html)
-- [Methodology (legacy)](methodology.html)
-- [Threat model (legacy)](threat-model.html)
+- [Architecture (legacy)](architecture.md)
+- [Methodology (legacy)](methodology.md)
+- [Threat model (legacy)](threat-model.md)

@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Attachment Risk Analysis
 redirect_from:
   - /skills/attachment-analysis.html

@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Security Policy
 redirect_from:
   - /policies/security.html

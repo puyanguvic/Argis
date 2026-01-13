@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Rules and Weights
 redirect_from:
   - /governance/rule-lifecycle.html

@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Reasoning Policy and Guardrails
 redirect_from:
   - /agent/reasoning-policy.html

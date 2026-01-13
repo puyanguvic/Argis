@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Reporting
 redirect_from:
   - /reporting/
@@ -12,9 +11,9 @@ How results are presented to humans and machines.
 
 ## Pages
 
-- [Overview](overview.html)
-- [Executive summary](executive-summary.html)
-- [Evidence table](evidence-table.html)
-- [Attack narrative](attack-narrative.html)
-- [Recommendations](recommendation.html)
-- [Machine output](machine-output.html)
+- [Overview](overview.md)
+- [Executive summary](executive-summary.md)
+- [Evidence table](evidence-table.md)
+- [Attack narrative](attack-narrative.md)
+- [Recommendations](recommendation.md)
+- [Machine output](machine-output.md)

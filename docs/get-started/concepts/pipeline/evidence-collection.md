@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Evidence Collection
 redirect_from:
   - /pipeline/evidence-collection.html

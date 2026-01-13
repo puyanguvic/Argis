@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Config File
 redirect_from:
   - /deployment/configuration.html

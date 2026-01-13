@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Execution Model
 redirect_from:
   - /architecture/execution-model.html

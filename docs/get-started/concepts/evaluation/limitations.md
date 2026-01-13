@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Known Limitations
 redirect_from:
   - /evaluation/limitations.html

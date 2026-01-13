@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Governance
 redirect_from:
   - /governance/
@@ -12,6 +11,6 @@ Model and rule update governance plus auditability.
 
 ## Pages
 
-- [Model updates](model-updates.html)
-- [Rules and weights](../../../configuration/rules.html)
-- [Audit and traceability](audit-traceability.html)
+- [Model updates](model-updates.md)
+- [Rules and weights](../../../configuration/rules.md)
+- [Audit and traceability](audit-traceability.md)

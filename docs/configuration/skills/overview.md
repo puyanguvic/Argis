@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Skills and Playbooks Overview
 redirect_from:
   - /skills/overview.html

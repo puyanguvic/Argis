@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Policies
 redirect_from:
   - /policies/
@@ -12,7 +11,7 @@ Security, privacy, compliance, and escalation guidance.
 
 ## Pages
 
-- [Security](security.html)
-- [Privacy](privacy.html)
-- [Compliance](compliance.html)
-- [Escalation](escalation.html)
+- [Security](security.md)
+- [Privacy](privacy.md)
+- [Compliance](compliance.md)
+- [Escalation](escalation.md)

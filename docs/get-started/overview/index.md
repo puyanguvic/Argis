@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Overview
 redirect_from:
   - /overview/
@@ -12,6 +11,6 @@ High-level context, threats, and design goals for the system.
 
 ## Pages
 
-- [Problem statement](problem-statement.html)
-- [Threat landscape](threat-landscape.html)
-- [Design goals](design-goals.html)
+- [Problem statement](problem-statement.md)
+- [Threat landscape](threat-landscape.md)
+- [Design goals](design-goals.md)

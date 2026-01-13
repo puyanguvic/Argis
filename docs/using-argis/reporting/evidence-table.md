@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Evidence Table
 redirect_from:
   - /reporting/evidence-table.html

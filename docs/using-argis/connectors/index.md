@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Connectors
 ---
 
@@ -11,5 +10,5 @@ Current status: **scaffolding only**. The IMAP/Gmail clients/mappers raise `NotI
 
 ## Pages
 
-- [IMAP](imap.html)
-- [Gmail](gmail.html)
+- [IMAP](imap.md)
+- [Gmail](gmail.md)

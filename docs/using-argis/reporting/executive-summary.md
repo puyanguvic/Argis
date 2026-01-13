@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Executive Summary
 redirect_from:
   - /reporting/executive-summary.html

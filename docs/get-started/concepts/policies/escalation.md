@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Escalation Policy
 redirect_from:
   - /policies/escalation.html

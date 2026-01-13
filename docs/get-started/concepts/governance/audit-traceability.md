@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Audit and Traceability
 redirect_from:
   - /governance/audit-traceability.html

@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Roles: Reasoner / Executor / Verifier
 redirect_from:
   - /agent/roles.html

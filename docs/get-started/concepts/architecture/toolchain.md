@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Toolchain and External Signals
 redirect_from:
   - /architecture/toolchain.html

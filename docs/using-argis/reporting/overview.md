@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Reporting Overview
 redirect_from:
   - /reporting/overview.html

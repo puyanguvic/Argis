@@ -1,5 +1,4 @@
 ---
-layout: default
 title: End-to-End Workflow
 redirect_from:
   - /architecture/workflow-pipeline.html

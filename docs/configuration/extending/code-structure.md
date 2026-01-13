@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Code Structure
 redirect_from:
   - /developer/code-structure.html

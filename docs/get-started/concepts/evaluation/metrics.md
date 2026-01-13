@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Evaluation Metrics
 redirect_from:
   - /evaluation/metrics.html

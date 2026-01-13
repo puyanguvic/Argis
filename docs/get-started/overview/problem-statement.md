@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Problem Statement
 redirect_from:
   - /overview/problem-statement.html

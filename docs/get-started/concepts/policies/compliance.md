@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Compliance (SOC2 / GDPR)
 redirect_from:
   - /policies/compliance.html

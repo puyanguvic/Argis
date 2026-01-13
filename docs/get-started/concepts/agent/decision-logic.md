@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Decision Logic and Risk Scoring
 redirect_from:
   - /agent/decision-logic.html

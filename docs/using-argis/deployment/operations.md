@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Operations and Monitoring
 redirect_from:
   - /deployment/operations.html

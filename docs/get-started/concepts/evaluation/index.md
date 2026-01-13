@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Evaluation
 redirect_from:
   - /evaluation/
@@ -12,6 +11,6 @@ Metrics, benchmarks, and known limitations.
 
 ## Pages
 
-- [Metrics](metrics.html)
-- [Benchmarks](benchmarks.html)
-- [Limitations](limitations.html)
+- [Metrics](metrics.md)
+- [Benchmarks](benchmarks.md)
+- [Limitations](limitations.md)

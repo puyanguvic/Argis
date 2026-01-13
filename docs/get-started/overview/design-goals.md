@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Design Goals and Non-Goals
 redirect_from:
   - /overview/design-goals.html

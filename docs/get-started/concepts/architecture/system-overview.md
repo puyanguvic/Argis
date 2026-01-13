@@ -1,5 +1,4 @@
 ---
-layout: default
 title: System Overview
 redirect_from:
   - /architecture/system-overview.html

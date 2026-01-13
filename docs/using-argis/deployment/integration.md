@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Integration
 redirect_from:
   - /deployment/integration.html

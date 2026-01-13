@@ -1,5 +1,4 @@
 ---
-layout: default
 title: URL Analysis
 redirect_from:
   - /skills/url-analysis.html

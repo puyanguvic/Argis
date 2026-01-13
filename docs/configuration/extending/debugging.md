@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Debugging and Trace
 redirect_from:
   - /developer/debugging.html

@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Known Failure Modes
 redirect_from:
   - /agent/failure-modes.html

@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Threat Landscape
 redirect_from:
   - /overview/threat-landscape.html

@@ -1,5 +1,4 @@
 ---
-layout: default
 title: BEC Detection
 redirect_from:
   - /skills/bec-detection.html

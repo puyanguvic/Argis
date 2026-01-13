@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Header Forensics
 redirect_from:
   - /skills/header-forensics.html

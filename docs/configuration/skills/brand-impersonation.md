@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Brand Impersonation Detection
 redirect_from:
   - /skills/brand-impersonation.html

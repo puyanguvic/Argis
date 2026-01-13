@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Quickstart
 ---
 
@@ -38,4 +37,4 @@ Only use `--record` when you explicitly need traceability/replay, because JSONL 
 python apps/demo/gradio_app.py
 ```
 
-Next: [Using Argis](../using-argis/index.html).
+Next: [Using Argis](../using-argis/index.md).

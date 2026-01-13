@@ -1,5 +1,4 @@
 ---
-layout: default
 title: Privacy Policy
 redirect_from:
   - /policies/privacy.html

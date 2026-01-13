@@ -12,3 +12,6 @@ Recommended convention:
 - publish release notes via git tags / GitHub Releases and link them here.
 
 For now, you can use `git log --oneline` for a chronological summary.
+
+TODO:
+Build a web page for this project.

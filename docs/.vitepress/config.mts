@@ -1,6 +1,9 @@
 import { defineConfig } from "vitepress";
 
+const base = process.env.BASE_URL ?? "/";
+
 export default defineConfig({
+  base,
   title: "Argis Docs",
   description: "Documentation for Argis (Phish Email Detection Agent)",
   cleanUrls: true,

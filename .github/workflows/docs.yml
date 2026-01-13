@@ -41,6 +41,8 @@ jobs:
 
       - name: Build docs
         working-directory: docs
+        env:
+          BASE_URL: "/${{ github.event.repository.name }}/"
         run: npm run docs:build
 
       - name: Setup Pages

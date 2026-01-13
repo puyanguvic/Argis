@@ -1,33 +1,9 @@
 import { defineConfig } from "vitepress";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
-const configDir = path.dirname(fileURLToPath(import.meta.url));
-const siteRoot = path.resolve(configDir, "..");
 
 export default defineConfig({
   title: "Argis Docs",
   description: "Documentation for Argis (Phish Email Detection Agent)",
-  srcDir: "../docs",
   cleanUrls: true,
-  vite: {
-    root: siteRoot,
-    optimizeDeps: {
-      exclude: ["@vue/devtools-api", "@vueuse/core"],
-    },
-    plugins: [
-      {
-        name: "argis-optimize-deps-filter",
-        configResolved(config) {
-          const include = config.optimizeDeps?.include;
-          if (!include) return;
-          config.optimizeDeps.include = include.filter(
-            (dep) => dep !== "@vue/devtools-api" && dep !== "@vueuse/core"
-          );
-        },
-      },
-    ],
-  },
   themeConfig: {
     nav: [
       { text: "Get started", link: "/get-started/" },

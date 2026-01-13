@@ -1,26 +1,10 @@
 - title: Overview
   url: /
-- title: Introduction
-  url: /overview/
-- title: Architecture
-  url: /architecture/
-- title: Agent
-  url: /agent/
-- title: Skills
-  url: /skills/
-- title: Detection Pipeline
-  url: /pipeline/
-- title: Reporting
-  url: /reporting/
-- title: Policies
-  url: /policies/
-- title: Evaluation
-  url: /evaluation/
-- title: Deployment
-  url: /deployment/
-- title: Developer Guide
-  url: /developer/
-- title: Governance
-  url: /governance/
-- title: Glossary
-  url: /glossary.html
+- title: Get Started
+  url: /get-started/
+- title: Using Argis
+  url: /using-argis/
+- title: Configuration
+  url: /configuration/
+- title: Releases
+  url: /releases/

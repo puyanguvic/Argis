@@ -5,7 +5,7 @@ title: Phish Email Detection Agent Docs
 
 # Phish Email Detection Agent Docs
 
-This documentation hub covers the product and engineering design of the Phish Email Detection Agent, from threat context and system architecture to detection pipeline, reporting, and governance.
+This documentation hub covers how to understand, run, configure, and track releases of Argis (Phish Email Detection Agent).
 
 Core principles:
 
@@ -15,96 +15,42 @@ Core principles:
 
 ## Documentation map
 
-### 1) Overview
+### 1) Get started
 
-- [Problem statement](overview/problem-statement.html)
-- [Threat landscape: phishing / BEC / APT](overview/threat-landscape.html)
-- [Design goals and non-goals](overview/design-goals.html)
+- [Get started](get-started/index.html)
+- [Overview](get-started/overview/index.html)
+- [Quickstart](get-started/quickstart.html)
+- [Concepts](get-started/concepts/index.html)
 
-### 2) Architecture
+### 2) Using Argis
 
-- [System overview](architecture/system-overview.html)
-- [Protocol v1 (UI <-> Engine contract)](protocol/v1.html)
-- [Agent components](architecture/agent-components.html)
-- [End-to-end workflow](architecture/workflow-pipeline.html)
-- [Toolchain and external signals](architecture/toolchain.html)
-- [Execution model](architecture/execution-model.html)
+- [Using Argis](using-argis/index.html)
+- [CLI](using-argis/cli.html)
+- [Gradio demo](using-argis/gradio-demo.html)
+- [Connectors: IMAP/Gmail](using-argis/connectors/index.html)
+- [Deployment](using-argis/deployment/index.html)
+- [Reporting](using-argis/reporting/index.html)
 
-### 3) Agent
+### 3) Configuration
 
-- [Roles: Reasoner / Executor / Verifier](agent/roles.html)
-- [Decision logic and risk scoring](agent/decision-logic.html)
-- [Reasoning policy and guardrails](agent/reasoning-policy.html)
-- [Known failure modes](agent/failure-modes.html)
+- [Configuration](configuration/index.html)
+- [Config file](configuration/config-file.html)
+- [Rules and weights](configuration/rules.html)
+- [Skills](configuration/skills/index.html)
+- [Extending Argis](configuration/extending/index.html)
 
-### 4) Skills (detection playbooks)
+### 4) Releases
 
-- [Skill mechanism overview](skills/overview.html)
-- [Brand impersonation detection](skills/brand-impersonation.html)
-- [BEC detection](skills/bec-detection.html)
-- [URL analysis (redirects/obfuscation)](skills/url-analysis.html)
-- [Header forensics](skills/header-forensics.html)
-- [Attachment risk analysis](skills/attachment-analysis.html)
-
-### 5) Detection pipeline
-
-- [Ingestion: EML / MSG / API](pipeline/ingestion.html)
-- [Parsing: MIME / header / body](pipeline/parsing.html)
-- [Normalization and deobfuscation](pipeline/normalization.html)
-- [Evidence collection](pipeline/evidence-collection.html)
-- [Risk fusion and scoring](pipeline/risk-scoring.html)
-
-### 6) Reporting
-
-- [Reporting overview](reporting/overview.html)
-- [Executive summary structure](reporting/executive-summary.html)
-- [Evidence table schema](reporting/evidence-table.html)
-- [Attack narrative](reporting/attack-narrative.html)
-- [Recommendations](reporting/recommendation.html)
-- [Machine-readable output: JSON / API](reporting/machine-output.html)
-
-### 7) Policies
-
-- [Security and access control](policies/security.html)
-- [Privacy and redaction](policies/privacy.html)
-- [Compliance (SOC2 / GDPR view)](policies/compliance.html)
-- [Escalation policy](policies/escalation.html)
-
-### 8) Evaluation
-
-- [Metrics: precision / recall / risk](evaluation/metrics.html)
-- [Benchmark scenarios](evaluation/benchmarks.html)
-- [Known limitations](evaluation/limitations.html)
-
-### 9) Deployment
-
-- [Deployment models: local / cloud / hybrid](deployment/models.html)
-- [Configuration: YAML / ENV](deployment/configuration.html)
-- [Integrations: SIEM / email gateway](deployment/integration.html)
-- [Operations and monitoring](deployment/operations.html)
-
-### 10) Developer guide
-
-- [Code structure](developer/code-structure.html)
-- [Adding skills](developer/adding-skills.html)
-- [Adding tools](developer/adding-tools.html)
-- [Debugging and tracing](developer/debugging.html)
-
-### 11) Governance
-
-- [Model update policy](governance/model-updates.html)
-- [Rule lifecycle](governance/rule-lifecycle.html)
-- [Audit and traceability](governance/audit-traceability.html)
-
-### 12) Glossary
-
-- [Glossary](glossary.html)
+- [Releases](releases/index.html)
+- [Changelog](releases/changelog.html)
+- [Feature maturity](releases/feature-maturity.html)
+- [Open source](releases/open-source.html)
 
 ## Start here
 
 If you are new to the project, read in this order:
 
-1. `overview/problem-statement.md`
-2. `architecture/system-overview.md`
-3. `pipeline/evidence-collection.md`
-4. `reporting/overview.md`
+1. `get-started/overview/problem-statement.md`
+2. `get-started/concepts/architecture/system-overview.md`
+3. `get-started/concepts/pipeline/evidence-collection.md`
+4. `using-argis/reporting/overview.md`

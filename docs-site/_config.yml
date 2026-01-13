@@ -1,6 +1,8 @@
 title: Argis Docs
 description: Phish Email Detection Agent documentation.
 theme: null
+plugins:
+  - jekyll-redirect-from
 markdown: kramdown
 kramdown:
   input: GFM

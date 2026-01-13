@@ -1,4 +1,14 @@
 import { defineConfig } from "vitepress";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const configDir = dirname(fileURLToPath(import.meta.url));
+const docsSiteRoot = resolve(configDir, "..");
+const vuePath = resolve(docsSiteRoot, "node_modules/vue/dist/vue.esm-bundler.js");
+const vueServerRendererPath = resolve(
+  docsSiteRoot,
+  "node_modules/@vue/server-renderer/dist/server-renderer.esm-bundler.js"
+);
 
 export default defineConfig({
   title: "Argis",
@@ -8,9 +18,10 @@ export default defineConfig({
   cleanUrls: true,
   vite: {
     resolve: {
-      alias: {
-        "vue/server-renderer": "@vue/server-renderer"
-      }
+      alias: [
+        { find: /^vue\/server-renderer$/, replacement: vueServerRendererPath },
+        { find: /^vue$/, replacement: vuePath }
+      ]
     }
   },
   themeConfig: {

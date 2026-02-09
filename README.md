@@ -32,15 +32,17 @@ Some collaboration/OAuth workflows are low-noise and do not trip classic hard si
 
 ```
 phish-agent/
+├── src/argis/               # App package (core/llm/agents/tools/runtime/ui)
 ├── protocol/                # Stable UI <-> Engine contract (Op/Event)
 ├── engine/                  # Core engine (session/task/turn + detection pipeline)
 ├── tools_builtin/           # Deterministic evidence tools (offline by default)
 ├── providers/               # Model adapters (Ollama, etc.)
 ├── connectors/              # Gmail/IMAP connectors (pluggable)
-├── apps/                    # Entry points (CLI, Gradio)
+├── apps/                    # Backward-compatible entry points
 ├── schemas/                 # Input/decision schemas (Pydantic)
 ├── scoring/                 # Fusion + hard rules
-├── configs/                 # Profiles + provider/connector configs
+├── configs/                 # Profiles + provider/connector configs/prompts
+├── scripts/                 # Local run + smoke scripts
 ├── docs/                    # Architecture + protocol docs
 ├── examples/                # Sample inputs
 └── tests/                   # Unit tests
@@ -60,6 +62,8 @@ pip install -e .[test]
 
 ```
 phish-agent detect --input examples/email_sample.json --record run.jsonl
+# or the new app package entrypoint:
+PYTHONPATH=src python -m argis detect --input examples/email_sample.json --record run.jsonl
 ```
 
 3) Replay a recorded run (audit-only, no tools):

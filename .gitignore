@@ -229,3 +229,10 @@ docs/node_modules/
 # Build outputs (optional)
 dist/
 build/
+
+# Local caches/runtime artifacts
+.cache/
+**/.cache/
+.gradio/
+.uv-cache/
+*.tmp

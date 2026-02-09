@@ -10,7 +10,22 @@ profiles:
 
   litellm:
     provider: litellm
-    model: openai/gpt-oss-20b
+    model: ollama/qwen2.5:1b
     temperature: 0.0
-    api_base: http://localhost:4000
-    api_key: sk-local
+    api_base: http://localhost:11434
+    api_key: ollama
+    model_choices:
+      - ollama/qwen2.5:1b
+      - ollama/qwen2.5:3b
+      - ollama/llama3.2:3b
+
+  ollama:
+    provider: litellm
+    model: ollama/qwen2.5:1b
+    temperature: 0.0
+    api_base: http://localhost:11434
+    api_key: ollama
+    model_choices:
+      - ollama/qwen2.5:1b
+      - ollama/qwen2.5:3b
+      - ollama/llama3.2:3b

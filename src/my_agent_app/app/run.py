@@ -8,8 +8,8 @@ from my_agent_app.app.build_agent import create_agent
 from my_agent_app.app.sessions import InMemorySession
 
 
-def run_once(text: str) -> str:
-    agent, runtime = create_agent()
+def run_once(text: str, model: str | None = None) -> str:
+    agent, runtime = create_agent(model_override=model)
     result = agent.analyze(text)
     result["runtime"] = runtime
     return json.dumps(result, ensure_ascii=True)

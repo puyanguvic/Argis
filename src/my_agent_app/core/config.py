@@ -25,6 +25,7 @@ class AppConfig(BaseSettings):
     temperature: float = Field(default=0.0)
     api_base: str | None = Field(default=None)
     api_key: str | None = Field(default=None)
+    model_choices: list[str] = Field(default_factory=list)
     default_config_path: str = Field(default="configs/default.yaml")
 
 
@@ -56,6 +57,17 @@ def load_config(path: str | Path | None = None) -> tuple[AppConfig, dict[str, An
     except (TypeError, ValueError):
         parsed_temp = 0.0
 
+    raw_choices = pick(
+        "MY_AGENT_APP_MODEL_CHOICES",
+        selected.get("model_choices", merged.get("model_choices", [])),
+    )
+    if isinstance(raw_choices, str):
+        parsed_choices = [item.strip() for item in raw_choices.split(",") if item.strip()]
+    elif isinstance(raw_choices, list):
+        parsed_choices = [str(item).strip() for item in raw_choices if str(item).strip()]
+    else:
+        parsed_choices = []
+
     payload = {
         "profile": active_profile,
         "provider": pick("MY_AGENT_APP_PROVIDER", selected.get("provider", merged.get("provider", "openai"))),
@@ -63,6 +75,7 @@ def load_config(path: str | Path | None = None) -> tuple[AppConfig, dict[str, An
         "temperature": parsed_temp,
         "api_base": pick("MY_AGENT_APP_API_BASE", selected.get("api_base", merged.get("api_base"))),
         "api_key": pick("MY_AGENT_APP_API_KEY", selected.get("api_key", merged.get("api_key"))),
+        "model_choices": parsed_choices,
         "default_config_path": str(default_path),
     }
 

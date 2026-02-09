@@ -6,4 +6,7 @@ import gradio as gr
 
 
 def model_hint() -> gr.Markdown:
-    return gr.Markdown("Using configured provider/model from env + configs/default.yaml")
+    return gr.Markdown(
+        "Provider/model come from env + configs/default.yaml. "
+        "Use profile `ollama` for local OLLAMA via LiteLLM."
+    )

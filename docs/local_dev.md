@@ -7,4 +7,10 @@ PYTHONPATH=src uv run python -m my_agent_app
 ```
 
 Set env with `.env.example` values only when overriding `configs/default.yaml`.
-Recommended override: `MY_AGENT_APP_PROFILE=litellm` for local/self-hosted model path.
+Recommended local model path:
+
+```bash
+ollama pull qwen2.5:1b
+export MY_AGENT_APP_PROFILE=ollama
+PYTHONPATH=src uv run python -m my_agent_app --text "test message"
+```

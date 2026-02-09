@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 import gradio as gr
 
 from my_agent_app.app.build_agent import create_agent
@@ -39,4 +41,5 @@ def build() -> gr.Blocks:
 
 
 if __name__ == "__main__":
-    build().launch()
+    share = os.getenv("MY_AGENT_APP_GRADIO_SHARE", "").strip().lower() in {"1", "true", "yes", "on"}
+    build().launch(share=share)

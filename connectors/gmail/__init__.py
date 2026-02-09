@@ -1,1 +1,0 @@
-"""Gmail connector package."""

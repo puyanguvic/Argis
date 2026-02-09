@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 export PYTHONPATH="src:${PYTHONPATH:-}"
-uv run python -m my_agent_app.ui.gradio_app
+uv run ruff check src tests examples

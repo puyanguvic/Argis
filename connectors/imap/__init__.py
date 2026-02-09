@@ -1,1 +1,0 @@
-"""IMAP connector package."""

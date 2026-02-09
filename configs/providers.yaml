@@ -1,11 +1,7 @@
-# Provider-level defaults and credentials mapping.
-default_provider: ollama
 providers:
   ollama:
-    base_url: http://localhost:11434
     model: llama3.1:8b
   openai:
-    api_key_env: OPENAI_API_KEY
     model: gpt-4.1-mini
   litellm:
     model: openai/gpt-4.1-mini

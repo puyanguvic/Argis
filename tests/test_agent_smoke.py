@@ -1,7 +1,8 @@
-from argis.agents.base import MainAgent
+import json
+
+from my_agent_app.app.run import run_once
 
 
-def test_main_agent_smoke_with_recording():
-    agent = MainAgent()
-    artifacts = agent.run("recording", "run.jsonl")
-    assert "detection_result" in artifacts
+def test_agent_smoke():
+    payload = json.loads(run_once("hello team"))
+    assert payload["verdict"] in {"benign", "phishing"}

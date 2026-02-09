@@ -1,4 +1,0 @@
-profile: balanced
-profile_path: configs/profiles/balanced.yaml
-provider: ollama
-connector: null

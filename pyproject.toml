@@ -3,32 +3,27 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "phish-email-detection-agent"
+name = "my-agent-app"
 version = "0.1.0"
-description = "Agent-style phishing email analysis pipeline"
+description = "Structured agent app template"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "TBD" }
-authors = [{ name = "Your Name" }]
+license = { text = "MIT" }
+authors = [{ name = "Argis Team" }]
 
 dependencies = [
   "pydantic>=2.6",
   "pydantic-settings>=2.2",
   "pyyaml>=6.0",
-  "tldextract>=5.1",
 ]
 
 [project.optional-dependencies]
 ui = [
   "gradio>=4.0",
-  "datasets>=2.18",
-  "pyarrow>=14.0",
 ]
-
 test = [
   "pytest>=7.4",
 ]
-
 dev = [
   "ruff>=0.3",
 ]
@@ -36,25 +31,14 @@ dev = [
 [tool.pytest.ini_options]
 addopts = "-q"
 testpaths = ["tests"]
+pythonpath = ["src"]
 
 [tool.ruff]
 line-length = 100
 
 [tool.setuptools.packages.find]
-where = [".", "src"]
-include = [
-  "argis*",
-  "apps",
-  "connectors",
-  "engine",
-  "models*",
-  "protocol",
-  "providers",
-  "schemas",
-  "scoring",
-  "tools_builtin",
-]
+where = ["src"]
+include = ["my_agent_app*"]
 
 [project.scripts]
-argis = "argis.__main__:main"
-phish-agent = "apps.cli.main:main"
+my-agent-app = "my_agent_app.__main__:main"

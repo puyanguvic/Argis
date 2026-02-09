@@ -5,17 +5,25 @@ from __future__ import annotations
 from my_agent_app.agents.main import MainAgent
 from my_agent_app.agents.prompts import SYSTEM_PROMPT
 from my_agent_app.core.config import load_config
-from my_agent_app.models.factory import get_model
 
 
 def create_agent() -> tuple[MainAgent, dict[str, object]]:
     env_cfg, yaml_cfg = load_config()
-    model = get_model(env_cfg.provider, env_cfg.model, env_cfg.temperature)
-    agent = MainAgent(instructions=SYSTEM_PROMPT)
+    agent = MainAgent(
+        instructions=SYSTEM_PROMPT,
+        provider=env_cfg.provider,
+        model=env_cfg.model,
+        temperature=env_cfg.temperature,
+        api_base=env_cfg.api_base,
+        api_key=env_cfg.api_key,
+    )
     runtime = {
-        "provider": model.provider,
-        "model": model.model,
-        "temperature": model.temperature,
+        "profile": env_cfg.profile,
+        "provider": env_cfg.provider,
+        "model": env_cfg.model,
+        "temperature": env_cfg.temperature,
+        "api_base": env_cfg.api_base,
+        "agents_sdk": True,
         "config": yaml_cfg,
     }
     return agent, runtime

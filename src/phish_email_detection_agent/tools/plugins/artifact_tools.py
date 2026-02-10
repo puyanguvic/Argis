@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from my_agent_app.tools.email import classify_attachment, extract_urls, is_suspicious_url, url_domain
+from phish_email_detection_agent.tools.email import classify_attachment, extract_urls, is_suspicious_url, url_domain
 
 
 def tool_extract_urls(text: str) -> dict[str, object]:

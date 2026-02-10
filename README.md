@@ -1,4 +1,4 @@
-# my-agent-app
+# phish-email-detection-agent
 
 A professional phishing detection agent stack based on OpenAI Agents SDK.
 
@@ -10,7 +10,7 @@ A professional phishing detection agent stack based on OpenAI Agents SDK.
   - `Summarizer Agent`: final verdict + risk score + actions
 - Extensible tool architecture:
   - built-in tools
-  - plugin auto-discovery from `src/my_agent_app/tools/plugins`
+  - plugin auto-discovery from `src/phish_email_detection_agent/tools/plugins`
   - optional external modules via `MY_AGENT_APP_TOOL_MODULES`
 - Model access strategy:
   - `openai`: native OpenAI Agents SDK model path
@@ -20,19 +20,19 @@ A professional phishing detection agent stack based on OpenAI Agents SDK.
 ## Run
 
 ```bash
-uv run python -m my_agent_app
+uv run python -m phish_email_detection_agent
 ```
 
 Single input text:
 
 ```bash
-uv run python -m my_agent_app --text "Please verify your account now"
+uv run python -m phish_email_detection_agent --text "Please verify your account now"
 ```
 
 Structured deep input (text + urls + attachments):
 
 ```bash
-uv run python -m my_agent_app --text '{"text":"Urgent: login now","urls":["https://bit.ly/reset"],"attachments":["invoice.zip"]}'
+uv run python -m phish_email_detection_agent --text '{"text":"Urgent: login now","urls":["https://bit.ly/reset"],"attachments":["invoice.zip"]}'
 ```
 
 ## Providers / Profiles
@@ -42,7 +42,7 @@ OpenAI:
 ```bash
 export MY_AGENT_APP_PROFILE=openai
 export OPENAI_API_KEY=your_key
-uv run python -m my_agent_app --text "review this email"
+uv run python -m phish_email_detection_agent --text "review this email"
 ```
 
 LiteLLM + Ollama (local):
@@ -52,21 +52,21 @@ ollama pull qwen2.5:1b
 ollama pull qwen2.5:7b
 ollama pull llama3.1:8b
 export MY_AGENT_APP_PROFILE=ollama
-uv run python -m my_agent_app --text "review this email"
+uv run python -m phish_email_detection_agent --text "review this email"
 ```
 
 Temporary model override:
 
 ```bash
 export MY_AGENT_APP_PROFILE=ollama
-uv run python -m my_agent_app --model ollama/qwen2.5:3b --text "review this email"
+uv run python -m phish_email_detection_agent --model ollama/qwen2.5:3b --text "review this email"
 ```
 
 ## Plugin tools
 
 Auto-discovered plugin functions must be top-level and named `tool_*`.
 
-- Built-in plugin directory: `src/my_agent_app/tools/plugins`
+- Built-in plugin directory: `src/phish_email_detection_agent/tools/plugins`
 - External modules (comma-separated):
 
 ```bash
@@ -76,7 +76,7 @@ export MY_AGENT_APP_TOOL_MODULES="my_pkg.mail.tools,my_pkg.security.tools"
 ## Layout
 
 ```text
-src/my_agent_app/
+src/phish_email_detection_agent/
   agents/
   app/
   core/

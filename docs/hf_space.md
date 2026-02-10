@@ -1,3 +1,3 @@
 # HF Space
 
-Use `src/my_agent_app/ui/gradio_app.py` as app entrypoint.
+Use `src/phish_email_detection_agent/ui/gradio_app.py` as app entrypoint.

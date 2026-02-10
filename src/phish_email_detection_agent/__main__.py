@@ -1,14 +1,14 @@
-"""CLI entrypoint for my_agent_app."""
+"""CLI entrypoint for phish_email_detection_agent."""
 
 from __future__ import annotations
 
 import argparse
 
-from my_agent_app.app.run import run_chat, run_once
+from phish_email_detection_agent.app.run import run_chat, run_once
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="my-agent-app")
+    parser = argparse.ArgumentParser(prog="phish-email-detection-agent")
     parser.add_argument("--text", help="Run once with a single input text.")
     parser.add_argument("--model", help="Override model for this run, e.g. ollama/qwen2.5:1b.")
     return parser

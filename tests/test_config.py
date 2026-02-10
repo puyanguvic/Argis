@@ -1,6 +1,6 @@
 import os
 
-from my_agent_app.core.config import load_config
+from phish_email_detection_agent.core.config import load_config
 
 
 def test_load_config():

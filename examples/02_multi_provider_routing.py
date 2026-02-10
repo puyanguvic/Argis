@@ -1,6 +1,6 @@
 import os
 
-from my_agent_app.app.run import run_once
+from phish_email_detection_agent.app.run import run_once
 
 for profile in ("ollama", "openai"):
     os.environ["MY_AGENT_APP_PROFILE"] = profile

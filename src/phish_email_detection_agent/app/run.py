@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import json
 
-from my_agent_app.app.build_agent import create_agent
-from my_agent_app.app.sessions import InMemorySession
+from phish_email_detection_agent.app.build_agent import create_agent
+from phish_email_detection_agent.app.sessions import InMemorySession
 
 
 def run_once(text: str, model: str | None = None) -> str:

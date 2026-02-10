@@ -1,4 +1,4 @@
-from my_agent_app.agents.tool_registry import ToolRegistry
+from phish_email_detection_agent.agents.tool_registry import ToolRegistry
 
 
 class DummyRegistry(ToolRegistry):

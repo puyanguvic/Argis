@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from my_agent_app.agents.service import AgentService
-from my_agent_app.core.config import load_config
+from phish_email_detection_agent.agents.service import AgentService
+from phish_email_detection_agent.core.config import load_config
 
 
 def create_agent(

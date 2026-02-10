@@ -9,10 +9,10 @@ import os
 import pkgutil
 from typing import Callable
 
-from my_agent_app.agents.router import route_text
-from my_agent_app.tools.debug import runtime_info
-from my_agent_app.tools.email import classify_attachment, extract_urls, is_suspicious_url
-from my_agent_app.tools.text import contains_phishing_keywords, normalize_text
+from phish_email_detection_agent.agents.router import route_text
+from phish_email_detection_agent.tools.debug import runtime_info
+from phish_email_detection_agent.tools.email import classify_attachment, extract_urls, is_suspicious_url
+from phish_email_detection_agent.tools.text import contains_phishing_keywords, normalize_text
 
 
 def _keyword_matches(text: str) -> list[str]:
@@ -92,7 +92,7 @@ class ToolRegistry:
         ):
             self.register_callable(func)
 
-    def register_plugin_tools(self, package: str = "my_agent_app.tools.plugins") -> None:
+    def register_plugin_tools(self, package: str = "phish_email_detection_agent.tools.plugins") -> None:
         """Auto-discover plugin tools from a package.
 
         Any top-level function named `tool_*` is auto-registered.

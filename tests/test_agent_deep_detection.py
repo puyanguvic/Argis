@@ -1,4 +1,4 @@
-from my_agent_app.agents.service import AgentService
+from phish_email_detection_agent.agents.service import AgentService
 
 
 def test_fallback_deep_detection_with_url_and_attachment():

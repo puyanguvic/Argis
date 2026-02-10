@@ -1,4 +1,4 @@
-from my_agent_app.tools.text import contains_phishing_keywords, normalize_text
+from phish_email_detection_agent.tools.text import contains_phishing_keywords, normalize_text
 
 
 def test_text_tools():

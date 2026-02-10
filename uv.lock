@@ -1463,42 +1463,6 @@ wheels = [
 ]
 
 [[package]]
-name = "my-agent-app"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "litellm" },
-    { name = "openai-agents" },
-    { name = "pydantic" },
-    { name = "pydantic-settings" },
-    { name = "pyyaml" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "ruff" },
-]
-test = [
-    { name = "pytest" },
-]
-ui = [
-    { name = "gradio" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "gradio", marker = "extra == 'ui'", specifier = ">=4.0" },
-    { name = "litellm" },
-    { name = "openai-agents" },
-    { name = "pydantic", specifier = ">=2.6" },
-    { name = "pydantic-settings", specifier = ">=2.2" },
-    { name = "pytest", marker = "extra == 'test'", specifier = ">=7.4" },
-    { name = "pyyaml", specifier = ">=6.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.3" },
-]
-provides-extras = ["ui", "test", "dev"]
-
-[[package]]
 name = "numpy"
 version = "2.2.6"
 source = { registry = "https://pypi.org/simple" }
@@ -1835,6 +1799,42 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/44/91/483de934193e12a3b1d6ae7c8645d083ff88dec75f46e827562f1e4b4da6/pandas-2.3.3-cp314-cp314t-musllinux_1_2_aarch64.whl", hash = "sha256:d051c0e065b94b7a3cea50eb1ec32e912cd96dba41647eb24104b6c6c14c5788", size = 12699963, upload-time = "2025-09-29T23:31:10.009Z" },
     { url = "https://files.pythonhosted.org/packages/70/44/5191d2e4026f86a2a109053e194d3ba7a31a2d10a9c2348368c63ed4e85a/pandas-2.3.3-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:3869faf4bd07b3b66a9f462417d0ca3a9df29a9f6abd5d0d0dbab15dac7abe87", size = 13202175, upload-time = "2025-09-29T23:31:59.173Z" },
 ]
+
+[[package]]
+name = "phish-email-detection-agent"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "litellm" },
+    { name = "openai-agents" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "pyyaml" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "ruff" },
+]
+test = [
+    { name = "pytest" },
+]
+ui = [
+    { name = "gradio" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "gradio", marker = "extra == 'ui'", specifier = ">=4.0" },
+    { name = "litellm" },
+    { name = "openai-agents" },
+    { name = "pydantic", specifier = ">=2.6" },
+    { name = "pydantic-settings", specifier = ">=2.2" },
+    { name = "pytest", marker = "extra == 'test'", specifier = ">=7.4" },
+    { name = "pyyaml", specifier = ">=6.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.3" },
+]
+provides-extras = ["ui", "test", "dev"]
 
 [[package]]
 name = "pillow"

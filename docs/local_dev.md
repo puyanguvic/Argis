@@ -2,7 +2,7 @@
 
 ```bash
 uv sync
-PYTHONPATH=src uv run python -m my_agent_app
+PYTHONPATH=src uv run python -m phish_email_detection_agent
 ./scripts/test.sh
 ```
 
@@ -12,5 +12,5 @@ Recommended local model path:
 ```bash
 ollama pull qwen2.5:1b
 export MY_AGENT_APP_PROFILE=ollama
-PYTHONPATH=src uv run python -m my_agent_app --text "test message"
+PYTHONPATH=src uv run python -m phish_email_detection_agent --text "test message"
 ```

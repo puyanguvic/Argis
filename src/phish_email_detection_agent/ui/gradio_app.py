@@ -11,8 +11,8 @@ from typing import Any
 
 import gradio as gr
 
-from my_agent_app.app.build_agent import create_agent
-from my_agent_app.ui.components import model_hint
+from phish_email_detection_agent.app.build_agent import create_agent
+from phish_email_detection_agent.ui.components import model_hint
 
 PROVIDER_MODE_TO_PROFILE = {
     "api": "openai",
@@ -245,8 +245,8 @@ def build() -> gr.Blocks:
             if current_model not in choices:
                 current_model = choices[0]
 
-    with gr.Blocks(title="my-agent-app") as demo:
-        gr.Markdown("# my-agent-app")
+    with gr.Blocks(title="phish-email-detection-agent") as demo:
+        gr.Markdown("# phish-email-detection-agent")
         model_hint()
         runtime_hint = gr.Markdown(_format_runtime_hint(runtime))
         backend_status = gr.Markdown(_format_backend_status(runtime))

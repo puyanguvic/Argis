@@ -9,19 +9,19 @@ import json
 import os
 from typing import Any
 
-from my_agent_app.agents.contracts import (
+from phish_email_detection_agent.agents.contracts import (
     EmailInput,
     InvestigationReport,
     RouterDecision,
     TriageOutput,
     TriageResult,
 )
-from my_agent_app.agents.prompts import INVESTIGATOR_PROMPT, ROUTER_PROMPT, SUMMARIZER_PROMPT
-from my_agent_app.agents.providers import ProviderConfig, build_model_reference
-from my_agent_app.agents.router import route_text
-from my_agent_app.agents.tool_registry import ToolRegistry
-from my_agent_app.tools.email import classify_attachment, extract_urls, is_suspicious_url
-from my_agent_app.tools.text import contains_phishing_keywords, normalize_text
+from phish_email_detection_agent.agents.prompts import INVESTIGATOR_PROMPT, ROUTER_PROMPT, SUMMARIZER_PROMPT
+from phish_email_detection_agent.agents.providers import ProviderConfig, build_model_reference
+from phish_email_detection_agent.agents.router import route_text
+from phish_email_detection_agent.agents.tool_registry import ToolRegistry
+from phish_email_detection_agent.tools.email import classify_attachment, extract_urls, is_suspicious_url
+from phish_email_detection_agent.tools.text import contains_phishing_keywords, normalize_text
 
 TraceEvent = dict[str, Any]
 

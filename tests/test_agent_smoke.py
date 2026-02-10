@@ -1,6 +1,6 @@
 import json
 
-from my_agent_app.app.run import run_once
+from phish_email_detection_agent.app.run import run_once
 
 
 def test_agent_smoke():

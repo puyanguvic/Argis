@@ -23,6 +23,10 @@ dependencies = [
 ui = [
   "gradio>=4.0",
 ]
+api = [
+  "fastapi>=0.110",
+  "uvicorn>=0.30",
+]
 analysis = [
   "openai>=1.40",
   "pillow>=10.0",
@@ -51,7 +55,7 @@ where = ["src"]
 include = ["phish_email_detection_agent*"]
 
 [tool.setuptools.package-data]
-phish_email_detection_agent = ["configs/*.yaml"]
+phish_email_detection_agent = ["config/*.yaml"]
 
 [project.scripts]
 phish-email-detection-agent = "phish_email_detection_agent.__main__:main"

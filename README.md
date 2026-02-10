@@ -16,8 +16,6 @@ A professional phishing detection agent stack based on OpenAI Agents SDK.
   - deterministic risk fusion (`text + url + domain + attachment + ocr`)
 - Extensible tool architecture:
   - built-in tools
-  - plugin auto-discovery from `src/phish_email_detection_agent/tools/plugins`
-  - optional external modules via `MY_AGENT_APP_TOOL_MODULES`
 - Model access strategy:
   - `openai`: native OpenAI Agents SDK model path
   - `local` (and non-OpenAI providers): unified through LiteLLM
@@ -91,26 +89,28 @@ export MY_AGENT_APP_PROFILE=ollama
 uv run python -m phish_email_detection_agent --model ollama/qwen2.5:3b --text "review this email"
 ```
 
-## Plugin tools
-
-Auto-discovered plugin functions must be top-level and named `tool_*`.
-
-- Built-in plugin directory: `src/phish_email_detection_agent/tools/plugins`
-- External modules (comma-separated):
-
-```bash
-export MY_AGENT_APP_TOOL_MODULES="my_pkg.mail.tools,my_pkg.security.tools"
-```
-
 ## Layout
 
 ```text
 src/phish_email_detection_agent/
+  cli.py
+  api/
+  domain/
+    email/
+    url/
+    attachment/
+    evidence.py
+  orchestrator/
   agents/
-  app/
-  configs/
-  core/
+  providers/
+  config/
+  infra/
   tools/
-    plugins/
+    url_fetch/
+    ocr/
+    asr/
+    intel/
+    text/
+    attachment/
   ui/
 ```

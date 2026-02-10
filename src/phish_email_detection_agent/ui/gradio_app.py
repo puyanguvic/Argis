@@ -11,8 +11,7 @@ from typing import Any
 
 import gradio as gr
 
-from phish_email_detection_agent.app.build_agent import create_agent
-from phish_email_detection_agent.ui.components import model_hint
+from phish_email_detection_agent.agents.build import create_agent
 
 PROVIDER_MODE_TO_PROFILE = {
     "api": "openai",
@@ -247,7 +246,10 @@ def build() -> gr.Blocks:
 
     with gr.Blocks(title="phish-email-detection-agent") as demo:
         gr.Markdown("# phish-email-detection-agent")
-        model_hint()
+        gr.Markdown(
+            "Models come from env + `src/phish_email_detection_agent/config/defaults.yaml`. "
+            "OpenAI uses native Agents SDK path; profile `ollama` uses LiteLLM + Ollama."
+        )
         runtime_hint = gr.Markdown(_format_runtime_hint(runtime))
         backend_status = gr.Markdown(_format_backend_status(runtime))
         provider_mode = gr.Dropdown(

@@ -2,11 +2,7 @@
 
 from __future__ import annotations
 
+from phish_email_detection_agent.orchestrator.policy import route_text as policy_route_text
 
 def route_text(text: str) -> str:
-    size = len(text or "")
-    if size < 160:
-        return "FAST"
-    if size > 1200:
-        return "DEEP"
-    return "STANDARD"
+    return policy_route_text(text)

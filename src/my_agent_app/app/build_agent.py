@@ -6,9 +6,16 @@ from my_agent_app.agents.service import AgentService
 from my_agent_app.core.config import load_config
 
 
-def create_agent(*, model_override: str | None = None) -> tuple[AgentService, dict[str, object]]:
-    env_cfg, yaml_cfg = load_config()
+def create_agent(
+    *,
+    profile_override: str | None = None,
+    model_override: str | None = None,
+) -> tuple[AgentService, dict[str, object]]:
+    env_cfg, yaml_cfg = load_config(profile_override=profile_override)
     active_model = model_override or env_cfg.model
+    profiles = yaml_cfg.get("profiles")
+    profile_map = profiles if isinstance(profiles, dict) else {}
+    profile_choices = [str(item) for item in profile_map.keys() if str(item).strip()]
     agent = AgentService(
         provider=env_cfg.provider,
         model=active_model,
@@ -19,6 +26,7 @@ def create_agent(*, model_override: str | None = None) -> tuple[AgentService, di
     )
     runtime = {
         "profile": env_cfg.profile,
+        "profile_choices": profile_choices,
         "provider": env_cfg.provider,
         "model": active_model,
         "temperature": env_cfg.temperature,

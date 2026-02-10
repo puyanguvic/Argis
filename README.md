@@ -48,6 +48,8 @@ LiteLLM + Ollama:
 
 ```bash
 ollama pull qwen2.5:1b
+ollama pull qwen2.5:7b
+ollama pull llama3.1:8b
 export MY_AGENT_APP_PROFILE=ollama
 uv run python -m my_agent_app --text "review this email"
 ```

@@ -45,9 +45,9 @@ def _pick_env(name: str, fallback: Any) -> Any:
 
 def _parse_model_choices(raw: Any) -> list[str]:
     if isinstance(raw, str):
-        return [item.strip() for item in raw.split(",") if item.strip()]
+        return list(dict.fromkeys(item.strip() for item in raw.split(",") if item.strip()))
     if isinstance(raw, list):
-        return [str(item).strip() for item in raw if str(item).strip()]
+        return list(dict.fromkeys(str(item).strip() for item in raw if str(item).strip()))
     return []
 
 
@@ -66,15 +66,20 @@ def _parse_float(raw: Any, fallback: float) -> float:
         return fallback
 
 
-def load_config(path: str | Path | None = None) -> tuple[AppConfig, dict[str, Any]]:
+def load_config(
+    path: str | Path | None = None,
+    *,
+    profile_override: str | None = None,
+) -> tuple[AppConfig, dict[str, Any]]:
     default_path = Path(path or os.getenv("MY_AGENT_APP_DEFAULT_CONFIG_PATH", "configs/default.yaml"))
     merged = load_yaml(default_path)
     profiles = merged.get("profiles")
     profile_map = profiles if isinstance(profiles, dict) else {}
 
-    active_profile = str(_pick_env("MY_AGENT_APP_PROFILE", merged.get("profile", "openai")))
+    active_profile = str(profile_override or _pick_env("MY_AGENT_APP_PROFILE", merged.get("profile", "openai")))
     selected_profile = profile_map.get(active_profile, {})
     selected = selected_profile if isinstance(selected_profile, dict) else {}
+    selected_provider = _pick_env("MY_AGENT_APP_PROVIDER", selected.get("provider", merged.get("provider", "openai")))
 
     raw_temp = _pick_env("MY_AGENT_APP_TEMPERATURE", selected.get("temperature", merged.get("temperature", 0.0)))
     raw_choices = _pick_env(
@@ -82,15 +87,32 @@ def load_config(path: str | Path | None = None) -> tuple[AppConfig, dict[str, An
         selected.get("model_choices", merged.get("model_choices", [])),
     )
     raw_turns = _pick_env("MY_AGENT_APP_MAX_TURNS", selected.get("max_turns", merged.get("max_turns", 8)))
+    selected_model = _pick_env("MY_AGENT_APP_MODEL", selected.get("model", merged.get("model", "gpt-4.1-mini")))
+
+    parsed_choices = _parse_model_choices(raw_choices)
+    if not parsed_choices and isinstance(profile_map, dict):
+        for profile_cfg in profile_map.values():
+            if not isinstance(profile_cfg, dict):
+                continue
+            if str(profile_cfg.get("provider", "")).strip() != str(selected_provider).strip():
+                continue
+            parsed_choices.extend(_parse_model_choices(profile_cfg.get("model_choices", [])))
+            model_value = str(profile_cfg.get("model", "")).strip()
+            if model_value:
+                parsed_choices.append(model_value)
+        parsed_choices = list(dict.fromkeys(item for item in parsed_choices if item))
+
+    if selected_model and selected_model not in parsed_choices:
+        parsed_choices.insert(0, str(selected_model))
 
     payload = {
         "profile": active_profile,
-        "provider": _pick_env("MY_AGENT_APP_PROVIDER", selected.get("provider", merged.get("provider", "openai"))),
-        "model": _pick_env("MY_AGENT_APP_MODEL", selected.get("model", merged.get("model", "gpt-4.1-mini"))),
+        "provider": selected_provider,
+        "model": selected_model,
         "temperature": _parse_float(raw_temp, 0.0),
         "api_base": _pick_env("MY_AGENT_APP_API_BASE", selected.get("api_base", merged.get("api_base"))),
         "api_key": _pick_env("MY_AGENT_APP_API_KEY", selected.get("api_key", merged.get("api_key"))),
-        "model_choices": _parse_model_choices(raw_choices),
+        "model_choices": parsed_choices,
         "max_turns": _parse_int(raw_turns, 8),
         "default_config_path": str(default_path),
     }

@@ -48,12 +48,32 @@ def _format_compact_result(final: dict[str, Any]) -> str:
     return f"Detection Result: {verdict_text}\nReason Summary: {summary}"
 
 
-def _stream_with_selected_model(text: str, model: str):
+def _resolve_model_options(runtime: dict[str, Any]) -> tuple[list[str], str | None]:
+    current_model = str(runtime.get("model", "")).strip()
+    raw_choices = runtime.get("model_choices", [])
+    choices = [str(item).strip() for item in raw_choices if str(item).strip()]
+    if current_model and current_model not in choices:
+        choices.insert(0, current_model)
+    return choices or ([current_model] if current_model else []), current_model or None
+
+
+def _reload_model_dropdown(profile: str):
+    selected_profile = (profile or "").strip() or None
+    _, runtime = create_agent(profile_override=selected_profile)
+    choices, value = _resolve_model_options(runtime)
+    return gr.Dropdown(choices=choices, value=value, allow_custom_value=True)
+
+
+def _stream_with_selected_model(text: str, profile: str, model: str):
+    selected_profile = (profile or "").strip() or None
     selected = (model or "").strip() or None
-    agent, runtime = create_agent(model_override=selected)
+    agent, runtime = create_agent(profile_override=selected_profile, model_override=selected)
 
     process_lines = [
-        f"provider={runtime['provider']} model={runtime['model']} max_turns={runtime['max_turns']}",
+        (
+            f"profile={runtime['profile']} provider={runtime['provider']} "
+            f"model={runtime['model']} max_turns={runtime['max_turns']}"
+        ),
     ]
     result_text = ""
     yield "\n".join(process_lines), result_text
@@ -73,18 +93,24 @@ def _stream_with_selected_model(text: str, model: str):
 
 def build() -> gr.Blocks:
     _, runtime = create_agent()
-    current_model = str(runtime.get("model", ""))
-    raw_choices = runtime.get("model_choices", [])
-    choices = [str(item) for item in raw_choices if str(item).strip()]
-    if current_model and current_model not in choices:
-        choices.insert(0, current_model)
+    current_profile = str(runtime.get("profile", "openai")).strip() or "openai"
+    profile_choices = runtime.get("profile_choices", [])
+    profiles = [str(item).strip() for item in profile_choices if str(item).strip()]
+    if current_profile not in profiles:
+        profiles.insert(0, current_profile)
+    choices, current_model = _resolve_model_options(runtime)
 
     with gr.Blocks(title="my-agent-app") as demo:
         gr.Markdown("# my-agent-app")
         model_hint()
+        profile = gr.Dropdown(
+            choices=profiles or [current_profile],
+            value=current_profile,
+            label="Profile",
+        )
         model = gr.Dropdown(
-            choices=choices or [current_model],
-            value=current_model if current_model else None,
+            choices=choices,
+            value=current_model,
             label="Model",
             allow_custom_value=True,
         )
@@ -92,7 +118,8 @@ def build() -> gr.Blocks:
         process = gr.Textbox(label="Detection Process", lines=12)
         out = gr.Textbox(label="Result", lines=12)
         btn = gr.Button("Run")
-        btn.click(_stream_with_selected_model, inputs=[inp, model], outputs=[process, out])
+        profile.change(_reload_model_dropdown, inputs=[profile], outputs=[model])
+        btn.click(_stream_with_selected_model, inputs=[inp, profile, model], outputs=[process, out])
     return demo
 
 

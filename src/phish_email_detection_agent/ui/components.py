@@ -7,6 +7,6 @@ import gradio as gr
 
 def model_hint() -> gr.Markdown:
     return gr.Markdown(
-        "Models come from env + configs/default.yaml. "
+        "Models come from env + src/phish_email_detection_agent/configs/default.yaml. "
         "OpenAI uses native Agents SDK path; profile `ollama` uses LiteLLM + Ollama."
     )

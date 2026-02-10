@@ -50,5 +50,8 @@ line-length = 100
 where = ["src"]
 include = ["phish_email_detection_agent*"]
 
+[tool.setuptools.package-data]
+phish_email_detection_agent = ["configs/*.yaml"]
+
 [project.scripts]
 phish-email-detection-agent = "phish_email_detection_agent.__main__:main"

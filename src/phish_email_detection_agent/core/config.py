@@ -9,6 +9,9 @@ from typing import Any
 import yaml
 from pydantic import BaseModel, Field
 
+PACKAGE_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_CONFIG_PATH = PACKAGE_ROOT / "configs" / "default.yaml"
+
 
 class AppConfig(BaseModel):
 
@@ -43,7 +46,7 @@ class AppConfig(BaseModel):
     whisper_cli_path: str = Field(default="whisper")
     audio_openai_api_key: str | None = Field(default=None)
     audio_openai_base_url: str | None = Field(default=None)
-    default_config_path: str = Field(default="configs/default.yaml")
+    default_config_path: str = Field(default=str(DEFAULT_CONFIG_PATH))
 
 
 def _normalize_provider(raw: Any) -> str:
@@ -107,12 +110,21 @@ def _parse_str(raw: Any, fallback: str) -> str:
     return value or fallback
 
 
+def _resolve_default_config_path(path: str | Path | None) -> Path:
+    if path is not None:
+        return Path(path)
+    env_default_path = os.getenv("MY_AGENT_APP_DEFAULT_CONFIG_PATH")
+    if env_default_path:
+        return Path(env_default_path)
+    return DEFAULT_CONFIG_PATH
+
+
 def load_config(
     path: str | Path | None = None,
     *,
     profile_override: str | None = None,
 ) -> tuple[AppConfig, dict[str, Any]]:
-    default_path = Path(path or os.getenv("MY_AGENT_APP_DEFAULT_CONFIG_PATH", "configs/default.yaml"))
+    default_path = _resolve_default_config_path(path)
     merged = load_yaml(default_path)
     profiles = merged.get("profiles")
     profile_map = profiles if isinstance(profiles, dict) else {}

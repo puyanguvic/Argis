@@ -14,7 +14,7 @@
 - `agents/service.py`: multi-agent orchestration workflow.
 - `app/`: assembly and runtime runners.
 - `ui/`: Gradio demo.
-- `configs/default.yaml`: runtime defaults + provider profiles.
+- `src/phish_email_detection_agent/configs/default.yaml`: runtime defaults + provider profiles.
 
 ## Multi-agent flow
 

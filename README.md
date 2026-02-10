@@ -108,6 +108,7 @@ export MY_AGENT_APP_TOOL_MODULES="my_pkg.mail.tools,my_pkg.security.tools"
 src/phish_email_detection_agent/
   agents/
   app/
+  configs/
   core/
   tools/
     plugins/

@@ -20,6 +20,10 @@ PROVIDER_MODE_TO_PROFILE = {
 }
 
 
+def _is_local_provider(provider: Any) -> bool:
+    return str(provider or "").strip().lower() in {"local", "ollama"}
+
+
 def _format_stage_line(event: dict[str, Any]) -> str:
     stage = str(event.get("stage", "runtime")).upper()
     status = str(event.get("status", "info")).upper()
@@ -76,7 +80,7 @@ def _profile_from_provider_mode(mode: str) -> str:
 
 def _provider_mode_from_profile(profile: str) -> str:
     clean = str(profile or "").strip().lower()
-    if clean in {"ollama", "litellm"}:
+    if clean == "ollama":
         return "local"
     return "api"
 
@@ -146,8 +150,7 @@ def _fetch_ollama_models_for_dropdown(api_base: str | None) -> tuple[list[str], 
 
 
 def _format_backend_status(runtime: dict[str, Any]) -> str:
-    provider = str(runtime.get("provider", "")).strip()
-    if provider == "litellm":
+    if _is_local_provider(runtime.get("provider", "")):
         return _check_ollama_status(runtime.get("api_base"))
     return "Backend Status: OpenAI profile selected; local Ollama check skipped."
 
@@ -157,7 +160,7 @@ def _format_runtime_hint(runtime: dict[str, Any]) -> str:
     provider = str(runtime.get("provider", ""))
     model = str(runtime.get("model", ""))
     hint = f"Current: profile={profile}, provider={provider}, model={model}"
-    if provider == "litellm":
+    if _is_local_provider(provider):
         hint += " (for Ollama, ensure service is running at configured api_base)"
     return hint
 
@@ -166,7 +169,7 @@ def _reload_provider_state(provider_mode: str):
     selected_profile = _profile_from_provider_mode(provider_mode)
     _, runtime = create_agent(profile_override=selected_profile)
     choices, value = _resolve_model_options(runtime)
-    if str(runtime.get("provider", "")).strip() == "litellm":
+    if _is_local_provider(runtime.get("provider", "")):
         dynamic_choices, _ = _fetch_ollama_models_for_dropdown(runtime.get("api_base"))
         if dynamic_choices:
             choices = dynamic_choices
@@ -193,7 +196,7 @@ def _stream_with_selected_model(text: str, provider_mode: str, model: str):
     result_text = ""
     yield "\n".join(process_lines), result_text
 
-    if str(runtime.get("provider", "")).strip() == "litellm":
+    if _is_local_provider(runtime.get("provider", "")):
         available, error = _fetch_ollama_model_names(runtime.get("api_base"))
         requested = str(runtime.get("model", "")).strip()
         normalized = _normalize_ollama_model_name(requested)
@@ -235,7 +238,7 @@ def build() -> gr.Blocks:
     current_profile = str(runtime.get("profile", "openai")).strip() or "openai"
     current_provider_mode = _provider_mode_from_profile(current_profile)
     choices, current_model = _resolve_model_options(runtime)
-    if str(runtime.get("provider", "")).strip() == "litellm":
+    if _is_local_provider(runtime.get("provider", "")):
         dynamic_choices, _ = _fetch_ollama_models_for_dropdown(runtime.get("api_base"))
         if dynamic_choices:
             choices = dynamic_choices

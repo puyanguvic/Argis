@@ -12,9 +12,10 @@ A professional phishing detection agent stack based on OpenAI Agents SDK.
   - built-in tools
   - plugin auto-discovery from `src/my_agent_app/tools/plugins`
   - optional external modules via `MY_AGENT_APP_TOOL_MODULES`
-- Provider abstraction:
-  - `openai` (OpenAI API)
-  - `litellm` (including Ollama)
+- Model access strategy:
+  - `openai`: native OpenAI Agents SDK model path
+  - `local` (and non-OpenAI providers): unified through LiteLLM
+  - local runtime: Ollama
 
 ## Run
 
@@ -34,7 +35,7 @@ Structured deep input (text + urls + attachments):
 uv run python -m my_agent_app --text '{"text":"Urgent: login now","urls":["https://bit.ly/reset"],"attachments":["invoice.zip"]}'
 ```
 
-## Providers
+## Providers / Profiles
 
 OpenAI:
 
@@ -44,7 +45,7 @@ export OPENAI_API_KEY=your_key
 uv run python -m my_agent_app --text "review this email"
 ```
 
-LiteLLM + Ollama:
+LiteLLM + Ollama (local):
 
 ```bash
 ollama pull qwen2.5:1b

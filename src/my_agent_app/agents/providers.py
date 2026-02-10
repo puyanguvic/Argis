@@ -18,11 +18,11 @@ def build_model_reference(cfg: ProviderConfig) -> Any:
     """Return model reference accepted by `agents.Agent`.
 
     - `openai`: model name string (SDK resolves via OpenAI client/env).
-    - `litellm`: `LitellmModel` for local/third-party providers (e.g. Ollama).
+    - `local`: `LitellmModel` for local/third-party providers (e.g. Ollama).
     """
 
     provider = (cfg.provider or "openai").strip().lower()
-    if provider == "litellm":
+    if provider in {"local", "ollama"}:
         from agents.extensions.models.litellm_model import LitellmModel
 
         return LitellmModel(

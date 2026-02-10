@@ -23,6 +23,13 @@ class AppConfig(BaseModel):
     default_config_path: str = Field(default="configs/default.yaml")
 
 
+def _normalize_provider(raw: Any) -> str:
+    provider = str(raw or "").strip().lower()
+    if provider in {"ollama", "local"}:
+        return "local"
+    return provider or "openai"
+
+
 def load_yaml(path: str | Path) -> dict[str, Any]:
     p = Path(path)
     if not p.exists():
@@ -81,9 +88,11 @@ def load_config(
             return _pick_env(name, fallback)
         return fallback
 
-    selected_provider = _pick_selector_env(
-        "MY_AGENT_APP_PROVIDER",
-        selected.get("provider", merged.get("provider", "openai")),
+    selected_provider = _normalize_provider(
+        _pick_selector_env(
+            "MY_AGENT_APP_PROVIDER",
+            selected.get("provider", merged.get("provider", "openai")),
+        )
     )
 
     raw_temp = _pick_selector_env(
@@ -108,7 +117,8 @@ def load_config(
         for profile_cfg in profile_map.values():
             if not isinstance(profile_cfg, dict):
                 continue
-            if str(profile_cfg.get("provider", "")).strip() != str(selected_provider).strip():
+            profile_provider = _normalize_provider(profile_cfg.get("provider", ""))
+            if profile_provider != str(selected_provider).strip():
                 continue
             parsed_choices.extend(_parse_model_choices(profile_cfg.get("model_choices", [])))
             model_value = str(profile_cfg.get("model", "")).strip()

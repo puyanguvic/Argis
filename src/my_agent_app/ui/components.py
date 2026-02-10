@@ -7,6 +7,6 @@ import gradio as gr
 
 def model_hint() -> gr.Markdown:
     return gr.Markdown(
-        "Provider/model come from env + configs/default.yaml. "
-        "Use profile `ollama` for local OLLAMA via LiteLLM."
+        "Models come from env + configs/default.yaml. "
+        "OpenAI uses native Agents SDK path; profile `ollama` uses LiteLLM + Ollama."
     )

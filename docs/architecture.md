@@ -4,7 +4,7 @@
 - `tools/`: deterministic utilities and analyzers.
 - `tools/plugins/`: auto-discovered `tool_*` plugin functions.
 - `agents/contracts.py`: structured schemas for router/investigator/final output.
-- `agents/providers.py`: provider model factory (`openai` / `litellm`).
+- `agents/providers.py`: model factory (`openai` native; `local` via LiteLLM, local runtime with Ollama).
 - `agents/tool_registry.py`: built-in + plugin + external tool registration.
 - `agents/service.py`: multi-agent orchestration workflow.
 - `app/`: assembly and runtime runners.

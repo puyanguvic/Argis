@@ -1,54 +1,83 @@
 # my-agent-app
 
-A clean reference architecture for an agent application.
+A professional phishing detection agent stack based on OpenAI Agents SDK.
+
+## Core design
+
+- Multi-agent workflow:
+  - `Router Agent`: select `FAST | STANDARD | DEEP`
+  - `Investigator Agent`: deep artifact analysis (text/URL/attachment)
+  - `Summarizer Agent`: final verdict + risk score + actions
+- Extensible tool architecture:
+  - built-in tools
+  - plugin auto-discovery from `src/my_agent_app/tools/plugins`
+  - optional external modules via `MY_AGENT_APP_TOOL_MODULES`
+- Provider abstraction:
+  - `openai` (OpenAI API)
+  - `litellm` (including Ollama)
 
 ## Run
-
-No-arg startup (recommended):
 
 ```bash
 uv run python -m my_agent_app
 ```
 
-Single input:
+Single input text:
 
 ```bash
 uv run python -m my_agent_app --text "Please verify your account now"
 ```
 
-Defaults live in `configs/default.yaml`.
-Switch profile by changing `profile: openai|litellm|ollama` in that file.
-You can also one-line override via env: `MY_AGENT_APP_PROFILE=ollama`.
+Structured deep input (text + urls + attachments):
 
-Use local OLLAMA models through LiteLLM:
+```bash
+uv run python -m my_agent_app --text '{"text":"Urgent: login now","urls":["https://bit.ly/reset"],"attachments":["invoice.zip"]}'
+```
+
+## Providers
+
+OpenAI:
+
+```bash
+export MY_AGENT_APP_PROFILE=openai
+export OPENAI_API_KEY=your_key
+uv run python -m my_agent_app --text "review this email"
+```
+
+LiteLLM + Ollama:
 
 ```bash
 ollama pull qwen2.5:1b
 export MY_AGENT_APP_PROFILE=ollama
-uv run python -m my_agent_app --text "Please verify your account now"
+uv run python -m my_agent_app --text "review this email"
 ```
 
-Temporarily choose another local model for a single run:
+Temporary model override:
 
 ```bash
 export MY_AGENT_APP_PROFILE=ollama
-uv run python -m my_agent_app --model ollama/qwen2.5:3b --text "Please verify your account now"
+uv run python -m my_agent_app --model ollama/qwen2.5:3b --text "review this email"
+```
+
+## Plugin tools
+
+Auto-discovered plugin functions must be top-level and named `tool_*`.
+
+- Built-in plugin directory: `src/my_agent_app/tools/plugins`
+- External modules (comma-separated):
+
+```bash
+export MY_AGENT_APP_TOOL_MODULES="my_pkg.mail.tools,my_pkg.security.tools"
 ```
 
 ## Layout
 
 ```text
-my-agent-app/
-├── pyproject.toml
-├── uv.lock
-├── README.md
-├── LICENSE
-├── .gitignore
-├── .env.example
-├── src/my_agent_app/
-├── examples/
-├── tests/
-├── scripts/
-├── docs/
-└── configs/
+src/my_agent_app/
+  agents/
+  app/
+  core/
+  tools/
+    plugins/
+  ui/
 ```

@@ -1,10 +1,12 @@
 profile: openai
+max_turns: 8
 
 profiles:
   openai:
     provider: openai
     model: gpt-4.1-mini
     temperature: 0.0
+    max_turns: 8
     api_base:
     api_key:
 
@@ -12,6 +14,7 @@ profiles:
     provider: litellm
     model: ollama/qwen2.5:1b
     temperature: 0.0
+    max_turns: 8
     api_base: http://localhost:11434
     api_key: ollama
     model_choices:
@@ -23,6 +26,7 @@ profiles:
     provider: litellm
     model: ollama/qwen2.5:1b
     temperature: 0.0
+    max_turns: 8
     api_base: http://localhost:11434
     api_key: ollama
     model_choices:

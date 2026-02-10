@@ -10,9 +10,13 @@ import pkgutil
 from typing import Callable
 
 from phish_email_detection_agent.agents.router import route_text
+from phish_email_detection_agent.tools.attachment_analysis import AttachmentPolicy, analyze_attachments
 from phish_email_detection_agent.tools.debug import runtime_info
+from phish_email_detection_agent.tools.domain_intel import analyze_domain
 from phish_email_detection_agent.tools.email import classify_attachment, extract_urls, is_suspicious_url
+from phish_email_detection_agent.tools.preprocessing import parse_input_payload
 from phish_email_detection_agent.tools.text import contains_phishing_keywords, normalize_text
+from phish_email_detection_agent.tools.url_analysis import SafeFetchPolicy, analyze_url_target
 
 
 def _keyword_matches(text: str) -> list[str]:
@@ -69,6 +73,37 @@ def _tool_runtime_info() -> dict[str, str]:
     return runtime_info()
 
 
+def _tool_parse_email(raw: str) -> dict[str, object]:
+    """Parse text/json/eml input into normalized email schema."""
+
+    return parse_input_payload(raw).model_dump(mode="json")
+
+
+def _tool_url_target(
+    url: str,
+    enable_fetch: bool = False,
+    sandbox_backend: str = "internal",
+) -> dict[str, object]:
+    """Analyze URL target using safe fetch + HTML signal extraction."""
+
+    return analyze_url_target(
+        url,
+        policy=SafeFetchPolicy(enabled=bool(enable_fetch), sandbox_backend=sandbox_backend),
+    )
+
+
+def _tool_domain_intel(url: str) -> dict[str, object]:
+    """Extract domain intelligence heuristics for a URL."""
+
+    return analyze_domain(url)
+
+
+def _tool_attachments_deep(attachments: list[str]) -> dict[str, object]:
+    """Deep attachment analysis with static-safe inspection."""
+
+    return analyze_attachments(attachments, policy=AttachmentPolicy(enable_ocr=False))
+
+
 @dataclass
 class ToolRegistry:
     """Extensible registry for OpenAI Agents function tools."""
@@ -89,6 +124,10 @@ class ToolRegistry:
             _tool_check_url,
             _tool_attachment_risk,
             _tool_runtime_info,
+            _tool_parse_email,
+            _tool_url_target,
+            _tool_domain_intel,
+            _tool_attachments_deep,
         ):
             self.register_callable(func)
 

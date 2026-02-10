@@ -46,3 +46,51 @@ def test_load_config_model_choices_from_env():
             os.environ.pop("MY_AGENT_APP_MODEL_CHOICES", None)
         else:
             os.environ["MY_AGENT_APP_MODEL_CHOICES"] = old
+
+
+def test_load_config_security_pipeline_overrides():
+    env_vars = {
+        "MY_AGENT_APP_URL_FETCH_BACKEND": "firejail",
+        "MY_AGENT_APP_OCR_BACKEND": "tesseract",
+        "MY_AGENT_APP_AUDIO_TRANSCRIPTION_BACKEND": "openai",
+    }
+    backup = {name: os.environ.get(name) for name in env_vars}
+    try:
+        for name, value in env_vars.items():
+            os.environ[name] = value
+        cfg, _ = load_config()
+        assert cfg.url_fetch_backend == "firejail"
+        assert cfg.ocr_backend == "tesseract"
+        assert cfg.audio_transcription_backend == "openai"
+    finally:
+        for name, value in backup.items():
+            if value is None:
+                os.environ.pop(name, None)
+            else:
+                os.environ[name] = value
+
+
+def test_load_config_deep_analysis_one_switch_enables_pipeline():
+    names = [
+        "MY_AGENT_APP_ENABLE_DEEP_ANALYSIS",
+        "MY_AGENT_APP_ENABLE_URL_FETCH",
+        "MY_AGENT_APP_ENABLE_OCR",
+        "MY_AGENT_APP_ENABLE_AUDIO_TRANSCRIPTION",
+    ]
+    backup = {name: os.environ.get(name) for name in names}
+    try:
+        os.environ["MY_AGENT_APP_ENABLE_DEEP_ANALYSIS"] = "true"
+        os.environ.pop("MY_AGENT_APP_ENABLE_URL_FETCH", None)
+        os.environ.pop("MY_AGENT_APP_ENABLE_OCR", None)
+        os.environ.pop("MY_AGENT_APP_ENABLE_AUDIO_TRANSCRIPTION", None)
+        cfg, _ = load_config()
+        assert cfg.enable_deep_analysis is True
+        assert cfg.enable_url_fetch is True
+        assert cfg.enable_ocr is True
+        assert cfg.enable_audio_transcription is True
+    finally:
+        for name, value in backup.items():
+            if value is None:
+                os.environ.pop(name, None)
+            else:
+                os.environ[name] = value

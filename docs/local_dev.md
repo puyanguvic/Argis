@@ -3,7 +3,7 @@
 ```bash
 uv sync
 PYTHONPATH=src uv run python -m phish_email_detection_agent
-./scripts/test.sh
+uv run pytest -q
 ```
 
 Set env with `.env.example` values only when overriding `configs/default.yaml`.

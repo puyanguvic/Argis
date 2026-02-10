@@ -2,12 +2,18 @@
 
 A professional phishing detection agent stack based on OpenAI Agents SDK.
 
-## Core design
+## Core design (v2)
 
 - Multi-agent workflow:
   - `Router Agent`: select `FAST | STANDARD | DEEP`
-  - `Investigator Agent`: deep artifact analysis (text/URL/attachment)
+  - `Investigator Agent`: deep artifact analysis (text/URL/domain/attachment)
   - `Summarizer Agent`: final verdict + risk score + actions
+- End-to-end attack-chain analysis:
+  - email text + html parsing
+  - URL safe fetch (sandbox policy + redirect chain + html signals)
+  - attachment deep analyzer (PDF/image/audio/office/html static-safe pipeline)
+  - domain intelligence (typosquat/punycode/risky-tld heuristics)
+  - deterministic risk fusion (`text + url + domain + attachment + ocr`)
 - Extensible tool architecture:
   - built-in tools
   - plugin auto-discovery from `src/phish_email_detection_agent/tools/plugins`
@@ -23,6 +29,12 @@ A professional phishing detection agent stack based on OpenAI Agents SDK.
 uv run python -m phish_email_detection_agent
 ```
 
+Install OCR/audio analysis dependencies (optional):
+
+```bash
+uv sync --extra analysis
+```
+
 Single input text:
 
 ```bash
@@ -34,6 +46,23 @@ Structured deep input (text + urls + attachments):
 ```bash
 uv run python -m phish_email_detection_agent --text '{"text":"Urgent: login now","urls":["https://bit.ly/reset"],"attachments":["invoice.zip"]}'
 ```
+
+EML input:
+
+```bash
+uv run python -m phish_email_detection_agent --text '{"eml_path":"/path/to/sample.eml"}'
+```
+
+## Security policy switches
+
+Safe defaults: URL fetch is disabled, private-network access is blocked, OCR/audio transcription are off.
+
+```bash
+# One switch: enable full deep analysis pipeline with built-in defaults
+export MY_AGENT_APP_ENABLE_DEEP_ANALYSIS=true
+```
+
+If you need fine-grained control later, you can still override individual options (backend/model/limits) via env vars.
 
 ## Providers / Profiles
 

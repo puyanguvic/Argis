@@ -1,5 +1,28 @@
 profile: openai
 max_turns: 8
+enable_deep_analysis: false
+enable_url_fetch: false
+fetch_timeout_s: 5.0
+fetch_max_redirects: 4
+fetch_max_bytes: 1000000
+allow_private_network: false
+url_fetch_backend: internal
+url_sandbox_exec_timeout_s: 20.0
+url_firejail_bin: firejail
+url_docker_bin: docker
+url_docker_image: python:3.11-slim
+attachment_max_read_bytes: 4000000
+enable_ocr: false
+ocr_backend: tesseract
+ocr_languages: eng
+enable_qr_decode: true
+enable_audio_transcription: false
+audio_transcription_backend: openai
+audio_transcription_model: gpt-4o-mini-transcribe
+audio_local_model_size: small
+whisper_cli_path: whisper
+audio_openai_api_key:
+audio_openai_base_url:
 
 profiles:
   openai:
@@ -14,6 +37,29 @@ profiles:
       - gpt-4.1
       - gpt-4o-mini
       - gpt-4o
+    enable_deep_analysis: false
+    enable_url_fetch: false
+    fetch_timeout_s: 5.0
+    fetch_max_redirects: 4
+    fetch_max_bytes: 1000000
+    allow_private_network: false
+    url_fetch_backend: internal
+    url_sandbox_exec_timeout_s: 20.0
+    url_firejail_bin: firejail
+    url_docker_bin: docker
+    url_docker_image: python:3.11-slim
+    attachment_max_read_bytes: 4000000
+    enable_ocr: false
+    ocr_backend: tesseract
+    ocr_languages: eng
+    enable_qr_decode: true
+    enable_audio_transcription: false
+    audio_transcription_backend: openai
+    audio_transcription_model: gpt-4o-mini-transcribe
+    audio_local_model_size: small
+    whisper_cli_path: whisper
+    audio_openai_api_key:
+    audio_openai_base_url:
 
   ollama:
     provider: local
@@ -30,3 +76,26 @@ profiles:
       - ollama/qwen3:8b
       - ollama/llama3.2:3b
       - ollama/llama3.1:8b
+    enable_deep_analysis: false
+    enable_url_fetch: false
+    fetch_timeout_s: 5.0
+    fetch_max_redirects: 4
+    fetch_max_bytes: 1000000
+    allow_private_network: false
+    url_fetch_backend: internal
+    url_sandbox_exec_timeout_s: 20.0
+    url_firejail_bin: firejail
+    url_docker_bin: docker
+    url_docker_image: python:3.11-slim
+    attachment_max_read_bytes: 4000000
+    enable_ocr: false
+    ocr_backend: tesseract
+    ocr_languages: eng
+    enable_qr_decode: true
+    enable_audio_transcription: false
+    audio_transcription_backend: openai
+    audio_transcription_model: gpt-4o-mini-transcribe
+    audio_local_model_size: small
+    whisper_cli_path: whisper
+    audio_openai_api_key:
+    audio_openai_base_url:

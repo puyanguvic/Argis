@@ -23,6 +23,14 @@ dependencies = [
 ui = [
   "gradio>=4.0",
 ]
+analysis = [
+  "openai>=1.40",
+  "pillow>=10.0",
+  "pytesseract>=0.3.10",
+  "opencv-python-headless>=4.8",
+  "pyzbar>=0.1.9",
+  "faster-whisper>=1.0",
+]
 test = [
   "pytest>=7.4",
 ]

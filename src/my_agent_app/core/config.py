@@ -9,15 +9,8 @@ from typing import Any
 import yaml
 from pydantic import BaseModel, Field
 
-try:  # pragma: no cover
-    from pydantic_settings import BaseSettings, SettingsConfigDict
-except ModuleNotFoundError:  # pragma: no cover
-    BaseSettings = BaseModel  # type: ignore[misc,assignment]
-    SettingsConfigDict = dict  # type: ignore[misc,assignment]
 
-
-class AppConfig(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="MY_AGENT_APP_", extra="ignore")
+class AppConfig(BaseModel):
 
     profile: str = Field(default="openai")
     provider: str = Field(default="openai")
@@ -79,15 +72,36 @@ def load_config(
     active_profile = str(profile_override or _pick_env("MY_AGENT_APP_PROFILE", merged.get("profile", "openai")))
     selected_profile = profile_map.get(active_profile, {})
     selected = selected_profile if isinstance(selected_profile, dict) else {}
-    selected_provider = _pick_env("MY_AGENT_APP_PROVIDER", selected.get("provider", merged.get("provider", "openai")))
+    # When profile is explicitly chosen (e.g. by UI dropdown), keep model/provider
+    # settings deterministic from that profile and avoid cross-profile env leakage.
+    use_selector_env = profile_override is None
 
-    raw_temp = _pick_env("MY_AGENT_APP_TEMPERATURE", selected.get("temperature", merged.get("temperature", 0.0)))
-    raw_choices = _pick_env(
+    def _pick_selector_env(name: str, fallback: Any) -> Any:
+        if use_selector_env:
+            return _pick_env(name, fallback)
+        return fallback
+
+    selected_provider = _pick_selector_env(
+        "MY_AGENT_APP_PROVIDER",
+        selected.get("provider", merged.get("provider", "openai")),
+    )
+
+    raw_temp = _pick_selector_env(
+        "MY_AGENT_APP_TEMPERATURE",
+        selected.get("temperature", merged.get("temperature", 0.0)),
+    )
+    raw_choices = _pick_selector_env(
         "MY_AGENT_APP_MODEL_CHOICES",
         selected.get("model_choices", merged.get("model_choices", [])),
     )
-    raw_turns = _pick_env("MY_AGENT_APP_MAX_TURNS", selected.get("max_turns", merged.get("max_turns", 8)))
-    selected_model = _pick_env("MY_AGENT_APP_MODEL", selected.get("model", merged.get("model", "gpt-4.1-mini")))
+    raw_turns = _pick_selector_env(
+        "MY_AGENT_APP_MAX_TURNS",
+        selected.get("max_turns", merged.get("max_turns", 8)),
+    )
+    selected_model = _pick_selector_env(
+        "MY_AGENT_APP_MODEL",
+        selected.get("model", merged.get("model", "gpt-4.1-mini")),
+    )
 
     parsed_choices = _parse_model_choices(raw_choices)
     if not parsed_choices and isinstance(profile_map, dict):
@@ -117,8 +131,5 @@ def load_config(
         "default_config_path": str(default_path),
     }
 
-    if hasattr(AppConfig, "model_validate"):
-        cfg = AppConfig.model_validate(payload)
-    else:
-        cfg = AppConfig(**payload)
+    cfg = AppConfig.model_validate(payload)
     return cfg, merged

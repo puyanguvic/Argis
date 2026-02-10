@@ -4,12 +4,20 @@ from __future__ import annotations
 
 import json
 import os
+from urllib.error import URLError
+from urllib.parse import urljoin
+from urllib.request import urlopen
 from typing import Any
 
 import gradio as gr
 
 from my_agent_app.app.build_agent import create_agent
 from my_agent_app.ui.components import model_hint
+
+PROVIDER_MODE_TO_PROFILE = {
+    "api": "openai",
+    "local": "ollama",
+}
 
 
 def _format_stage_line(event: dict[str, Any]) -> str:
@@ -23,7 +31,7 @@ def _format_stage_line(event: dict[str, Any]) -> str:
     return f"[{stage}/{status}] {message}"
 
 
-def _format_compact_result(final: dict[str, Any]) -> str:
+def _format_compact_result(final: dict[str, Any], runtime: dict[str, Any]) -> str:
     verdict = str(final.get("verdict", "")).lower()
     if verdict == "phishing":
         verdict_text = "Potential phishing"
@@ -45,7 +53,11 @@ def _format_compact_result(final: dict[str, Any]) -> str:
     summary_parts = [part for part in [reason, indicator_text] if part]
     summary = "; ".join(summary_parts) if summary_parts else "No explainable reason was returned."
 
-    return f"Detection Result: {verdict_text}\nReason Summary: {summary}"
+    execution = (
+        f"Model Used: profile={runtime.get('profile')} "
+        f"provider={runtime.get('provider')} model={runtime.get('model')}"
+    )
+    return f"Detection Result: {verdict_text}\nReason Summary: {summary}\n{execution}"
 
 
 def _resolve_model_options(runtime: dict[str, Any]) -> tuple[list[str], str | None]:
@@ -57,15 +69,118 @@ def _resolve_model_options(runtime: dict[str, Any]) -> tuple[list[str], str | No
     return choices or ([current_model] if current_model else []), current_model or None
 
 
-def _reload_model_dropdown(profile: str):
-    selected_profile = (profile or "").strip() or None
+def _profile_from_provider_mode(mode: str) -> str:
+    clean = str(mode or "").strip().lower()
+    return PROVIDER_MODE_TO_PROFILE.get(clean, "openai")
+
+
+def _provider_mode_from_profile(profile: str) -> str:
+    clean = str(profile or "").strip().lower()
+    if clean in {"ollama", "litellm"}:
+        return "local"
+    return "api"
+
+
+def _check_ollama_status(api_base: str | None) -> str:
+    base = str(api_base or "").strip()
+    if not base:
+        return "Backend Status: Ollama profile selected but `api_base` is empty."
+
+    endpoint = urljoin(base if base.endswith("/") else f"{base}/", "api/tags")
+    try:
+        with urlopen(endpoint, timeout=1.5) as resp:
+            if getattr(resp, "status", 0) != 200:
+                return f"Backend Status: Ollama unreachable (HTTP {getattr(resp, 'status', 'unknown')})."
+            payload = json.loads(resp.read().decode("utf-8"))
+            models = payload.get("models", []) if isinstance(payload, dict) else []
+            return f"Backend Status: Ollama reachable at {base} (models discovered: {len(models)})."
+    except URLError as exc:
+        return f"Backend Status: Ollama unreachable at {base} ({type(exc.reason).__name__})."
+    except Exception as exc:  # pragma: no cover
+        return f"Backend Status: Ollama check failed at {base} ({type(exc).__name__})."
+
+
+def _normalize_ollama_model_name(model: str) -> str:
+    clean = str(model or "").strip()
+    if clean.startswith("ollama/"):
+        return clean.split("/", 1)[1]
+    return clean
+
+
+def _fetch_ollama_model_names(api_base: str | None) -> tuple[set[str], str | None]:
+    base = str(api_base or "").strip()
+    if not base:
+        return set(), "api_base is empty"
+
+    endpoint = urljoin(base if base.endswith("/") else f"{base}/", "api/tags")
+    try:
+        with urlopen(endpoint, timeout=2.0) as resp:
+            if getattr(resp, "status", 0) != 200:
+                return set(), f"HTTP {getattr(resp, 'status', 'unknown')}"
+            payload = json.loads(resp.read().decode("utf-8"))
+    except URLError as exc:
+        return set(), f"{type(exc.reason).__name__}"
+    except Exception as exc:  # pragma: no cover
+        return set(), type(exc).__name__
+
+    models = payload.get("models", []) if isinstance(payload, dict) else []
+    names: set[str] = set()
+    for item in models:
+        if not isinstance(item, dict):
+            continue
+        for key in ("name", "model"):
+            raw = str(item.get(key, "")).strip()
+            if not raw:
+                continue
+            names.add(raw)
+            names.add(_normalize_ollama_model_name(raw))
+    return names, None
+
+
+def _fetch_ollama_models_for_dropdown(api_base: str | None) -> tuple[list[str], str | None]:
+    names, error = _fetch_ollama_model_names(api_base)
+    if error:
+        return [], error
+    normalized = sorted({item for item in names if "/" not in item})
+    return [f"ollama/{item}" for item in normalized], None
+
+
+def _format_backend_status(runtime: dict[str, Any]) -> str:
+    provider = str(runtime.get("provider", "")).strip()
+    if provider == "litellm":
+        return _check_ollama_status(runtime.get("api_base"))
+    return "Backend Status: OpenAI profile selected; local Ollama check skipped."
+
+
+def _format_runtime_hint(runtime: dict[str, Any]) -> str:
+    profile = str(runtime.get("profile", ""))
+    provider = str(runtime.get("provider", ""))
+    model = str(runtime.get("model", ""))
+    hint = f"Current: profile={profile}, provider={provider}, model={model}"
+    if provider == "litellm":
+        hint += " (for Ollama, ensure service is running at configured api_base)"
+    return hint
+
+
+def _reload_provider_state(provider_mode: str):
+    selected_profile = _profile_from_provider_mode(provider_mode)
     _, runtime = create_agent(profile_override=selected_profile)
     choices, value = _resolve_model_options(runtime)
-    return gr.Dropdown(choices=choices, value=value, allow_custom_value=True)
+    if str(runtime.get("provider", "")).strip() == "litellm":
+        dynamic_choices, _ = _fetch_ollama_models_for_dropdown(runtime.get("api_base"))
+        if dynamic_choices:
+            choices = dynamic_choices
+            if value not in choices:
+                value = choices[0]
+    return (
+        gr.Dropdown(choices=choices, value=value, allow_custom_value=True),
+        _format_runtime_hint(runtime),
+        _format_backend_status(runtime),
+    )
 
 
-def _stream_with_selected_model(text: str, profile: str, model: str):
-    selected_profile = (profile or "").strip() or None
+def _stream_with_selected_model(text: str, provider_mode: str, model: str):
+    selected_profile = _profile_from_provider_mode(provider_mode)
     selected = (model or "").strip() or None
     agent, runtime = create_agent(profile_override=selected_profile, model_override=selected)
 
@@ -78,11 +193,35 @@ def _stream_with_selected_model(text: str, profile: str, model: str):
     result_text = ""
     yield "\n".join(process_lines), result_text
 
+    if str(runtime.get("provider", "")).strip() == "litellm":
+        available, error = _fetch_ollama_model_names(runtime.get("api_base"))
+        requested = str(runtime.get("model", "")).strip()
+        normalized = _normalize_ollama_model_name(requested)
+        candidates = {requested, normalized, f"{normalized}:latest"}
+        if error:
+            process_lines.append("[BLOCKED] Pre-run model check failed.")
+            result_text = (
+                "Run blocked: unable to validate local Ollama models. "
+                f"Reason: {error}. Check Ollama service and api_base."
+            )
+            yield "\n".join(process_lines), result_text
+            return
+        if not (candidates & available):
+            installed = ", ".join(sorted(available)[:10]) if available else "(none)"
+            process_lines.append("[BLOCKED] Selected model is not installed in local Ollama.")
+            result_text = (
+                "Run blocked: selected model is not available in local Ollama.\n"
+                f"Selected: {requested}\n"
+                f"Installed: {installed}"
+            )
+            yield "\n".join(process_lines), result_text
+            return
+
     for event in agent.analyze_stream(text):
         if event.get("type") == "final":
             final = event.get("result")
             if isinstance(final, dict):
-                result_text = _format_compact_result(final)
+                result_text = _format_compact_result(final, runtime)
                 process_lines.append("[DONE] Detection pipeline finished.")
                 yield "\n".join(process_lines), result_text
             continue
@@ -94,19 +233,24 @@ def _stream_with_selected_model(text: str, profile: str, model: str):
 def build() -> gr.Blocks:
     _, runtime = create_agent()
     current_profile = str(runtime.get("profile", "openai")).strip() or "openai"
-    profile_choices = runtime.get("profile_choices", [])
-    profiles = [str(item).strip() for item in profile_choices if str(item).strip()]
-    if current_profile not in profiles:
-        profiles.insert(0, current_profile)
+    current_provider_mode = _provider_mode_from_profile(current_profile)
     choices, current_model = _resolve_model_options(runtime)
+    if str(runtime.get("provider", "")).strip() == "litellm":
+        dynamic_choices, _ = _fetch_ollama_models_for_dropdown(runtime.get("api_base"))
+        if dynamic_choices:
+            choices = dynamic_choices
+            if current_model not in choices:
+                current_model = choices[0]
 
     with gr.Blocks(title="my-agent-app") as demo:
         gr.Markdown("# my-agent-app")
         model_hint()
-        profile = gr.Dropdown(
-            choices=profiles or [current_profile],
-            value=current_profile,
-            label="Profile",
+        runtime_hint = gr.Markdown(_format_runtime_hint(runtime))
+        backend_status = gr.Markdown(_format_backend_status(runtime))
+        provider_mode = gr.Dropdown(
+            choices=["api", "local"],
+            value=current_provider_mode,
+            label="Provider",
         )
         model = gr.Dropdown(
             choices=choices,
@@ -118,8 +262,12 @@ def build() -> gr.Blocks:
         process = gr.Textbox(label="Detection Process", lines=12)
         out = gr.Textbox(label="Result", lines=12)
         btn = gr.Button("Run")
-        profile.change(_reload_model_dropdown, inputs=[profile], outputs=[model])
-        btn.click(_stream_with_selected_model, inputs=[inp, profile, model], outputs=[process, out])
+        provider_mode.change(
+            _reload_provider_state,
+            inputs=[provider_mode],
+            outputs=[model, runtime_hint, backend_status],
+        )
+        btn.click(_stream_with_selected_model, inputs=[inp, provider_mode, model], outputs=[process, out])
     return demo
 
 

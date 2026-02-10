@@ -17,13 +17,13 @@ profiles:
 
   litellm:
     provider: litellm
-    model: ollama/qwen2.5:1b
+    model: ollama/qwen2.5:1.5b
     temperature: 0.0
     max_turns: 8
     api_base: http://localhost:11434
     api_key: ollama
     model_choices:
-      - ollama/qwen2.5:1b
+      - ollama/qwen2.5:1.5b
       - ollama/qwen2.5:3b
       - ollama/qwen2.5:7b
       - ollama/qwen2.5:14b
@@ -33,13 +33,13 @@ profiles:
 
   ollama:
     provider: litellm
-    model: ollama/qwen2.5:1b
+    model: ollama/qwen2.5:1.5b
     temperature: 0.0
     max_turns: 8
     api_base: http://localhost:11434
     api_key: ollama
     model_choices:
-      - ollama/qwen2.5:1b
+      - ollama/qwen2.5:1.5b
       - ollama/qwen2.5:3b
       - ollama/qwen2.5:7b
       - ollama/qwen2.5:14b

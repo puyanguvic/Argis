@@ -12,9 +12,9 @@ Task: Decide processing depth path and if deep investigation is needed.
 Return only structured output.
 
 Routing guide:
-- FAST: short/simple content and no suspicious artifacts.
-- STANDARD: moderate length or mixed signals.
-- DEEP: long/complex content, many URLs, or risky attachments.
+- FAST: low-signal content with no suspicious artifacts.
+- STANDARD: some suspicious clues with limited blast radius.
+- DEEP: strong phishing cues, suspicious URL/domain evidence, hidden links, or risky attachments.
 """
 
 INVESTIGATOR_PROMPT = BASE_POLICY + """

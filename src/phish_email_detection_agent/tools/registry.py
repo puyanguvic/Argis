@@ -38,10 +38,14 @@ def _tool_keyword_scan(text: str) -> dict[str, object]:
     }
 
 
-def _tool_route_path(text: str) -> str:
-    """Return FAST/STANDARD/DEEP route based on text length."""
+def _tool_route_path(
+    text: str,
+    urls: list[str] | None = None,
+    attachments: list[str] | None = None,
+) -> str:
+    """Return FAST/STANDARD/DEEP route from phishing-relevant signals."""
 
-    return route_text(text)
+    return route_text(text, urls=urls, attachments=attachments)
 
 
 def _tool_extract_urls(text: str) -> dict[str, object]:

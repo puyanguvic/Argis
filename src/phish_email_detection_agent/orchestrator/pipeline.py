@@ -231,7 +231,15 @@ def _fallback_result(email: EmailInput, provider: str, precheck: dict[str, Any])
     return TriageResult(
         verdict="phishing" if phishing else "benign",
         reason=reason,
-        path=route_text(" ".join([email.subject, email.text, email.body_text])),
+        path=route_text(
+            " ".join([email.subject, email.text, email.body_text]),
+            urls=list(precheck.get("combined_urls", [])),
+            attachments=email.attachments,
+            chain_flags=list(precheck.get("chain_flags", [])),
+            hidden_link_count=len(precheck.get("hidden_links", [])),
+            suspicious_url_count=len(precheck.get("suspicious_urls", [])),
+            risky_attachment_count=len(precheck.get("risky_attachments", [])),
+        ),
         risk_score=score,
         indicators=list(precheck.get("indicators", [])),
         recommended_actions=list(dict.fromkeys(actions)),

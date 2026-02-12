@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import importlib.util
 import json
 import os
+import re
 from typing import Any
 
 from phish_email_detection_agent.agents.contracts import (
@@ -23,7 +24,7 @@ from phish_email_detection_agent.orchestrator.fusion import fuse_risk_scores
 from phish_email_detection_agent.providers.llm_openai import ProviderConfig, build_model_reference
 from phish_email_detection_agent.tools.registry import ToolRegistry
 from phish_email_detection_agent.tools.attachment.analyze import AttachmentPolicy, analyze_attachments
-from phish_email_detection_agent.tools.intel.domain_intel import analyze_domain
+from phish_email_detection_agent.tools.intel.domain_intel import DomainIntelPolicy, analyze_domain
 from phish_email_detection_agent.domain.url.extract import extract_urls, is_suspicious_url
 from phish_email_detection_agent.domain.email.parse import (
     extract_urls_from_html,
@@ -32,6 +33,44 @@ from phish_email_detection_agent.domain.email.parse import (
 )
 from phish_email_detection_agent.tools.text.text_model import contains_phishing_keywords
 from phish_email_detection_agent.tools.url_fetch.service import SafeFetchPolicy, analyze_url_target
+
+_FINANCE_THEME_TOKENS = (
+    "invoice",
+    "payment",
+    "billing",
+    "reconciliation",
+    "accounts receivable",
+    "statement",
+    "finance",
+    "remittance",
+)
+_URGENCY_PATTERNS = (
+    re.compile(r"\baction required\b"),
+    re.compile(r"\bwithin (?:the )?next \d+\s*(?:hours?|days?)\b"),
+    re.compile(r"\b(?:\d{1,2}\s*)?hours?\b"),
+    re.compile(r"\bimmediately\b"),
+    re.compile(r"\basap\b"),
+    re.compile(r"\bfinal notice\b"),
+    re.compile(r"\btemporary hold\b"),
+    re.compile(r"\bservice interruption\b"),
+)
+_PAYMENT_ACTION_PATTERNS = (
+    re.compile(r"\breview (?:the )?(?:invoice|payment|billing|transaction|account)\b"),
+    re.compile(r"\bconfirm (?:the )?(?:invoice|payment|billing|transaction|account)\b"),
+    re.compile(r"\bverify (?:the )?(?:invoice|payment|billing|transaction|account|details)\b"),
+    re.compile(r"\bclick\b"),
+    re.compile(r"\blog(?:-| )?in\b"),
+)
+_URL_PATH_RISK_TOKENS = (
+    "/verify",
+    "/login",
+    "/account",
+    "/secure",
+    "/payment",
+    "/billing",
+    "/portal",
+    "confirm",
+)
 
 
 def _extract_keywords(text: str) -> list[str]:
@@ -46,8 +85,16 @@ def _extract_keywords(text: str) -> list[str]:
         "security",
         "suspended",
         "mfa",
+        "payment",
+        "billing",
+        "reconciliation",
+        "action required",
     )
     return [item for item in keywords if item in raw]
+
+
+def _count_pattern_hits(text: str, patterns: tuple[re.Pattern[str], ...]) -> int:
+    return sum(1 for pattern in patterns if pattern.search(text))
 
 
 def _build_safe_fetch_policy(service: "AgentService") -> SafeFetchPolicy:
@@ -82,6 +129,13 @@ def _build_attachment_policy(service: "AgentService") -> AttachmentPolicy:
     )
 
 
+def _build_domain_policy(service: "AgentService") -> DomainIntelPolicy:
+    return DomainIntelPolicy(
+        suspicious_token_cap=max(0, int(service.precheck_domain_token_cap)),
+        synthetic_service_bonus=max(0, int(service.precheck_domain_synthetic_bonus)),
+    )
+
+
 def _local_artifact_precheck(email: EmailInput, service: "AgentService") -> dict[str, Any]:
     """Deterministic artifact checks for trace visibility and fallback support."""
 
@@ -96,10 +150,11 @@ def _local_artifact_precheck(email: EmailInput, service: "AgentService") -> dict
 
     safe_fetch_policy = _build_safe_fetch_policy(service)
     attachment_policy = _build_attachment_policy(service)
+    domain_policy = _build_domain_policy(service)
 
     url_checks = [{"url": item, "suspicious": is_suspicious_url(item)} for item in combined_urls]
     url_target_reports = [analyze_url_target(item, policy=safe_fetch_policy) for item in combined_urls]
-    domain_reports = [analyze_domain(item) for item in combined_urls]
+    domain_reports = [analyze_domain(item, policy=domain_policy) for item in combined_urls]
     attachment_bundle = analyze_attachments(email.attachments, policy=attachment_policy)
     nested_urls = attachment_bundle.get("extracted_urls", [])
 
@@ -107,22 +162,45 @@ def _local_artifact_precheck(email: EmailInput, service: "AgentService") -> dict
         chain_flags.append("nested_url_in_attachment")
         combined_urls = list(dict.fromkeys(combined_urls + nested_urls))
 
-    nested_domain_reports = [analyze_domain(item) for item in nested_urls]
-    keyword_hits = _extract_keywords(" ".join([email.subject, email.text, email.body_text]))
+    nested_domain_reports = [analyze_domain(item, policy=domain_policy) for item in nested_urls]
+    combined_text = " ".join([email.subject, email.text, email.body_text]).lower()
+    keyword_hits = _extract_keywords(combined_text)
+    urgency_hits = _count_pattern_hits(combined_text, _URGENCY_PATTERNS)
+    action_hits = _count_pattern_hits(combined_text, _PAYMENT_ACTION_PATTERNS)
+    finance_theme_hits = sum(1 for token in _FINANCE_THEME_TOKENS if token in combined_text)
+    domain_suspicious_threshold = max(0, int(service.precheck_domain_suspicious_threshold))
     suspicious_urls = [item["url"] for item in url_checks if item["suspicious"]]
     suspicious_urls.extend(
         item["url"] for item in url_target_reports if int(item.get("risk_score", 0)) >= 50
     )
     suspicious_urls.extend(
-        item["url"] for item in domain_reports if int(item.get("risk_score", 0)) >= 45
+        item["url"] for item in domain_reports if int(item.get("risk_score", 0)) >= domain_suspicious_threshold
     )
     suspicious_urls = list(dict.fromkeys(suspicious_urls))
     risky_attachments = [name for name in attachment_bundle.get("risky", []) if isinstance(name, str)]
 
-    text_score = min(
-        100,
-        len(keyword_hits) * 10 + (15 if contains_phishing_keywords(email.text) else 0),
+    domain_scores = [int(item.get("risk_score", 0)) for item in (domain_reports + nested_domain_reports)]
+    max_domain_score = max(domain_scores, default=0)
+    text_keyword_weight = max(0, int(service.precheck_text_keyword_weight))
+    text_urgency_weight = max(0, int(service.precheck_text_urgency_weight))
+    text_action_weight = max(0, int(service.precheck_text_action_weight))
+    text_core_bonus = max(0, int(service.precheck_text_core_bonus))
+    text_finance_combo_bonus = max(0, int(service.precheck_text_finance_combo_bonus))
+    text_suspicious_finance_bonus = max(0, int(service.precheck_text_suspicious_finance_bonus))
+    text_suspicious_urgency_bonus = max(0, int(service.precheck_text_suspicious_urgency_bonus))
+    text_signal_score = (
+        len(keyword_hits) * text_keyword_weight
+        + urgency_hits * text_urgency_weight
+        + action_hits * text_action_weight
+        + (text_core_bonus if contains_phishing_keywords(combined_text) else 0)
     )
+    if finance_theme_hits >= 2 and (urgency_hits > 0 or action_hits > 0):
+        text_signal_score += text_finance_combo_bonus
+    if suspicious_urls and finance_theme_hits > 0:
+        text_signal_score += text_suspicious_finance_bonus
+    if suspicious_urls and urgency_hits > 0:
+        text_signal_score += text_suspicious_urgency_bonus
+    text_score = min(100, text_signal_score)
     shortener_bonus = min(
         20,
         sum(
@@ -131,19 +209,34 @@ def _local_artifact_precheck(email: EmailInput, service: "AgentService") -> dict
             if any(token in item.lower() for token in ("bit.ly/", "tinyurl.com/", "t.co/", "rb.gy/"))
         ),
     )
+    url_path_token_bonus = max(0, int(service.precheck_url_path_token_bonus))
+    url_path_bonus_cap = max(0, int(service.precheck_url_path_bonus_cap))
+    path_risk_bonus = min(
+        url_path_bonus_cap,
+        sum(
+            url_path_token_bonus
+            for item in combined_urls
+            if any(token in item.lower() for token in _URL_PATH_RISK_TOKENS)
+        ),
+    )
+    domain_context_divisor = max(1, int(service.precheck_url_domain_context_divisor))
+    domain_context_cap = max(0, int(service.precheck_url_domain_context_cap))
+    domain_context_bonus = min(domain_context_cap, max_domain_score // domain_context_divisor)
     chain_bonus = 20 if combined_urls and email.attachments else 0
+    url_suspicious_weight = max(0, int(service.precheck_url_suspicious_weight))
     url_signal_score = (
-        len(suspicious_urls) * 16
+        len(suspicious_urls) * url_suspicious_weight
         + min(40, len(html_url_meta["hidden_links"]) * 18)
         + max([int(item.get("risk_score", 0)) for item in url_target_reports], default=0) // 2
         + shortener_bonus
+        + path_risk_bonus
+        + domain_context_bonus
         + chain_bonus
     )
     url_score = min(
         100,
         url_signal_score,
     )
-    domain_scores = [int(item.get("risk_score", 0)) for item in (domain_reports + nested_domain_reports)]
     domain_score = int(round(sum(domain_scores) / len(domain_scores))) if domain_scores else 0
     attachment_scores = [
         int(item.get("risk_score", 0)) for item in attachment_bundle.get("reports", []) if isinstance(item, dict)
@@ -165,6 +258,12 @@ def _local_artifact_precheck(email: EmailInput, service: "AgentService") -> dict
 
     indicators: list[str] = []
     indicators.extend([f"keyword:{item}" for item in keyword_hits])
+    if urgency_hits > 0:
+        indicators.append(f"text:urgency_hits={urgency_hits}")
+    if action_hits > 0:
+        indicators.append(f"text:action_hits={action_hits}")
+    if finance_theme_hits > 0:
+        indicators.append(f"text:finance_theme_hits={finance_theme_hits}")
     indicators.extend([f"url:{item}" for item in suspicious_urls])
     indicators.extend([f"attachment:{item}" for item in risky_attachments])
     indicators.extend([f"chain:{item}" for item in chain_flags])
@@ -287,6 +386,21 @@ class AgentService:
     whisper_cli_path: str = "whisper"
     audio_openai_api_key: str | None = None
     audio_openai_base_url: str | None = None
+    precheck_domain_suspicious_threshold: int = 35
+    precheck_text_keyword_weight: int = 9
+    precheck_text_urgency_weight: int = 8
+    precheck_text_action_weight: int = 8
+    precheck_text_core_bonus: int = 15
+    precheck_text_finance_combo_bonus: int = 12
+    precheck_text_suspicious_finance_bonus: int = 12
+    precheck_text_suspicious_urgency_bonus: int = 8
+    precheck_url_suspicious_weight: int = 24
+    precheck_url_path_token_bonus: int = 8
+    precheck_url_path_bonus_cap: int = 24
+    precheck_url_domain_context_divisor: int = 2
+    precheck_url_domain_context_cap: int = 20
+    precheck_domain_token_cap: int = 30
+    precheck_domain_synthetic_bonus: int = 18
 
     def _can_call_remote(self) -> bool:
         if importlib.util.find_spec("agents") is None:

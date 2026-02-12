@@ -23,6 +23,21 @@ audio_local_model_size: small
 whisper_cli_path: whisper
 audio_openai_api_key:
 audio_openai_base_url:
+precheck_domain_suspicious_threshold: 35
+precheck_text_keyword_weight: 9
+precheck_text_urgency_weight: 8
+precheck_text_action_weight: 8
+precheck_text_core_bonus: 15
+precheck_text_finance_combo_bonus: 12
+precheck_text_suspicious_finance_bonus: 12
+precheck_text_suspicious_urgency_bonus: 8
+precheck_url_suspicious_weight: 24
+precheck_url_path_token_bonus: 8
+precheck_url_path_bonus_cap: 24
+precheck_url_domain_context_divisor: 2
+precheck_url_domain_context_cap: 20
+precheck_domain_token_cap: 30
+precheck_domain_synthetic_bonus: 18
 
 profiles:
   openai:
@@ -60,6 +75,21 @@ profiles:
     whisper_cli_path: whisper
     audio_openai_api_key:
     audio_openai_base_url:
+    precheck_domain_suspicious_threshold: 35
+    precheck_text_keyword_weight: 9
+    precheck_text_urgency_weight: 8
+    precheck_text_action_weight: 8
+    precheck_text_core_bonus: 15
+    precheck_text_finance_combo_bonus: 12
+    precheck_text_suspicious_finance_bonus: 12
+    precheck_text_suspicious_urgency_bonus: 8
+    precheck_url_suspicious_weight: 24
+    precheck_url_path_token_bonus: 8
+    precheck_url_path_bonus_cap: 24
+    precheck_url_domain_context_divisor: 2
+    precheck_url_domain_context_cap: 20
+    precheck_domain_token_cap: 30
+    precheck_domain_synthetic_bonus: 18
 
   ollama:
     provider: local
@@ -99,3 +129,18 @@ profiles:
     whisper_cli_path: whisper
     audio_openai_api_key:
     audio_openai_base_url:
+    precheck_domain_suspicious_threshold: 35
+    precheck_text_keyword_weight: 9
+    precheck_text_urgency_weight: 8
+    precheck_text_action_weight: 8
+    precheck_text_core_bonus: 15
+    precheck_text_finance_combo_bonus: 12
+    precheck_text_suspicious_finance_bonus: 12
+    precheck_text_suspicious_urgency_bonus: 8
+    precheck_url_suspicious_weight: 24
+    precheck_url_path_token_bonus: 8
+    precheck_url_path_bonus_cap: 24
+    precheck_url_domain_context_divisor: 2
+    precheck_url_domain_context_cap: 20
+    precheck_domain_token_cap: 30
+    precheck_domain_synthetic_bonus: 18

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import re
 from typing import Any
 from urllib.parse import urlparse
@@ -17,6 +18,12 @@ COMMON_BRANDS = (
     "dhl",
 )
 RISKY_TLDS = (".xyz", ".top", ".click", ".work", ".country", ".gq", ".tk")
+
+
+@dataclass
+class DomainIntelPolicy:
+    suspicious_token_cap: int = 30
+    synthetic_service_bonus: int = 18
 
 
 def _levenshtein(a: str, b: str) -> int:
@@ -58,7 +65,8 @@ def _detect_typosquat(host: str) -> list[str]:
     return list(dict.fromkeys(hits))
 
 
-def analyze_domain(url: str) -> dict[str, Any]:
+def analyze_domain(url: str, *, policy: DomainIntelPolicy | None = None) -> dict[str, Any]:
+    active = policy or DomainIntelPolicy()
     parsed = urlparse((url or "").strip())
     host = (parsed.hostname or "").lower()
     if not host:
@@ -86,12 +94,29 @@ def analyze_domain(url: str) -> dict[str, Any]:
 
     suspicious_tokens = [
         token
-        for token in ("secure", "verify", "login", "update", "account", "wallet")
+        for token in (
+            "secure",
+            "verify",
+            "login",
+            "update",
+            "account",
+            "wallet",
+            "payment",
+            "billing",
+            "invoice",
+            "finance",
+            "portal",
+            "support",
+        )
         if token in host
     ]
     if suspicious_tokens:
-        risk += min(20, len(suspicious_tokens) * 6)
+        risk += min(max(0, int(active.suspicious_token_cap)), len(suspicious_tokens) * 6)
         indicators.append("credential_theme_domain")
+    # Synthetic service domains often string multiple trust-themed words with hyphens.
+    if host.count("-") >= 2 and len(suspicious_tokens) >= 2 and len(host) >= 20:
+        risk += max(0, int(active.synthetic_service_bonus))
+        indicators.append("synthetic_service_domain")
 
     return {
         "url": url,

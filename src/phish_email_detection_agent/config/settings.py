@@ -15,9 +15,9 @@ DEFAULT_CONFIG_PATH = PACKAGE_ROOT / "config" / "defaults.yaml"
 
 class AppConfig(BaseModel):
 
-    profile: str = Field(default="openai")
-    provider: str = Field(default="openai")
-    model: str = Field(default="gpt-4.1-mini")
+    profile: str = Field(default="ollama")
+    provider: str = Field(default="local")
+    model: str = Field(default="ollama/qwen2.5:7b")
     temperature: float = Field(default=0.0)
     api_base: str | None = Field(default=None)
     api_key: str | None = Field(default=None)
@@ -144,7 +144,7 @@ def load_config(
     profiles = merged.get("profiles")
     profile_map = profiles if isinstance(profiles, dict) else {}
 
-    active_profile = str(profile_override or _pick_env("MY_AGENT_APP_PROFILE", merged.get("profile", "openai")))
+    active_profile = str(profile_override or _pick_env("MY_AGENT_APP_PROFILE", merged.get("profile", "ollama")))
     selected_profile = profile_map.get(active_profile, {})
     selected = selected_profile if isinstance(selected_profile, dict) else {}
     # When profile is explicitly chosen (e.g. by UI dropdown), keep model/provider
@@ -159,7 +159,7 @@ def load_config(
     selected_provider = _normalize_provider(
         _pick_selector_env(
             "MY_AGENT_APP_PROVIDER",
-            selected.get("provider", merged.get("provider", "openai")),
+            selected.get("provider", merged.get("provider", "local")),
         )
     )
 
@@ -177,7 +177,7 @@ def load_config(
     )
     selected_model = _pick_selector_env(
         "MY_AGENT_APP_MODEL",
-        selected.get("model", merged.get("model", "gpt-4.1-mini")),
+        selected.get("model", merged.get("model", "ollama/qwen2.5:7b")),
     )
 
     parsed_choices = _parse_model_choices(raw_choices)

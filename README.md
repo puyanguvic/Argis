@@ -64,6 +64,9 @@ If you need fine-grained control later, you can still override individual option
 
 ## Providers / Profiles
 
+Default runtime is local Ollama (`profile=ollama`, `model=ollama/qwen2.5:7b`).
+So without extra env vars, the app prefers local inference over OpenAI API.
+
 OpenAI:
 
 ```bash
@@ -75,10 +78,8 @@ uv run python -m phish_email_detection_agent --text "review this email"
 LiteLLM + Ollama (local):
 
 ```bash
-ollama pull qwen2.5:1b
 ollama pull qwen2.5:7b
 ollama pull llama3.1:8b
-export MY_AGENT_APP_PROFILE=ollama
 uv run python -m phish_email_detection_agent --text "review this email"
 ```
 

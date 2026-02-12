@@ -10,7 +10,6 @@ Set env with `.env.example` values only when overriding `src/phish_email_detecti
 Recommended local model path:
 
 ```bash
-ollama pull qwen2.5:1b
-export MY_AGENT_APP_PROFILE=ollama
+ollama pull qwen2.5:7b
 PYTHONPATH=src uv run python -m phish_email_detection_agent --text "test message"
 ```

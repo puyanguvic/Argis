@@ -277,5 +277,5 @@ def build() -> gr.Blocks:
 
 
 if __name__ == "__main__":
-    share = os.getenv("MY_AGENT_APP_GRADIO_SHARE", "").strip().lower() in {"1", "true", "yes", "on"}
+    share = os.getenv("MY_AGENT_APP_GRADIO_SHARE", "true").strip().lower() in {"1", "true", "yes", "on"}
     build().launch(share=share)

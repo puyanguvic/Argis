@@ -1,4 +1,4 @@
-profile: openai
+profile: ollama
 max_turns: 8
 enable_deep_analysis: false
 enable_url_fetch: false
@@ -93,7 +93,7 @@ profiles:
 
   ollama:
     provider: local
-    model: ollama/qwen2.5:1.5b
+    model: ollama/qwen2.5:7b
     temperature: 0.0
     max_turns: 8
     api_base: http://localhost:11434

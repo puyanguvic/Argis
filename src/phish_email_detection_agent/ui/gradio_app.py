@@ -18,6 +18,169 @@ PROVIDER_MODE_TO_PROFILE = {
     "local": "ollama",
 }
 
+APP_CSS = """
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --text-main: #171a1f;
+  --text-muted: #68707d;
+  --border-soft: rgba(20, 25, 35, 0.1);
+  --accent: #171a1f;
+  --accent-soft: #262b33;
+  --focus: rgba(23, 26, 31, 0.14);
+}
+
+.gradio-container {
+  font-family: "IBM Plex Sans", "Avenir Next", "Segoe UI", sans-serif !important;
+  color: var(--text-main);
+  background: var(--bg);
+}
+
+.app-shell {
+  max-width: 1080px;
+  margin: 0 auto 24px auto;
+  padding: 34px 10px 40px 10px;
+  animation: rise-in 0.34s ease-out;
+}
+
+.hero {
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  padding: 20px 22px;
+  margin: 0 0 16px 0;
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.hero h1 {
+  margin: 0;
+  line-height: 1.06;
+  font-size: clamp(28px, 2.8vw, 36px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.hero p {
+  margin: 8px 0 0 0;
+  color: var(--text-muted);
+  max-width: 68ch;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.panel-card {
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: none;
+  padding: 8px;
+}
+
+.panel-title {
+  margin: 0 0 11px 0;
+  font-weight: 650;
+  font-size: 12px;
+  color: #434b58;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.top-grid,
+.work-grid {
+  gap: 14px !important;
+}
+
+.status-box {
+  border-radius: 8px;
+  border: 1px solid rgba(20, 25, 35, 0.1);
+  background: #fbfcfd;
+  padding: 10px 12px !important;
+}
+
+.status-box p {
+  margin: 0 !important;
+  color: #4d5562;
+  font-size: 12px;
+}
+
+.gradio-container .gr-button.run-btn {
+  border: 1px solid rgba(23, 26, 31, 0.08) !important;
+  color: #fff !important;
+  background: linear-gradient(145deg, var(--accent), var(--accent-soft)) !important;
+  box-shadow: none;
+  transition: transform 0.16s ease, filter 0.2s ease;
+  font-weight: 620 !important;
+}
+
+.gradio-container .gr-button.run-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.gradio-container .gr-button.run-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus);
+}
+
+.gradio-container .gr-form,
+.gradio-container .gr-box,
+.gradio-container .gr-group {
+  border-color: var(--border-soft) !important;
+  background: var(--surface) !important;
+}
+
+.gradio-container textarea,
+.gradio-container input {
+  background: #fcfdfe !important;
+}
+
+.gradio-container textarea:focus,
+.gradio-container input:focus,
+.gradio-container .gr-input:focus-within,
+.gradio-container .gr-textarea:focus-within {
+  border-color: rgba(23, 26, 31, 0.36) !important;
+  box-shadow: 0 0 0 3px var(--focus) !important;
+}
+
+.result-header {
+  margin: 0 0 6px 0;
+  color: #39414d;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 650;
+}
+
+.footnote {
+  margin-top: 6px !important;
+  color: #868d98;
+  font-size: 12px;
+}
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 900px) {
+  .hero {
+    padding: 16px 16px;
+  }
+  .panel-card {
+    border-radius: 9px;
+  }
+}
+"""
+
+HERO_HTML = """
+<section class="hero">
+  <h1>Email Threat Analyzer</h1>
+  <p>
+    Configure model execution, stream detection stages, and review final verdicts in one focused workspace.
+  </p>
+</section>
+"""
+
 
 def _is_local_provider(provider: Any) -> bool:
     return str(provider or "").strip().lower() in {"local", "ollama"}
@@ -244,29 +407,49 @@ def build() -> gr.Blocks:
             if current_model not in choices:
                 current_model = choices[0]
 
-    with gr.Blocks(title="phish-email-detection-agent") as demo:
-        gr.Markdown("# phish-email-detection-agent")
-        gr.Markdown(
-            "Models come from env + `src/phish_email_detection_agent/config/defaults.yaml`. "
-            "OpenAI uses native Agents SDK path; profile `ollama` uses LiteLLM + Ollama."
-        )
-        runtime_hint = gr.Markdown(_format_runtime_hint(runtime))
-        backend_status = gr.Markdown(_format_backend_status(runtime))
-        provider_mode = gr.Dropdown(
-            choices=["api", "local"],
-            value=current_provider_mode,
-            label="Provider",
-        )
-        model = gr.Dropdown(
-            choices=choices,
-            value=current_model,
-            label="Model",
-            allow_custom_value=True,
-        )
-        inp = gr.Textbox(label="Input", lines=8)
-        process = gr.Textbox(label="Detection Process", lines=12)
-        out = gr.Textbox(label="Result", lines=12)
-        btn = gr.Button("Run")
+    with gr.Blocks(
+        title="phish-email-detection-agent",
+        theme=gr.themes.Soft(primary_hue="orange", secondary_hue="teal", neutral_hue="slate"),
+        css=APP_CSS,
+    ) as demo:
+        with gr.Column(elem_classes=["app-shell"]):
+            gr.HTML(HERO_HTML)
+            with gr.Row(elem_classes=["top-grid"]):
+                with gr.Column(scale=4, elem_classes=["panel-card"]):
+                    gr.Markdown("Runtime", elem_classes=["panel-title"])
+                    runtime_hint = gr.Markdown(_format_runtime_hint(runtime), elem_classes=["status-box"])
+                    backend_status = gr.Markdown(_format_backend_status(runtime), elem_classes=["status-box"])
+                with gr.Column(scale=3, elem_classes=["panel-card"]):
+                    gr.Markdown("Execution Controls", elem_classes=["panel-title"])
+                    provider_mode = gr.Dropdown(
+                        choices=["api", "local"],
+                        value=current_provider_mode,
+                        label="Provider",
+                    )
+                    model = gr.Dropdown(
+                        choices=choices,
+                        value=current_model,
+                        label="Model",
+                        allow_custom_value=True,
+                    )
+            with gr.Row(elem_classes=["work-grid"]):
+                with gr.Column(scale=5, elem_classes=["panel-card"]):
+                    gr.Markdown("Input Message", elem_classes=["panel-title"])
+                    inp = gr.Textbox(
+                        label="Email Content",
+                        lines=14,
+                        placeholder="Paste headers + body, suspicious URLs, and other raw email content here...",
+                    )
+                    btn = gr.Button("Analyze Message", variant="primary", elem_classes=["run-btn"])
+                with gr.Column(scale=6, elem_classes=["panel-card"]):
+                    gr.Markdown("Live Analysis", elem_classes=["panel-title"])
+                    process = gr.Textbox(label="Detection Process", lines=10, autoscroll=True)
+                    gr.Markdown("Final Verdict", elem_classes=["result-header"])
+                    out = gr.Textbox(label="Result", lines=6)
+            gr.Markdown(
+                "Config source: `src/phish_email_detection_agent/config/defaults.yaml` plus environment variables.",
+                elem_classes=["footnote"],
+            )
         provider_mode.change(
             _reload_provider_state,
             inputs=[provider_mode],

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from phish_email_detection_agent.agents.pipeline.policy import PipelinePolicy
 from phish_email_detection_agent.orchestrator.pipeline import AgentService
 from phish_email_detection_agent.config.settings import load_config
 
@@ -16,6 +17,13 @@ def create_agent(
     profiles = yaml_cfg.get("profiles")
     profile_map = profiles if isinstance(profiles, dict) else {}
     profile_choices = [str(item) for item in profile_map.keys() if str(item).strip()]
+    pipeline_policy = PipelinePolicy(
+        pre_score_review_threshold=env_cfg.pre_score_review_threshold,
+        pre_score_deep_threshold=env_cfg.pre_score_deep_threshold,
+        context_trigger_score=env_cfg.context_trigger_score,
+        suspicious_min_score=env_cfg.suspicious_min_score,
+        suspicious_max_score=env_cfg.suspicious_max_score,
+    ).normalized()
     agent = AgentService(
         provider=env_cfg.provider,
         model=active_model,
@@ -60,11 +68,7 @@ def create_agent(
         precheck_url_domain_context_cap=env_cfg.precheck_url_domain_context_cap,
         precheck_domain_token_cap=env_cfg.precheck_domain_token_cap,
         precheck_domain_synthetic_bonus=env_cfg.precheck_domain_synthetic_bonus,
-        pre_score_review_threshold=env_cfg.pre_score_review_threshold,
-        pre_score_deep_threshold=env_cfg.pre_score_deep_threshold,
-        context_trigger_score=env_cfg.context_trigger_score,
-        suspicious_min_score=env_cfg.suspicious_min_score,
-        suspicious_max_score=env_cfg.suspicious_max_score,
+        pipeline_policy=pipeline_policy,
     )
     runtime = {
         "profile": env_cfg.profile,

@@ -18,12 +18,16 @@
 
 ## Multi-agent flow
 
-1. Router Agent picks depth path (`FAST | STANDARD | DEEP`).
-2. Preprocessing extracts text/html URLs, hidden links, attachment metadata and hashes.
-3. Deterministic precheck runs URL/domain/attachment analyzers and fusion scoring.
-4. Investigator Agent performs deeper URL/attachment/content analysis when needed.
-5. Summarizer Agent emits final verdict, risk score, indicators and actions.
-6. If remote model is unavailable, deterministic fusion output is returned.
+Current implementation follows a modular execution pipeline:
+
+1. `planner`: produce execution plan from pre-score route and runtime capability.
+2. `executor`: orchestrate end-to-end stage execution and event streaming.
+3. `evidence_builder`: build deterministic `EvidencePack` from headers/URLs/web/attachments/NLP cues.
+4. `judge`: run model judge on redacted evidence and merge with deterministic risk policy.
+5. `router`: normalize route/path and calibrate final verdict + score + confidence.
+
+The concrete modules live under `src/phish_email_detection_agent/agents/pipeline/`.
+Shared stage thresholds are centralized in `agents/pipeline/policy.py` (`PipelinePolicy`).
 
 ## Security defaults
 

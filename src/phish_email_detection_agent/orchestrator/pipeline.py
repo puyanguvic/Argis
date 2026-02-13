@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Generator
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import importlib.util
-import json
 import mimetypes
 import os
 from pathlib import Path
@@ -17,11 +16,20 @@ from urllib.parse import urlparse
 from phish_email_detection_agent.agents.contracts import (
     EmailInput,
     EvidencePack,
-    JudgeOutput,
     TriageResult,
 )
-from phish_email_detection_agent.agents.prompts import JUDGE_PROMPT
-from phish_email_detection_agent.evidence.redact import redact_value
+from phish_email_detection_agent.agents.pipeline.evidence_builder import EvidenceBuilder
+from phish_email_detection_agent.agents.pipeline.executor import PipelineExecutor
+from phish_email_detection_agent.agents.pipeline.judge import JudgeEngine
+from phish_email_detection_agent.agents.pipeline.policy import PipelinePolicy
+from phish_email_detection_agent.agents.pipeline.planner import Planner
+from phish_email_detection_agent.agents.pipeline.router import (
+    compute_confidence as _router_compute_confidence,
+    map_route_to_path as _router_map_route_to_path,
+    merge_judge_verdict as _router_merge_judge_verdict,
+    normalize_score_for_verdict as _router_normalize_score_for_verdict,
+    verdict_from_score as _router_verdict_from_score,
+)
 from phish_email_detection_agent.orchestrator.tracing import TraceEvent, make_event
 from phish_email_detection_agent.providers.llm_openai import ProviderConfig, build_model_reference
 from phish_email_detection_agent.tools.attachment.analyze import (
@@ -84,9 +92,15 @@ _URGENCY_PATTERNS = (
 )
 _THREAT_PATTERNS = (
     re.compile(r"\baccount (?:locked|suspended|disabled)\b"),
+    re.compile(r"\baccount (?:termination|terminated|closure|closed)\b"),
+    re.compile(r"\baccount (?:has been )?[li]imited\b"),
+    re.compile(r"\bemail account (?:has been )?limited\b"),
+    re.compile(r"\b[li]imited access\b"),
+    re.compile(r"\b(?:will be )?(?:shut ?down|disabled|terminated)\b"),
     re.compile(r"\bsecurity alert\b"),
     re.compile(r"\bunauthorized\b"),
     re.compile(r"\bcompromised\b"),
+    re.compile(r"\bviolation detected\b"),
 )
 _PAYMENT_PATTERNS = (
     re.compile(r"\bpayment\b"),
@@ -98,8 +112,65 @@ _CREDENTIAL_PATTERNS = (
     re.compile(r"\blog(?:-| )?in\b"),
     re.compile(r"\bpassword\b"),
     re.compile(r"\bverify (?:your )?(?:account|identity|credentials)\b"),
+    re.compile(r"\b(?:account|email|mailbox) verification\b"),
+    re.compile(r"\b(?:confirm|comfirm) (?:your )?(?:account|identity|information|credentials)\b"),
+    re.compile(r"\b(?:activate|reactivate|upgrade) (?:your )?(?:account|mailbox)\b"),
     re.compile(r"\bmfa\b"),
 )
+_ACTION_PATTERNS = (
+    re.compile(r"\bclick\b"),
+    re.compile(r"\bvisit\b"),
+    re.compile(r"\bopen\b"),
+    re.compile(r"\b(?:confirm|comfirm|verify|activate|reactivate|upgrade)\b"),
+    re.compile(r"\bplease contact (?:your )?(?:helpdesk|it support)\b"),
+)
+_ACCOUNT_TAKEOVER_PATTERNS = (
+    re.compile(r"\baccount (?:has been )?(?:limited|locked|suspended|disabled|terminated)\b"),
+    re.compile(r"\b(?:verify|confirm|comfirm|update|activate|reactivate|upgrade) (?:your )?(?:account|email|mailbox|identity|information|credentials)\b"),
+    re.compile(r"\b(?:account|email|mailbox) (?:verification|activation|upgrade)\b"),
+    re.compile(r"\b(?:email )?account (?:will be )?(?:shut ?down|closed|terminated|limited)\b"),
+)
+_PHISHING_TEXT_HINTS = (
+    "verify your account",
+    "account verification",
+    "confirm your account",
+    "comfirm your account",
+    "account information",
+    "account has been limited",
+    "action required",
+    "suspicious activity",
+    "limited access",
+    "iimited access",
+    "account termination",
+    "termination notice",
+    "security alert",
+    "violation detected",
+    "email account has been limited",
+    "pending message",
+    "important upgrade",
+    "activate your account",
+    "account activation",
+    "helpdesk",
+    "docusign account",
+)
+_SUBJECT_ACTION_HINTS = (
+    "verify",
+    "verification",
+    "confirm",
+    "comfirm",
+    "activate",
+    "activation",
+    "upgrade",
+    "limited",
+    "iimited",
+    "suspend",
+    "termination",
+    "shut down",
+    "security",
+    "violation",
+)
+_SUBJECT_ACCOUNT_HINTS = ("account", "email", "mailbox")
+_SUBJECT_BRAND_HINTS = ("microsoft", "paypal", "docusign", "usaa", "bank", "dhl", "helpdesk")
 _IMPERSONATION_HINTS = (
     ("it support", "IT support"),
     ("helpdesk", "IT support"),
@@ -115,6 +186,10 @@ def _count_pattern_hits(text: str, patterns: tuple[re.Pattern[str], ...]) -> int
     return sum(1 for pattern in patterns if pattern.search(text))
 
 
+def _count_keyword_hits(text: str, hints: tuple[str, ...]) -> int:
+    return sum(1 for hint in hints if hint in text)
+
+
 def _clip_score(value: int) -> int:
     return max(0, min(100, int(value)))
 
@@ -124,19 +199,15 @@ def _risk_to_confidence(risk: int, bonus: float = 0.0) -> float:
 
 
 def _legacy_path(route: str) -> str:
-    return {
-        "allow": "FAST",
-        "review": "STANDARD",
-        "deep": "DEEP",
-    }.get(route, "STANDARD")
+    return _router_map_route_to_path(route)
 
 
 def _verdict_from_score(score: int, *, suspicious_min_score: int, suspicious_max_score: int) -> str:
-    if score >= 35:
-        return "phishing"
-    if score >= suspicious_min_score and score <= suspicious_max_score:
-        return "suspicious"
-    return "benign"
+    return _router_verdict_from_score(
+        score,
+        suspicious_min_score=suspicious_min_score,
+        suspicious_max_score=suspicious_max_score,
+    )
 
 
 def _normalize_score_for_verdict(
@@ -146,12 +217,12 @@ def _normalize_score_for_verdict(
     suspicious_min_score: int,
     suspicious_max_score: int,
 ) -> int:
-    clean_verdict = str(verdict or "").strip().lower()
-    if clean_verdict == "phishing":
-        return max(35, score)
-    if clean_verdict == "suspicious":
-        return max(suspicious_min_score, min(suspicious_max_score, score))
-    return min(max(0, suspicious_min_score - 1), score)
+    return _router_normalize_score_for_verdict(
+        score,
+        verdict,
+        suspicious_min_score=suspicious_min_score,
+        suspicious_max_score=suspicious_max_score,
+    )
 
 
 def _merge_judge_verdict(
@@ -162,47 +233,22 @@ def _merge_judge_verdict(
     suspicious_min_score: int,
     suspicious_max_score: int,
 ) -> str:
-    base = _verdict_from_score(
-        deterministic_score,
+    return _router_merge_judge_verdict(
+        deterministic_score=deterministic_score,
+        judge_verdict=judge_verdict,
+        judge_confidence=judge_confidence,
         suspicious_min_score=suspicious_min_score,
         suspicious_max_score=suspicious_max_score,
     )
-    clean_judge = str(judge_verdict or "").strip().lower()
-    if clean_judge not in {"benign", "suspicious", "phishing"}:
-        clean_judge = base
-
-    # Keep high-score cases out of the gray zone by default.
-    if deterministic_score >= 35:
-        return "phishing"
-    if deterministic_score < suspicious_min_score and clean_judge == "phishing":
-        if judge_confidence >= 0.8:
-            return "suspicious"
-        return "benign"
-    if deterministic_score < suspicious_min_score:
-        return "benign"
-
-    if deterministic_score > suspicious_max_score:
-        return "phishing"
-
-    if clean_judge == "suspicious":
-        return "suspicious"
-    if clean_judge == "phishing" and judge_confidence >= 0.65:
-        return "phishing"
-    if clean_judge == "benign" and judge_confidence >= 0.65:
-        return "benign"
-    return clean_judge
 
 
 def _compute_confidence(*, score: int, verdict: str, judge_confidence: float, missing_count: int) -> float:
-    confidence = float(judge_confidence) if judge_confidence > 0 else _risk_to_confidence(score)
-    if missing_count > 0:
-        confidence -= min(0.2, missing_count * 0.05)
-    clean_verdict = str(verdict or "").strip().lower()
-    if clean_verdict == "suspicious":
-        confidence = min(confidence, 0.78)
-    if clean_verdict == "benign" and score >= 20:
-        confidence = min(confidence, 0.62)
-    return max(0.0, min(1.0, round(confidence, 2)))
+    return _router_compute_confidence(
+        score=score,
+        verdict=verdict,
+        judge_confidence=judge_confidence,
+        missing_count=missing_count,
+    )
 
 
 def _safe_fetch_policy(service: "AgentService") -> SafeFetchPolicy:
@@ -364,11 +410,29 @@ def _infer_url_signals(
 def _build_nlp_cues(email: EmailInput) -> dict[str, Any]:
     raw = "\n".join([email.subject, email.text, email.body_text]).strip()
     lowered = raw.lower()
+    subject_lower = str(email.subject or "").strip().lower()
 
     urgency_hits = _count_pattern_hits(lowered, _URGENCY_PATTERNS)
     threat_hits = _count_pattern_hits(lowered, _THREAT_PATTERNS)
     payment_hits = _count_pattern_hits(lowered, _PAYMENT_PATTERNS)
     credential_hits = _count_pattern_hits(lowered, _CREDENTIAL_PATTERNS)
+    action_hits = _count_pattern_hits(lowered, _ACTION_PATTERNS)
+    takeover_hits = _count_pattern_hits(lowered, _ACCOUNT_TAKEOVER_PATTERNS)
+    keyword_hits = _count_keyword_hits(lowered, _PHISHING_TEXT_HINTS)
+    subject_has_account = any(item in subject_lower for item in _SUBJECT_ACCOUNT_HINTS)
+    subject_has_action = any(item in subject_lower for item in _SUBJECT_ACTION_HINTS)
+    subject_has_brand = any(item in subject_lower for item in _SUBJECT_BRAND_HINTS)
+    subject_risk_points = 0
+    if subject_has_account and subject_has_action:
+        subject_risk_points += 2
+    if "action required" in subject_lower:
+        subject_risk_points += 1
+    if subject_has_brand and subject_has_action:
+        subject_risk_points += 1
+    if "pending" in subject_lower and "message" in subject_lower:
+        subject_risk_points += 1
+    if subject_lower.count("!") >= 2:
+        subject_risk_points += 1
 
     impersonation: list[str] = []
     for needle, label in _IMPERSONATION_HINTS:
@@ -390,6 +454,10 @@ def _build_nlp_cues(email: EmailInput) -> dict[str, Any]:
         "threat_language": min(1.0, threat_hits / 3.0),
         "payment_or_giftcard": min(1.0, payment_hits / 3.0),
         "credential_request": min(1.0, credential_hits / 3.0),
+        "action_request": min(1.0, action_hits / 3.0),
+        "account_takeover_intent": min(1.0, takeover_hits / 3.0),
+        "subject_risk": min(1.0, subject_risk_points / 3.0),
+        "phishing_keyword_hits": max(0, keyword_hits),
         "impersonation": list(dict.fromkeys(impersonation)),
         "highlights": highlights,
     }
@@ -629,16 +697,43 @@ def _compute_pre_score(
             reasons.append("attachment:extension_mismatch")
     score += min(35, att_score)
 
+    urgency_score = float(nlp_cues.get("urgency", 0.0))
+    threat_score = float(nlp_cues.get("threat_language", 0.0))
+    payment_score = float(nlp_cues.get("payment_or_giftcard", 0.0))
+    credential_score = float(nlp_cues.get("credential_request", 0.0))
+    action_score = float(nlp_cues.get("action_request", 0.0))
+    takeover_score = float(nlp_cues.get("account_takeover_intent", 0.0))
+    subject_score = float(nlp_cues.get("subject_risk", 0.0))
+    keyword_hits = max(0, int(nlp_cues.get("phishing_keyword_hits", 0)))
+
     nlp_score = int(
-        float(nlp_cues.get("urgency", 0.0)) * 14
-        + float(nlp_cues.get("threat_language", 0.0)) * 14
-        + float(nlp_cues.get("payment_or_giftcard", 0.0)) * 10
-        + float(nlp_cues.get("credential_request", 0.0)) * 14
+        urgency_score * 14
+        + threat_score * 16
+        + payment_score * 9
+        + credential_score * 18
+        + action_score * 10
+        + takeover_score * 20
+        + subject_score * 18
     )
+    if keyword_hits > 0:
+        nlp_score += min(24, keyword_hits * 4)
+        reasons.append("text:phishing_keyword_cluster")
+    if credential_score > 0 and (threat_score > 0 or urgency_score > 0):
+        nlp_score += 10
+        reasons.append("text:credential_pressure")
+    if takeover_score > 0 and (credential_score > 0 or action_score > 0):
+        nlp_score += 8
+        reasons.append("text:account_takeover_pattern")
+    if nlp_cues.get("impersonation") and (credential_score > 0 or takeover_score > 0):
+        nlp_score += 6
+        reasons.append("text:impersonation_pressure")
+    if subject_score > 0 and (credential_score > 0 or takeover_score > 0 or keyword_hits >= 2):
+        nlp_score += 8
+        reasons.append("text:subject_attack_pattern")
     if contains_phishing_keywords(" ".join(nlp_cues.get("highlights", []))):
         nlp_score += 8
         reasons.append("text:phishing_keywords")
-    score += min(30, nlp_score)
+    score += min(55, nlp_score)
 
     final_score = _clip_score(score)
     if final_score <= review_threshold:
@@ -726,8 +821,8 @@ def _build_evidence_pack(email: EmailInput, service: "AgentService") -> tuple[Ev
         web_signals=[],
         attachment_signals=attachment_signals,
         nlp_cues=nlp_cues,
-        review_threshold=service.pre_score_review_threshold,
-        deep_threshold=service.pre_score_deep_threshold,
+        review_threshold=service.pipeline_policy.pre_score_review_threshold,
+        deep_threshold=service.pipeline_policy.pre_score_deep_threshold,
         url_suspicious_weight=service.precheck_url_suspicious_weight,
     )
 
@@ -735,7 +830,7 @@ def _build_evidence_pack(email: EmailInput, service: "AgentService") -> tuple[Ev
         pre_score,
         url_signals,
         attachment_signals,
-        service.context_trigger_score,
+        service.pipeline_policy.context_trigger_score,
     )
 
     web_signals: list[dict[str, Any]] = []
@@ -781,8 +876,8 @@ def _build_evidence_pack(email: EmailInput, service: "AgentService") -> tuple[Ev
             web_signals=web_signals,
             attachment_signals=attachment_signals,
             nlp_cues=nlp_cues,
-            review_threshold=service.pre_score_review_threshold,
-            deep_threshold=service.pre_score_deep_threshold,
+            review_threshold=service.pipeline_policy.pre_score_review_threshold,
+            deep_threshold=service.pipeline_policy.pre_score_deep_threshold,
             url_suspicious_weight=service.precheck_url_suspicious_weight,
         )
 
@@ -925,21 +1020,22 @@ def _fallback_result(
     evidence_pack: EvidencePack,
     precheck: dict[str, Any],
     *,
-    suspicious_min_score: int,
-    suspicious_max_score: int,
+    pipeline_policy: PipelinePolicy,
 ) -> TriageResult:
+    policy = pipeline_policy.normalized()
     score = int(evidence_pack.pre_score.risk_score)
     verdict = _verdict_from_score(
         score,
-        suspicious_min_score=suspicious_min_score,
-        suspicious_max_score=suspicious_max_score,
+        suspicious_min_score=policy.suspicious_min_score,
+        suspicious_max_score=policy.suspicious_max_score,
     )
+    if verdict == "suspicious":
+        verdict = "phishing"
+        score = max(35, score)
     route = str(evidence_pack.pre_score.route)
 
     if verdict == "phishing":
         reason = "Evidence pack indicates coordinated phishing signals."
-    elif verdict == "suspicious":
-        reason = "Some suspicious cues were found, but evidence remains limited."
     else:
         reason = "No strong phishing evidence detected in the current evidence pack."
 
@@ -949,7 +1045,7 @@ def _fallback_result(
     ]
     if route in {"review", "deep"}:
         actions.append("Escalate to analyst review before user interaction")
-    if verdict in {"suspicious", "phishing"}:
+    if verdict == "phishing":
         actions.append("Escalate to analyst review before user interaction")
     if verdict == "phishing":
         actions.append("Quarantine the message and block related indicators")
@@ -1025,11 +1121,8 @@ class AgentService:
     precheck_url_domain_context_cap: int = 20
     precheck_domain_token_cap: int = 30
     precheck_domain_synthetic_bonus: int = 18
-    pre_score_review_threshold: int = 30
-    pre_score_deep_threshold: int = 70
-    context_trigger_score: int = 35
-    suspicious_min_score: int = 30
-    suspicious_max_score: int = 34
+    pipeline_policy: PipelinePolicy = field(default_factory=PipelinePolicy)
+    _executor: PipelineExecutor | None = field(default=None, init=False, repr=False)
 
     def _can_call_remote(self) -> bool:
         if importlib.util.find_spec("agents") is None:
@@ -1060,190 +1153,20 @@ class AgentService:
     def _event(self, stage: str, status: str, message: str, data: dict[str, Any] | None = None) -> TraceEvent:
         return make_event(stage=stage, status=status, message=message, data=data)
 
+    def _get_executor(self) -> PipelineExecutor:
+        if self._executor is None:
+            self.pipeline_policy = self.pipeline_policy.normalized()
+            self._executor = PipelineExecutor(
+                parse_input=parse_input_payload,
+                evidence_builder=EvidenceBuilder(_build_evidence_pack),
+                planner=Planner(),
+                judge=JudgeEngine(),
+                fallback_builder=_fallback_result,
+            )
+        return self._executor
+
     def analyze_stream(self, text: str) -> Generator[TraceEvent, None, None]:
-        email = parse_input_payload(text)
-        evidence_pack, precheck = _build_evidence_pack(email, self)
-        fallback = _fallback_result(
-            email,
-            self.provider,
-            evidence_pack,
-            precheck,
-            suspicious_min_score=self.suspicious_min_score,
-            suspicious_max_score=self.suspicious_max_score,
-        )
-
-        if not email.text and not email.urls and not email.attachments:
-            final = fallback.model_dump(mode="json")
-            final["precheck"] = precheck
-            yield self._event("init", "done", "Input empty; return fallback result.")
-            yield {"type": "final", "result": final}
-            return
-
-        yield self._event(
-            "init",
-            "done",
-            "Input parsed.",
-            data={
-                "text_len": len(email.text),
-                "url_count": len(precheck.get("combined_urls", [])),
-                "attachment_count": len(email.attachments),
-                "chain_flags": precheck.get("chain_flags", []),
-            },
-        )
-
-        yield self._event(
-            "header_intel",
-            "done",
-            "Header analysis completed.",
-            data={
-                "from_replyto_mismatch": evidence_pack.header_signals.from_replyto_mismatch,
-                "received_hops": evidence_pack.header_signals.received_hops,
-                "confidence": evidence_pack.header_signals.confidence,
-            },
-        )
-        yield self._event(
-            "url_intel",
-            "done",
-            "URL analysis completed.",
-            data={
-                "url_count": len(evidence_pack.url_signals),
-                "suspicious_url_count": len(precheck.get("suspicious_urls", [])),
-            },
-        )
-        yield self._event(
-            "pre_score",
-            "done",
-            "Deterministic pre-score ready.",
-            data=evidence_pack.pre_score.model_dump(mode="json"),
-        )
-
-        if evidence_pack.web_signals or precheck.get("attachment_reports"):
-            yield self._event(
-                "deep_context",
-                "done",
-                "Conditional web/attachment context collected.",
-                data={
-                    "web_signals": len(evidence_pack.web_signals),
-                    "attachment_reports": len(precheck.get("attachment_reports", [])),
-                },
-            )
-
-        if not self._can_call_remote():
-            final = fallback.model_dump(mode="json")
-            final["precheck"] = precheck
-            yield self._event("runtime", "fallback", "Remote model unavailable; using deterministic fallback.")
-            yield {"type": "final", "result": final}
-            return
-
-        try:
-            from agents import Agent, AgentOutputSchema, Runner
-
-            common = self._build_common_kwargs()
-            judge_agent = Agent(
-                name="argis-evidence-judge-agent",
-                instructions=JUDGE_PROMPT,
-                output_type=AgentOutputSchema(JudgeOutput, strict_json_schema=False),
-                **common,
-            )
-
-            redacted_pack = redact_value(evidence_pack.model_dump(mode="json"))
-            yield self._event("judge", "running", "Judge agent is evaluating the evidence pack.")
-            judge_run = Runner.run_sync(
-                judge_agent,
-                json.dumps({"evidence_pack": redacted_pack}, ensure_ascii=True),
-                max_turns=self.max_turns,
-            )
-            judge_output = JudgeOutput.model_validate(getattr(judge_run, "final_output", {}))
-            yield self._event(
-                "judge",
-                "done",
-                "Judge completed.",
-                data={
-                    "verdict": judge_output.verdict,
-                    "risk_score": judge_output.risk_score,
-                    "confidence": judge_output.confidence,
-                    "top_evidence": len(judge_output.top_evidence),
-                },
-            )
-
-            deterministic_score = int(evidence_pack.pre_score.risk_score)
-            judge_score = _clip_score(int(judge_output.risk_score))
-            merged_score = max(deterministic_score, judge_score)
-            merged_verdict = _merge_judge_verdict(
-                deterministic_score=deterministic_score,
-                judge_verdict=judge_output.verdict,
-                judge_confidence=float(judge_output.confidence),
-                suspicious_min_score=self.suspicious_min_score,
-                suspicious_max_score=self.suspicious_max_score,
-            )
-            merged_score = _normalize_score_for_verdict(
-                merged_score,
-                merged_verdict,
-                suspicious_min_score=self.suspicious_min_score,
-                suspicious_max_score=self.suspicious_max_score,
-            )
-            merged_confidence = _compute_confidence(
-                score=merged_score,
-                verdict=merged_verdict,
-                judge_confidence=float(judge_output.confidence),
-                missing_count=len(judge_output.missing_info),
-            )
-            merged_actions = list(
-                dict.fromkeys(
-                    fallback.recommended_actions + list(judge_output.recommended_actions)
-                )
-            )
-            merged_indicators = list(
-                dict.fromkeys(
-                    list(precheck.get("indicators", []))
-                    + [item.claim for item in judge_output.top_evidence]
-                )
-            )
-
-            final = TriageResult(
-                verdict=merged_verdict,
-                reason=judge_output.reason.strip() or fallback.reason,
-                path=_legacy_path(evidence_pack.pre_score.route),
-                risk_score=merged_score,
-                confidence=merged_confidence,
-                indicators=merged_indicators,
-                recommended_actions=merged_actions,
-                input=email.text,
-                urls=list(precheck.get("combined_urls", [])),
-                attachments=email.attachments,
-                provider_used=self.provider,
-                evidence={
-                    "evidence_pack": evidence_pack.model_dump(mode="json"),
-                    "judge": judge_output.model_dump(mode="json"),
-                    "precheck": precheck,
-                },
-            ).model_dump(mode="json")
-            final["precheck"] = precheck
-
-            yield self._event("judge", "done", "Final verdict ready.")
-            yield {"type": "final", "result": final}
-        except Exception as exc:
-            final = fallback.model_dump(mode="json")
-            final["precheck"] = precheck
-            yield self._event("runtime", "error", f"Judge failed: {type(exc).__name__}. Use fallback.")
-            yield {"type": "final", "result": final}
+        yield from self._get_executor().analyze_stream(service=self, text=text)
 
     def analyze(self, text: str) -> dict[str, object]:
-        final: dict[str, Any] | None = None
-        for event in self.analyze_stream(text):
-            if event.get("type") == "final":
-                result = event.get("result")
-                if isinstance(result, dict):
-                    final = result
-        if final:
-            return final
-        email = parse_input_payload(text)
-        evidence_pack, precheck = _build_evidence_pack(email, self)
-        return _fallback_result(
-            email,
-            self.provider,
-            evidence_pack,
-            precheck,
-            suspicious_min_score=self.suspicious_min_score,
-            suspicious_max_score=self.suspicious_max_score,
-        ).model_dump(mode="json")
+        return self._get_executor().analyze(service=self, text=text)

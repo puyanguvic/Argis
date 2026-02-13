@@ -59,6 +59,72 @@ def _looks_like_eml(raw: str) -> bool:
     return "subject:" in headers and ("from:" in headers or "to:" in headers)
 
 
+_PLAINTEXT_HEADER_KEYS = {
+    "subject",
+    "from",
+    "to",
+    "cc",
+    "reply-to",
+    "return-path",
+    "date",
+    "message-id",
+}
+
+
+def _parse_plaintext_header_email(raw: str) -> EmailInput | None:
+    lines = raw.replace("\r\n", "\n").split("\n")
+    cursor = 0
+    while cursor < len(lines) and not lines[cursor].strip():
+        cursor += 1
+    if cursor >= len(lines):
+        return None
+
+    first = lines[cursor]
+    if ":" not in first:
+        return None
+    first_key = first.split(":", maxsplit=1)[0].strip().lower()
+    if first_key not in _PLAINTEXT_HEADER_KEYS:
+        return None
+
+    headers: dict[str, str] = {}
+    while cursor < len(lines):
+        line = lines[cursor]
+        if not line.strip():
+            cursor += 1
+            break
+        if ":" not in line:
+            break
+        key, value = line.split(":", maxsplit=1)
+        clean_key = key.strip().lower()
+        if clean_key not in _PLAINTEXT_HEADER_KEYS:
+            break
+        headers[clean_key] = value.strip()
+        cursor += 1
+
+    if "subject" not in headers:
+        return None
+
+    body_text = "\n".join(lines[cursor:]).strip()
+    clean_text = raw.strip()
+    urls = extract_urls("\n".join(item for item in [clean_text, body_text] if item))
+
+    return EmailInput(
+        message_id=str(headers.get("message-id", "")).strip(),
+        date=str(headers.get("date", "")).strip(),
+        sender=str(headers.get("from", "")).strip(),
+        reply_to=str(headers.get("reply-to", "")).strip(),
+        return_path=str(headers.get("return-path", "")).strip(),
+        to=_parse_address_list(str(headers.get("to", "")).strip()),
+        cc=_parse_address_list(str(headers.get("cc", "")).strip()),
+        subject=str(headers.get("subject", "")).strip(),
+        body_text=body_text,
+        text=clean_text,
+        headers=headers,
+        headers_raw="\n".join(f"{key}: {value}" for key, value in headers.items()),
+        urls=list(dict.fromkeys(urls)),
+    )
+
+
 def _coerce_attachment_names(raw: Any) -> list[str]:
     if isinstance(raw, list):
         values: list[str] = []
@@ -277,6 +343,10 @@ def parse_input_payload(raw: str) -> EmailInput:
 
     if _looks_like_eml(raw):
         return parse_eml_content(raw)
+
+    parsed_plain = _parse_plaintext_header_email(original)
+    if parsed_plain is not None:
+        return parsed_plain
 
     clean = normalize_text(original)
     return EmailInput(text=clean, urls=extract_urls(clean))

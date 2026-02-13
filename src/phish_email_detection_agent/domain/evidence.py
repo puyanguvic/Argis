@@ -103,6 +103,10 @@ class NlpCues(BaseModel):
     threat_language: float = Field(default=0.0, ge=0.0, le=1.0)
     payment_or_giftcard: float = Field(default=0.0, ge=0.0, le=1.0)
     credential_request: float = Field(default=0.0, ge=0.0, le=1.0)
+    action_request: float = Field(default=0.0, ge=0.0, le=1.0)
+    account_takeover_intent: float = Field(default=0.0, ge=0.0, le=1.0)
+    subject_risk: float = Field(default=0.0, ge=0.0, le=1.0)
+    phishing_keyword_hits: int = Field(default=0, ge=0)
     impersonation: list[str] = Field(default_factory=list)
     highlights: list[str] = Field(default_factory=list)
 

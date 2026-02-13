@@ -39,3 +39,31 @@ def test_parse_json_payload_merges_fields():
     assert "https://bit.ly/reset" in parsed.urls
     assert "https://safe.example.com" in parsed.urls
     assert "report.zip" in parsed.attachments
+
+
+def test_parse_plaintext_subject_block_extracts_header_and_body():
+    raw = """Subject: Microsoft Account Verification!!!
+From: security@example.com
+To: user@example.com
+
+Please contact your helpdesk now.
+Your account will be shut down unless you confirm your account information.
+"""
+    parsed = parse_input_payload(raw)
+    assert parsed.subject == "Microsoft Account Verification!!!"
+    assert parsed.sender == "security@example.com"
+    assert parsed.to == ["user@example.com"]
+    assert "helpdesk" in parsed.body_text.lower()
+    assert "helpdesk" in parsed.text.lower()
+
+
+def test_parse_subject_and_body_without_rfc_headers():
+    raw = """Subject: VERIFY YOUR ACCOUNT
+
+Your Email account has been Limited.
+Confirm immediately to avoid suspension.
+"""
+    parsed = parse_input_payload(raw)
+    assert parsed.subject == "VERIFY YOUR ACCOUNT"
+    assert "limited" in parsed.body_text.lower()
+    assert "verify your account" in parsed.text.lower()

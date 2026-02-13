@@ -52,3 +52,25 @@ def test_score_is_aligned_with_benign_and_suspicious_ranges():
     )
     assert benign_score <= 23
     assert 24 <= suspicious_score <= 34
+
+
+def test_low_score_can_promote_to_phishing_with_high_judge_confidence():
+    verdict = _merge_judge_verdict(
+        deterministic_score=18,
+        judge_verdict="phishing",
+        judge_confidence=0.9,
+        suspicious_min_score=24,
+        suspicious_max_score=34,
+    )
+    assert verdict == "phishing"
+
+
+def test_low_score_can_promote_to_suspicious_with_mid_judge_confidence():
+    verdict = _merge_judge_verdict(
+        deterministic_score=18,
+        judge_verdict="phishing",
+        judge_confidence=0.7,
+        suspicious_min_score=24,
+        suspicious_max_score=34,
+    )
+    assert verdict == "suspicious"

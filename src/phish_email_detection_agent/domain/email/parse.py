@@ -5,6 +5,7 @@ from __future__ import annotations
 from email import policy
 from email.message import Message
 from email.parser import BytesParser
+from email.utils import getaddresses
 from html.parser import HTMLParser
 import hashlib
 import json
@@ -86,6 +87,16 @@ def _decode_part(part: Message) -> str:
     return ""
 
 
+def _parse_address_list(raw_value: str) -> list[str]:
+    pairs = getaddresses([raw_value or ""])
+    values: list[str] = []
+    for _, addr in pairs:
+        clean = normalize_text(addr)
+        if clean:
+            values.append(clean)
+    return list(dict.fromkeys(values))
+
+
 def _extract_body_parts(message: Message) -> tuple[str, str]:
     body_text: list[str] = []
     body_html: list[str] = []
@@ -140,8 +151,15 @@ def extract_urls_from_html(html: str) -> dict[str, list[str]]:
 def parse_eml_content(raw_eml: str) -> EmailInput:
     message = BytesParser(policy=policy.default).parsebytes(raw_eml.encode("utf-8", errors="ignore"))
     headers = {key.lower(): str(value) for key, value in message.items()}
+    headers_raw = "\n".join(f"{key}: {value}" for key, value in message.items())
     subject = str(message.get("Subject") or "")
     sender = str(message.get("From") or "")
+    to = _parse_address_list(str(message.get("To") or ""))
+    cc = _parse_address_list(str(message.get("Cc") or ""))
+    reply_to = str(message.get("Reply-To") or "")
+    return_path = str(message.get("Return-Path") or "")
+    message_id = str(message.get("Message-ID") or "")
+    sent_date = str(message.get("Date") or "")
     body_text, body_html = _extract_body_parts(message)
     html_urls = extract_urls_from_html(body_html)
     text_urls = extract_urls(body_text)
@@ -161,11 +179,18 @@ def parse_eml_content(raw_eml: str) -> EmailInput:
             attachment_hashes[clean_name] = _hash_payload(payload)
 
     return EmailInput(
+        message_id=message_id,
+        date=sent_date,
         subject=subject,
         body_text=body_text,
         body_html=body_html,
         sender=sender,
+        reply_to=reply_to,
+        return_path=return_path,
+        to=to,
+        cc=cc,
         headers=headers,
+        headers_raw=headers_raw,
         urls=list(dict.fromkeys(text_urls + html_urls["urls"])),
         attachments=list(dict.fromkeys(attachments)),
         attachment_hashes=attachment_hashes,
@@ -198,11 +223,18 @@ def parse_input_payload(raw: str) -> EmailInput:
                 base.headers.update(
                     {str(key).lower(): str(value) for key, value in payload.get("headers", {}).items()}
                 )
+                base.headers_raw = "\n".join(f"{key}: {value}" for key, value in base.headers.items())
 
             urls = payload.get("urls")
             attachments = payload.get("attachments")
             subject = payload.get("subject")
             sender = payload.get("sender")
+            reply_to = payload.get("reply_to")
+            return_path = payload.get("return_path")
+            message_id = payload.get("message_id")
+            sent_date = payload.get("date")
+            to = payload.get("to")
+            cc = payload.get("cc")
             body_html = payload.get("body_html")
             body_text = payload.get("body_text")
             text = payload.get("text")
@@ -210,6 +242,22 @@ def parse_input_payload(raw: str) -> EmailInput:
                 base.subject = subject.strip()
             if isinstance(sender, str) and sender.strip():
                 base.sender = sender.strip()
+            if isinstance(reply_to, str) and reply_to.strip():
+                base.reply_to = reply_to.strip()
+            if isinstance(return_path, str) and return_path.strip():
+                base.return_path = return_path.strip()
+            if isinstance(message_id, str) and message_id.strip():
+                base.message_id = message_id.strip()
+            if isinstance(sent_date, str) and sent_date.strip():
+                base.date = sent_date.strip()
+            if isinstance(to, list):
+                base.to = list(
+                    dict.fromkeys([str(item).strip() for item in to if isinstance(item, str) and item.strip()])
+                )
+            if isinstance(cc, list):
+                base.cc = list(
+                    dict.fromkeys([str(item).strip() for item in cc if isinstance(item, str) and item.strip()])
+                )
             if isinstance(body_html, str) and body_html.strip():
                 base.body_html = body_html
                 html_urls = extract_urls_from_html(body_html)

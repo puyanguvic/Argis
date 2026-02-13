@@ -20,11 +20,12 @@ from urllib.request import HTTPErrorProcessor, Request, build_opener
 @dataclass
 class SafeFetchPolicy:
     enabled: bool = False
-    timeout_s: float = 5.0
-    max_redirects: int = 4
+    timeout_s: float = 8.0
+    connect_timeout_s: float = 3.0
+    max_redirects: int = 3
     max_bytes: int = 1_000_000
     allow_private_network: bool = False
-    user_agent: str = "ArgisSafeFetcher/2.0"
+    user_agent: str = "ArgisSafeFetcher/3.0"
     sandbox_backend: str = "internal"
     sandbox_exec_timeout_s: float = 20.0
     firejail_bin: str = "firejail"
@@ -45,28 +46,49 @@ class _HtmlFeatureParser(HTMLParser):
         super().__init__()
         self.form_count = 0
         self.password_fields = 0
+        self.otp_fields = 0
         self.iframe_count = 0
         self.external_scripts = 0
+        self.external_links = 0
+        self.title = ""
+        self._in_title = False
         self.text_fragments: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         lower = tag.lower()
         attr_map = {k.lower(): (v or "") for k, v in attrs}
+        if lower == "title":
+            self._in_title = True
         if lower == "form":
             self.form_count += 1
         elif lower == "input" and attr_map.get("type", "").lower() == "password":
             self.password_fields += 1
+        elif lower == "input":
+            input_type = attr_map.get("type", "").lower()
+            input_name = attr_map.get("name", "").lower()
+            if "otp" in input_type or "otp" in input_name or "code" in input_name:
+                self.otp_fields += 1
         elif lower == "iframe":
             self.iframe_count += 1
         elif lower == "script":
             src = attr_map.get("src", "").strip().lower()
             if src.startswith(("http://", "https://", "//")):
                 self.external_scripts += 1
+        elif lower == "link":
+            href = attr_map.get("href", "").strip().lower()
+            if href.startswith(("http://", "https://", "//")):
+                self.external_links += 1
 
     def handle_data(self, data: str) -> None:
         clean = " ".join(data.split())
         if clean:
             self.text_fragments.append(clean)
+            if self._in_title and not self.title:
+                self.title = clean[:160]
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag.lower() == "title":
+            self._in_title = False
 
 
 def _repo_root() -> Path:
@@ -410,6 +432,7 @@ def analyze_html_content(html: str) -> dict[str, Any]:
     score = 0
     score += min(20, parser.form_count * 8)
     score += min(20, parser.password_fields * 12)
+    external_resource_count = parser.external_scripts + parser.external_links + parser.iframe_count
     score += min(15, parser.external_scripts * 5)
     score += min(10, parser.iframe_count * 5)
     score += min(20, len(suspicious_keywords) * 6)
@@ -417,9 +440,15 @@ def analyze_html_content(html: str) -> dict[str, Any]:
         score += 15
     return {
         "login_forms": parser.form_count,
+        "form_count": parser.form_count,
         "password_fields": parser.password_fields,
+        "has_password_field": parser.password_fields > 0,
+        "has_otp_field": parser.otp_fields > 0,
+        "otp_fields": parser.otp_fields,
         "external_scripts": parser.external_scripts,
+        "external_resource_count": external_resource_count,
         "iframes": parser.iframe_count,
+        "title": parser.title,
         "suspicious_keywords": suspicious_keywords,
         "brand_hits": brand_hits,
         "impersonation_score": min(100, score),

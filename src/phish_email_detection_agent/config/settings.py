@@ -25,8 +25,8 @@ class AppConfig(BaseModel):
     max_turns: int = Field(default=8)
     enable_deep_analysis: bool = Field(default=False)
     enable_url_fetch: bool = Field(default=False)
-    fetch_timeout_s: float = Field(default=5.0)
-    fetch_max_redirects: int = Field(default=4)
+    fetch_timeout_s: float = Field(default=8.0)
+    fetch_max_redirects: int = Field(default=3)
     fetch_max_bytes: int = Field(default=1_000_000)
     allow_private_network: bool = Field(default=False)
     url_fetch_backend: str = Field(default="internal")
@@ -61,6 +61,11 @@ class AppConfig(BaseModel):
     precheck_url_domain_context_cap: int = Field(default=20)
     precheck_domain_token_cap: int = Field(default=30)
     precheck_domain_synthetic_bonus: int = Field(default=18)
+    pre_score_review_threshold: int = Field(default=30)
+    pre_score_deep_threshold: int = Field(default=70)
+    context_trigger_score: int = Field(default=35)
+    suspicious_min_score: int = Field(default=30)
+    suspicious_max_score: int = Field(default=34)
     default_config_path: str = Field(default=str(DEFAULT_CONFIG_PATH))
 
 
@@ -223,16 +228,16 @@ def load_config(
         "fetch_timeout_s": _parse_float(
             _pick_env(
                 "MY_AGENT_APP_FETCH_TIMEOUT_S",
-                selected.get("fetch_timeout_s", merged.get("fetch_timeout_s", 5.0)),
+                selected.get("fetch_timeout_s", merged.get("fetch_timeout_s", 8.0)),
             ),
-            5.0,
+            8.0,
         ),
         "fetch_max_redirects": _parse_int(
             _pick_env(
                 "MY_AGENT_APP_FETCH_MAX_REDIRECTS",
-                selected.get("fetch_max_redirects", merged.get("fetch_max_redirects", 4)),
+                selected.get("fetch_max_redirects", merged.get("fetch_max_redirects", 3)),
             ),
-            4,
+            3,
         ),
         "fetch_max_bytes": _parse_int(
             _pick_env(
@@ -493,6 +498,41 @@ def load_config(
             ),
             18,
         ),
+        "pre_score_review_threshold": _parse_int(
+            _pick_env(
+                "MY_AGENT_APP_PRE_SCORE_REVIEW_THRESHOLD",
+                selected.get("pre_score_review_threshold", merged.get("pre_score_review_threshold", 30)),
+            ),
+            30,
+        ),
+        "pre_score_deep_threshold": _parse_int(
+            _pick_env(
+                "MY_AGENT_APP_PRE_SCORE_DEEP_THRESHOLD",
+                selected.get("pre_score_deep_threshold", merged.get("pre_score_deep_threshold", 70)),
+            ),
+            70,
+        ),
+        "context_trigger_score": _parse_int(
+            _pick_env(
+                "MY_AGENT_APP_CONTEXT_TRIGGER_SCORE",
+                selected.get("context_trigger_score", merged.get("context_trigger_score", 35)),
+            ),
+            35,
+        ),
+        "suspicious_min_score": _parse_int(
+            _pick_env(
+                "MY_AGENT_APP_SUSPICIOUS_MIN_SCORE",
+                selected.get("suspicious_min_score", merged.get("suspicious_min_score", 30)),
+            ),
+            30,
+        ),
+        "suspicious_max_score": _parse_int(
+            _pick_env(
+                "MY_AGENT_APP_SUSPICIOUS_MAX_SCORE",
+                selected.get("suspicious_max_score", merged.get("suspicious_max_score", 34)),
+            ),
+            34,
+        ),
         "default_config_path": str(default_path),
     }
 
@@ -504,6 +544,9 @@ def load_config(
             payload["enable_ocr"] = True
         if os.getenv("MY_AGENT_APP_ENABLE_AUDIO_TRANSCRIPTION") in (None, ""):
             payload["enable_audio_transcription"] = True
+
+    if int(payload["suspicious_max_score"]) < int(payload["suspicious_min_score"]):
+        payload["suspicious_max_score"] = int(payload["suspicious_min_score"])
 
     cfg = AppConfig.model_validate(payload)
     return cfg, merged

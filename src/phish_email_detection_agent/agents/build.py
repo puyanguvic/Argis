@@ -60,6 +60,11 @@ def create_agent(
         precheck_url_domain_context_cap=env_cfg.precheck_url_domain_context_cap,
         precheck_domain_token_cap=env_cfg.precheck_domain_token_cap,
         precheck_domain_synthetic_bonus=env_cfg.precheck_domain_synthetic_bonus,
+        pre_score_review_threshold=env_cfg.pre_score_review_threshold,
+        pre_score_deep_threshold=env_cfg.pre_score_deep_threshold,
+        context_trigger_score=env_cfg.context_trigger_score,
+        suspicious_min_score=env_cfg.suspicious_min_score,
+        suspicious_max_score=env_cfg.suspicious_max_score,
     )
     runtime = {
         "profile": env_cfg.profile,
@@ -85,6 +90,11 @@ def create_agent(
         "precheck_url_suspicious_weight": env_cfg.precheck_url_suspicious_weight,
         "precheck_domain_token_cap": env_cfg.precheck_domain_token_cap,
         "precheck_domain_synthetic_bonus": env_cfg.precheck_domain_synthetic_bonus,
+        "pre_score_review_threshold": env_cfg.pre_score_review_threshold,
+        "pre_score_deep_threshold": env_cfg.pre_score_deep_threshold,
+        "context_trigger_score": env_cfg.context_trigger_score,
+        "suspicious_min_score": env_cfg.suspicious_min_score,
+        "suspicious_max_score": env_cfg.suspicious_max_score,
         "agents_sdk": True,
         "config": yaml_cfg,
     }

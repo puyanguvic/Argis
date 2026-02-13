@@ -2,8 +2,8 @@ profile: ollama
 max_turns: 8
 enable_deep_analysis: false
 enable_url_fetch: false
-fetch_timeout_s: 5.0
-fetch_max_redirects: 4
+fetch_timeout_s: 8.0
+fetch_max_redirects: 3
 fetch_max_bytes: 1000000
 allow_private_network: false
 url_fetch_backend: internal
@@ -38,6 +38,11 @@ precheck_url_domain_context_divisor: 2
 precheck_url_domain_context_cap: 20
 precheck_domain_token_cap: 30
 precheck_domain_synthetic_bonus: 18
+pre_score_review_threshold: 30
+pre_score_deep_threshold: 70
+context_trigger_score: 35
+suspicious_min_score: 30
+suspicious_max_score: 34
 
 profiles:
   openai:
@@ -54,8 +59,8 @@ profiles:
       - gpt-4o
     enable_deep_analysis: false
     enable_url_fetch: false
-    fetch_timeout_s: 5.0
-    fetch_max_redirects: 4
+    fetch_timeout_s: 8.0
+    fetch_max_redirects: 3
     fetch_max_bytes: 1000000
     allow_private_network: false
     url_fetch_backend: internal
@@ -90,6 +95,11 @@ profiles:
     precheck_url_domain_context_cap: 20
     precheck_domain_token_cap: 30
     precheck_domain_synthetic_bonus: 18
+    pre_score_review_threshold: 30
+    pre_score_deep_threshold: 70
+    context_trigger_score: 35
+    suspicious_min_score: 30
+    suspicious_max_score: 34
 
   ollama:
     provider: local
@@ -108,8 +118,8 @@ profiles:
       - ollama/llama3.1:8b
     enable_deep_analysis: false
     enable_url_fetch: false
-    fetch_timeout_s: 5.0
-    fetch_max_redirects: 4
+    fetch_timeout_s: 8.0
+    fetch_max_redirects: 3
     fetch_max_bytes: 1000000
     allow_private_network: false
     url_fetch_backend: internal
@@ -144,3 +154,8 @@ profiles:
     precheck_url_domain_context_cap: 20
     precheck_domain_token_cap: 30
     precheck_domain_synthetic_bonus: 18
+    pre_score_review_threshold: 30
+    pre_score_deep_threshold: 70
+    context_trigger_score: 35
+    suspicious_min_score: 30
+    suspicious_max_score: 34

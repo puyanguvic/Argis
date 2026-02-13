@@ -497,7 +497,7 @@ class AgentService:
             return
 
         try:
-            from agents import Agent, Runner
+            from agents import Agent, AgentOutputSchema, Runner
 
             common = self._build_common_kwargs()
             router_agent = Agent(
@@ -509,7 +509,9 @@ class AgentService:
             investigator_agent = Agent(
                 name="argis-investigator-agent",
                 instructions=INVESTIGATOR_PROMPT,
-                output_type=InvestigationReport,
+                # InvestigationReport includes free-form dict fields; disable strict
+                # schema enforcement to prevent runtime UserError fallback.
+                output_type=AgentOutputSchema(InvestigationReport, strict_json_schema=False),
                 **common,
             )
             summarizer_agent = Agent(

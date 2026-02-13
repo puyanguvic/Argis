@@ -1,5 +1,9 @@
 import json
+import importlib.util
 import random
+import sys
+from urllib.error import URLError
+from urllib.request import urlopen
 from collections import Counter
 
 import pytest
@@ -13,6 +17,7 @@ RANDOM_SEED = 20250213
 TARGET_PROFILE = "ollama"
 TARGET_PROVIDER = "local"
 TARGET_MODEL = "ollama/qwen2.5:7b"
+MAX_FALLBACK_RATE = 0.05
 
 datasets = pytest.importorskip("datasets")
 load_dataset = datasets.load_dataset
@@ -63,10 +68,35 @@ def _truncate(text: str, limit: int = 56) -> str:
     return text[: limit - 3] + "..."
 
 
+def _assert_remote_model_ready() -> None:
+    if importlib.util.find_spec("agents") is None:
+        pytest.fail(
+            "Current test interpreter is missing `agents` package. "
+            f"python={sys.executable}. "
+            "Use the project venv and run `python -m pytest ...`, "
+            "or install dependencies into this interpreter."
+        )
+    try:
+        with urlopen("http://127.0.0.1:11434/api/tags", timeout=3.0) as resp:
+            if getattr(resp, "status", 200) >= 400:
+                raise URLError(f"HTTP {resp.status}")
+    except Exception as exc:
+        pytest.fail(
+            "Ollama is not reachable at http://127.0.0.1:11434. "
+            f"python={sys.executable}. error={exc!r}"
+        )
+
+
 def test_hf_eval_balanced_100_cases(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("MY_AGENT_APP_PROFILE", TARGET_PROFILE)
     monkeypatch.delenv("MY_AGENT_APP_PROVIDER", raising=False)
     monkeypatch.delenv("MY_AGENT_APP_MODEL", raising=False)
+    _assert_remote_model_ready()
+    print(
+        f"[hf-balance-test] env python={sys.executable} "
+        f"agents={importlib.util.find_spec('agents') is not None} "
+        f"ollama_url=http://127.0.0.1:11434"
+    )
 
     try:
         dataset, split_used = _load_eval_like_split()
@@ -83,6 +113,7 @@ def test_hf_eval_balanced_100_cases(monkeypatch: pytest.MonkeyPatch):
     risk_scores: list[int] = []
     runtime_models: set[str] = set()
     runtime_providers: set[str] = set()
+    provider_used_values: list[str] = []
 
     print("[hf-balance-test] per-case results")
     for case_no, row in enumerate(sampled, start=1):
@@ -91,6 +122,8 @@ def test_hf_eval_balanced_100_cases(monkeypatch: pytest.MonkeyPatch):
         runtime = output.get("runtime", {})
         runtime_models.add(str(runtime.get("model", "")))
         runtime_providers.add(str(runtime.get("provider", "")))
+        provider_used = str(output.get("provider_used", ""))
+        provider_used_values.append(provider_used)
         verdict = str(output.get("verdict", "benign"))
         pred_label = positive_label if output.get("verdict") == "phishing" else negative_label
         gold_label = int(row["label"])
@@ -103,6 +136,7 @@ def test_hf_eval_balanced_100_cases(monkeypatch: pytest.MonkeyPatch):
         print(
             f"[hf-balance-test] case={case_no:03d} gold={gold_label} pred={pred_label} "
             f"verdict={verdict} risk={risk_score:3d} hit={'Y' if is_hit else 'N'} "
+            f"provider_used={provider_used or 'unknown'} "
             f"subject={subject!r}"
         )
 
@@ -125,6 +159,8 @@ def test_hf_eval_balanced_100_cases(monkeypatch: pytest.MonkeyPatch):
     f1 = _safe_ratio(2 * precision * recall, precision + recall)
     predicted_phishing = sum(1 for label in pred_labels if label == positive_label)
     avg_risk = sum(risk_scores) / SAMPLE_SIZE if risk_scores else 0.0
+    fallback_count = sum(1 for item in provider_used_values if item.endswith(":fallback"))
+    fallback_rate = _safe_ratio(fallback_count, SAMPLE_SIZE)
 
     print(
         f"[hf-balance-test] dataset={DATASET_ID} split_used={split_used} sampled={SAMPLE_SIZE} "
@@ -134,6 +170,10 @@ def test_hf_eval_balanced_100_cases(monkeypatch: pytest.MonkeyPatch):
     print(
         f"[hf-balance-test] accuracy={accuracy:.4f} tp={tp} tn={tn} fp={fp} fn={fn} "
         f"predicted_phishing={predicted_phishing} avg_risk={avg_risk:.2f}"
+    )
+    print(
+        f"[hf-balance-test] fallback_count={fallback_count} fallback_rate={fallback_rate:.4f} "
+        f"max_allowed_fallback_rate={MAX_FALLBACK_RATE:.4f}"
     )
     print("[hf-balance-test] summary metrics table")
     print("| metric | value |")
@@ -149,3 +189,11 @@ def test_hf_eval_balanced_100_cases(monkeypatch: pytest.MonkeyPatch):
     print(f"| fn | {fn} |")
     print(f"| predicted_phishing | {predicted_phishing} |")
     print(f"| avg_risk | {avg_risk:.2f} |")
+    print(f"| fallback_count | {fallback_count} |")
+    print(f"| fallback_rate | {fallback_rate:.4f} |")
+    print(f"| max_allowed_fallback_rate | {MAX_FALLBACK_RATE:.4f} |")
+
+    assert fallback_rate <= MAX_FALLBACK_RATE, (
+        f"Fallback rate too high: {fallback_rate:.4f} > {MAX_FALLBACK_RATE:.4f}. "
+        "This run did not reliably execute the remote model path."
+    )

@@ -199,7 +199,12 @@ def _format_stage_line(event: dict[str, Any]) -> str:
 
 def _format_compact_result(final: dict[str, Any], runtime: dict[str, Any]) -> str:
     verdict = str(final.get("verdict", "")).lower()
-    if verdict == "phishing":
+    email_label = str(final.get("email_label", "")).strip().lower()
+    if email_label == "phish_email":
+        verdict_text = "Marked as phish email"
+    elif email_label == "spam":
+        verdict_text = "Marked as spam"
+    elif verdict == "phishing":
         verdict_text = "Potential phishing"
     elif verdict == "benign":
         verdict_text = "No high-risk anomalies detected"
@@ -223,7 +228,16 @@ def _format_compact_result(final: dict[str, Any], runtime: dict[str, Any]) -> st
         f"Model Used: profile={runtime.get('profile')} "
         f"provider={runtime.get('provider')} model={runtime.get('model')}"
     )
-    return f"Detection Result: {verdict_text}\nReason Summary: {summary}\n{execution}"
+    tags = final.get("threat_tags")
+    tag_line = ""
+    if isinstance(tags, list) and tags:
+        tag_line = f"Threat Tags: {', '.join(str(item) for item in tags)}"
+    label_line = f"Email Label: {email_label or 'unknown'}"
+    lines = [f"Detection Result: {verdict_text}", label_line, f"Reason Summary: {summary}"]
+    if tag_line:
+        lines.append(tag_line)
+    lines.append(execution)
+    return "\n".join(lines)
 
 
 def _resolve_model_options(runtime: dict[str, Any]) -> tuple[list[str], str | None]:

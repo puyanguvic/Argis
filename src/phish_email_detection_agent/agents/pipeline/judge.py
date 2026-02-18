@@ -16,6 +16,7 @@ from phish_email_detection_agent.agents.pipeline.router import (
 from phish_email_detection_agent.agents.pipeline.runtime import PipelineRuntime
 from phish_email_detection_agent.agents.prompts import JUDGE_PROMPT
 from phish_email_detection_agent.evidence.redact import redact_value
+from phish_email_detection_agent.tools.text.text_model import derive_email_labels
 
 
 @dataclass
@@ -80,6 +81,13 @@ class JudgeEngine:
                 judge_confidence=float(judge_output.confidence),
                 missing_count=len(judge_output.missing_info),
             )
+            labels = derive_email_labels(
+                verdict=merged_verdict,
+                risk_score=merged_score,
+                subject=getattr(email, "subject", ""),
+                text=getattr(email, "text", ""),
+                urls=list(precheck.get("combined_urls", [])),
+            )
 
             merged_actions = list(
                 dict.fromkeys(
@@ -100,6 +108,11 @@ class JudgeEngine:
                 path=map_route_to_path(evidence_pack.pre_score.route),
                 risk_score=merged_score,
                 confidence=merged_confidence,
+                email_label=str(labels.get("email_label", "benign")),
+                is_spam=bool(labels.get("is_spam", False)),
+                is_phish_email=bool(labels.get("is_phish_email", False)),
+                spam_score=int(labels.get("spam_score", 0)),
+                threat_tags=list(labels.get("threat_tags", [])),
                 indicators=merged_indicators,
                 recommended_actions=merged_actions,
                 input=email.text,

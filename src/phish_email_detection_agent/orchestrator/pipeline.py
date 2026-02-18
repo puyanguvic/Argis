@@ -46,7 +46,10 @@ from phish_email_detection_agent.domain.email.parse import (
 )
 from phish_email_detection_agent.domain.url.extract import canonicalize_url, extract_urls, is_suspicious_url
 from phish_email_detection_agent.tools.registry import ToolRegistry
-from phish_email_detection_agent.tools.text.text_model import contains_phishing_keywords
+from phish_email_detection_agent.tools.text.text_model import (
+    contains_phishing_keywords,
+    derive_email_labels,
+)
 from phish_email_detection_agent.tools.url_fetch.service import (
     SafeFetchPolicy,
     analyze_url_target,
@@ -836,6 +839,13 @@ def _fallback_result(
         judge_confidence=0.0,
         missing_count=0,
     )
+    labels = derive_email_labels(
+        verdict=verdict,
+        risk_score=score,
+        subject=email.subject,
+        text=email.text,
+        urls=list(precheck.get("combined_urls", [])),
+    )
 
     return TriageResult(
         verdict=verdict,
@@ -843,6 +853,11 @@ def _fallback_result(
         path=_legacy_path(route),
         risk_score=score,
         confidence=confidence,
+        email_label=str(labels.get("email_label", "benign")),
+        is_spam=bool(labels.get("is_spam", False)),
+        is_phish_email=bool(labels.get("is_phish_email", False)),
+        spam_score=int(labels.get("spam_score", 0)),
+        threat_tags=list(labels.get("threat_tags", [])),
         indicators=list(precheck.get("indicators", [])),
         recommended_actions=list(dict.fromkeys(actions)),
         input=email.text,

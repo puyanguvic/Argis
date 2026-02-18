@@ -156,6 +156,11 @@ class TriageOutput(BaseModel):
     path: Literal["FAST", "STANDARD", "DEEP"]
     risk_score: int = Field(ge=0, le=100)
     confidence: float = Field(default=0.0, ge=0.0, le=1.0)
+    email_label: Literal["benign", "spam", "phish_email"] = "benign"
+    is_spam: bool = False
+    is_phish_email: bool = False
+    spam_score: int = Field(default=0, ge=0, le=10)
+    threat_tags: list[str] = Field(default_factory=list)
     indicators: list[str] = Field(default_factory=list)
     recommended_actions: list[str] = Field(default_factory=list)
 
@@ -166,6 +171,11 @@ class TriageResult(BaseModel):
     path: Literal["FAST", "STANDARD", "DEEP"]
     risk_score: int = Field(ge=0, le=100)
     confidence: float = Field(default=0.0, ge=0.0, le=1.0)
+    email_label: Literal["benign", "spam", "phish_email"] = "benign"
+    is_spam: bool = False
+    is_phish_email: bool = False
+    spam_score: int = Field(default=0, ge=0, le=10)
+    threat_tags: list[str] = Field(default_factory=list)
     indicators: list[str] = Field(default_factory=list)
     recommended_actions: list[str] = Field(default_factory=list)
     input: str

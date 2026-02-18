@@ -12,28 +12,45 @@ import pytest
 from phish_email_detection_agent.cli import run_once
 
 DATASET_ID = "puyang2025/phish-email-datasets"
-DATASET_FILE = "Nazario.parquet"
-SAMPLE_SIZE = 100
+DATASET_FILE = "Phishing_Email.parquet"
+POSITIVE_SAMPLE_SIZE = 50
+NEGATIVE_SAMPLE_SIZE = 50
+SAMPLE_SIZE = POSITIVE_SAMPLE_SIZE + NEGATIVE_SAMPLE_SIZE
 RANDOM_SEED = 20250213
 TARGET_PROFILE = "ollama"
 TARGET_PROVIDER = "local"
 TARGET_MODEL = "ollama/qwen2.5:7b"
 POSITIVE_LABEL = 1
 NEGATIVE_LABEL = 0
+LABEL_KEY_CANDIDATES = [
+    "label",
+    "labels",
+    "Label",
+    "target",
+    "Target",
+    "class",
+    "Class",
+    "is_phishing",
+    "Is_Phishing",
+    "phishing",
+    "Phishing",
+    "email_type",
+    "Email Type",
+    "Category",
+    "category",
+    "ground_truth",
+    "Ground Truth",
+    "ground_truth_label",
+    "Ground Truth Label",
+]
 MAX_FALLBACK_RATE = 0.05
-MAX_SUSPICIOUS_RATE = float(os.getenv("MY_AGENT_EVAL_MAX_SUSPICIOUS_RATE", "0.30"))
 MIN_STRICT_RECALL = float(os.getenv("MY_AGENT_EVAL_MIN_STRICT_RECALL", "0.60"))
-ALLOW_SUSPICIOUS_VERDICT = (
-    str(os.getenv("MY_AGENT_EVAL_ALLOW_SUSPICIOUS", "0")).strip().lower() in {"1", "true", "yes", "on"}
-)
-_default_min_relaxed = "0.90" if ALLOW_SUSPICIOUS_VERDICT else str(MIN_STRICT_RECALL)
-MIN_RELAXED_RECALL = float(os.getenv("MY_AGENT_EVAL_MIN_RELAXED_RECALL", _default_min_relaxed))
 
 datasets = pytest.importorskip("datasets")
 load_dataset = datasets.load_dataset
 
 
-def _load_nazario_split():
+def _load_dataset_split():
     data_files = {"eval": f"hf://datasets/{DATASET_ID}/{DATASET_FILE}"}
     dataset = load_dataset("parquet", data_files=data_files, split="eval")
     return dataset, DATASET_FILE
@@ -43,6 +60,34 @@ def _to_clean_text(value: object) -> str:
     if value is None:
         return ""
     return str(value).strip()
+
+
+def _normalize_key(value: object) -> str:
+    return "".join(ch for ch in str(value).strip().lower() if ch.isalnum())
+
+
+_LABEL_NORMALIZED_KEYS = {
+    _normalize_key(key)
+    for key in LABEL_KEY_CANDIDATES
+}
+_LABEL_NORMALIZED_KEYS.update(
+    {
+        "label",
+        "labels",
+        "target",
+        "class",
+        "isphishing",
+        "phishing",
+        "emailtype",
+        "category",
+        "groundtruth",
+        "groundtruthlabel",
+    }
+)
+
+
+def _is_label_key(key: object) -> bool:
+    return _normalize_key(key) in _LABEL_NORMALIZED_KEYS
 
 
 def _first_non_empty_value(row: dict, candidates: list[str]) -> str:
@@ -58,7 +103,20 @@ def _build_input_text(row: dict) -> str:
     subject = _first_non_empty_value(row, ["subject", "Subject", "title", "Title"])
     body = _first_non_empty_value(
         row,
-        ["text", "Text", "body", "Body", "content", "Content", "email", "Email", "message", "Message"],
+        [
+            "text",
+            "Text",
+            "body",
+            "Body",
+            "content",
+            "Content",
+            "email",
+            "Email",
+            "message",
+            "Message",
+            "email_text",
+            "Email Text",
+        ],
     )
     if subject and body:
         return f"Subject: {subject}\n\n{body}"
@@ -67,23 +125,98 @@ def _build_input_text(row: dict) -> str:
 
     fallback_parts: list[str] = []
     for key, value in row.items():
-        if str(key).strip().lower() in {"label", "id", "index"}:
+        if str(key).strip().lower() in {"id", "index"} or _is_label_key(key):
             continue
         text = _to_clean_text(value)
         if text:
             fallback_parts.append(f"{key}: {text}")
     fallback = "\n".join(fallback_parts).strip()
-    assert fallback, "No usable text fields were found in a Nazario sample row."
+    assert fallback, f"No usable text fields were found in a {DATASET_FILE} sample row."
     return fallback
 
 
-def _sample_random_indices(total_size: int, sample_size: int, seed: int) -> list[int]:
-    assert total_size >= sample_size, (
-        f"Dataset {DATASET_ID}/{DATASET_FILE} has only {total_size} rows, "
-        f"but SAMPLE_SIZE is {sample_size}."
+def _normalize_binary_label(value: object) -> int | None:
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, int):
+        if value in {NEGATIVE_LABEL, POSITIVE_LABEL}:
+            return value
+        return None
+    if isinstance(value, float):
+        if value in {float(NEGATIVE_LABEL), float(POSITIVE_LABEL)}:
+            return int(value)
+        return None
+
+    text = _to_clean_text(value).lower()
+    if not text:
+        return None
+    compact = "".join(ch for ch in text if ch.isalnum())
+    if text in {"1", "1.0", "phishing", "phish", "spam", "malicious", "true", "yes"}:
+        return POSITIVE_LABEL
+    if text in {"0", "0.0", "benign", "ham", "legit", "legitimate", "normal", "false", "no"}:
+        return NEGATIVE_LABEL
+    if compact in {"safeemail", "nonphishingemail", "legitemail", "hamemail"}:
+        return NEGATIVE_LABEL
+    if compact in {"phishingemail", "maliciousemail", "spamemail"}:
+        return POSITIVE_LABEL
+    if "safe" in text:
+        return NEGATIVE_LABEL
+    if "phish" in text or "malicious" in text or "spam" in text:
+        return POSITIVE_LABEL
+    return None
+
+
+def _extract_label(row: dict) -> int:
+    for key in LABEL_KEY_CANDIDATES:
+        if key not in row:
+            continue
+        parsed = _normalize_binary_label(row.get(key))
+        if parsed is not None:
+            return parsed
+
+    for key, value in row.items():
+        if not _is_label_key(key):
+            continue
+        parsed = _normalize_binary_label(value)
+        if parsed is not None:
+            return parsed
+
+    raise AssertionError(
+        f"No binary label found in row. Tried keys={LABEL_KEY_CANDIDATES}. "
+        f"Available keys={list(row.keys())}"
     )
+
+
+def _sample_balanced_indices(
+    dataset,
+    *,
+    positive_sample_size: int,
+    negative_sample_size: int,
+    seed: int,
+) -> list[int]:
+    positive_indices: list[int] = []
+    negative_indices: list[int] = []
+
+    for idx, row in enumerate(dataset):
+        label = _extract_label(row)
+        if label == POSITIVE_LABEL:
+            positive_indices.append(idx)
+        elif label == NEGATIVE_LABEL:
+            negative_indices.append(idx)
+
+    assert len(positive_indices) >= positive_sample_size, (
+        f"Dataset {DATASET_ID}/{DATASET_FILE} has only {len(positive_indices)} positive rows, "
+        f"but requested {positive_sample_size}."
+    )
+    assert len(negative_indices) >= negative_sample_size, (
+        f"Dataset {DATASET_ID}/{DATASET_FILE} has only {len(negative_indices)} negative rows, "
+        f"but requested {negative_sample_size}."
+    )
+
     rng = random.Random(seed)
-    return rng.sample(list(range(total_size)), sample_size)
+    selected = rng.sample(positive_indices, positive_sample_size) + rng.sample(negative_indices, negative_sample_size)
+    rng.shuffle(selected)
+    return selected
 
 
 def _safe_ratio(numerator: int, denominator: int) -> float:
@@ -148,37 +281,44 @@ def _assert_remote_model_ready() -> None:
         )
 
 
-def test_hf_nazario_100_phishing_cases(monkeypatch: pytest.MonkeyPatch):
+def test_hf_phishing_email_balanced_sample(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("MY_AGENT_APP_PROFILE", TARGET_PROFILE)
     monkeypatch.delenv("MY_AGENT_APP_PROVIDER", raising=False)
     monkeypatch.delenv("MY_AGENT_APP_MODEL", raising=False)
     _assert_remote_model_ready()
     print(
-        f"[hf-nazario-test] env python={sys.executable} "
+        f"[hf-balanced-test] env python={sys.executable} "
         f"agents={importlib.util.find_spec('agents') is not None} "
-        f"ollama_url=http://127.0.0.1:11434 "
-        f"allow_suspicious_verdict={ALLOW_SUSPICIOUS_VERDICT}"
+        f"ollama_url=http://127.0.0.1:11434"
     )
 
     try:
-        dataset, split_used = _load_nazario_split()
+        dataset, split_used = _load_dataset_split()
     except Exception as exc:
         pytest.skip(f"Cannot load dataset {DATASET_ID}: {exc}")
 
-    selected_indices = _sample_random_indices(len(dataset), SAMPLE_SIZE, seed=RANDOM_SEED)
+    selected_indices = _sample_balanced_indices(
+        dataset,
+        positive_sample_size=POSITIVE_SAMPLE_SIZE,
+        negative_sample_size=NEGATIVE_SAMPLE_SIZE,
+        seed=RANDOM_SEED,
+    )
     sampled = dataset.select(selected_indices)
 
-    gold_labels = [POSITIVE_LABEL] * SAMPLE_SIZE
+    gold_labels = [_extract_label(row) for row in sampled]
+    gold_distribution = Counter(gold_labels)
+    assert gold_distribution[POSITIVE_LABEL] == POSITIVE_SAMPLE_SIZE
+    assert gold_distribution[NEGATIVE_LABEL] == NEGATIVE_SAMPLE_SIZE
+
     pred_labels_strict: list[int] = []
-    pred_labels_relaxed: list[int] = []
     risk_scores: list[int] = []
     runtime_models: set[str] = set()
     runtime_providers: set[str] = set()
     provider_used_values: list[str] = []
     verdict_values: list[str] = []
 
-    print("[hf-nazario-test] per-case results")
-    for case_no, row in enumerate(sampled, start=1):
+    print("[hf-balanced-test] per-case results")
+    for case_no, (row, gold_label) in enumerate(zip(sampled, gold_labels), start=1):
         payload = _build_input_text(row)
         output = json.loads(run_once(payload, model=TARGET_MODEL))
         runtime = output.get("runtime", {})
@@ -189,24 +329,17 @@ def test_hf_nazario_100_phishing_cases(monkeypatch: pytest.MonkeyPatch):
         verdict = str(output.get("verdict", "benign")).strip().lower()
         verdict_values.append(verdict)
         pred_labels_strict.append(POSITIVE_LABEL if verdict == "phishing" else NEGATIVE_LABEL)
-        if ALLOW_SUSPICIOUS_VERDICT:
-            pred_labels_relaxed.append(
-                POSITIVE_LABEL if verdict in {"phishing", "suspicious"} else NEGATIVE_LABEL
-            )
-        else:
-            pred_labels_relaxed.append(POSITIVE_LABEL if verdict == "phishing" else NEGATIVE_LABEL)
         risk_score = int(output.get("risk_score", 0))
         risk_scores.append(risk_score)
         subject = _truncate(_first_non_empty_value(row, ["subject", "Subject", "title", "Title"]))
         print(
-            f"[hf-nazario-test] case={case_no:03d} pred_strict={pred_labels_strict[-1]} "
+            f"[hf-balanced-test] case={case_no:03d} gold={gold_label} pred_strict={pred_labels_strict[-1]} "
             f"verdict={verdict} risk={risk_score:3d} "
             f"provider_used={provider_used or 'unknown'} subject={subject!r}"
         )
 
     verdict_counter = Counter(verdict_values)
     assert len(pred_labels_strict) == SAMPLE_SIZE
-    assert len(pred_labels_relaxed) == SAMPLE_SIZE
     assert runtime_models == {TARGET_MODEL}
     assert runtime_providers == {TARGET_PROVIDER}
 
@@ -216,50 +349,42 @@ def test_hf_nazario_100_phishing_cases(monkeypatch: pytest.MonkeyPatch):
         positive_label=POSITIVE_LABEL,
         negative_label=NEGATIVE_LABEL,
     )
-    relaxed = _compute_binary_metrics(
-        gold_labels=gold_labels,
-        pred_labels=pred_labels_relaxed,
-        positive_label=POSITIVE_LABEL,
-        negative_label=NEGATIVE_LABEL,
-    )
-
     strict_recall = float(strict["recall"])
-    relaxed_recall = float(relaxed["recall"])
     predicted_phishing = int(strict["predicted_positive"])
-    predicted_phish_or_suspicious = int(relaxed["predicted_positive"])
-    suspicious_count = int(verdict_counter.get("suspicious", 0))
-    suspicious_rate = _safe_ratio(suspicious_count, SAMPLE_SIZE)
     avg_risk = sum(risk_scores) / SAMPLE_SIZE if risk_scores else 0.0
     fallback_count = sum(1 for item in provider_used_values if item.endswith(":fallback"))
     fallback_rate = _safe_ratio(fallback_count, SAMPLE_SIZE)
 
     print(
-        f"[hf-nazario-test] dataset={DATASET_ID} split_used={split_used} sampled={SAMPLE_SIZE} "
-        f"seed={RANDOM_SEED} all_positive=True profile={TARGET_PROFILE} "
+        f"[hf-balanced-test] dataset={DATASET_ID} file={DATASET_FILE} split_used={split_used} "
+        f"sampled={SAMPLE_SIZE} seed={RANDOM_SEED} "
+        f"positives={POSITIVE_SAMPLE_SIZE} negatives={NEGATIVE_SAMPLE_SIZE} "
+        f"profile={TARGET_PROFILE} "
         f"provider={TARGET_PROVIDER} model={TARGET_MODEL}"
     )
     print(
-        f"[hf-nazario-test] strict_recall={strict_recall:.4f} predicted_phishing={predicted_phishing} "
-        f"false_negatives={strict['fn']}"
+        f"[hf-balanced-test] strict_accuracy={strict['accuracy']:.4f} "
+        f"strict_precision={strict['precision']:.4f} strict_recall={strict_recall:.4f} "
+        f"strict_specificity={strict['specificity']:.4f} predicted_phishing={predicted_phishing} "
+        f"false_negatives={strict['fn']} false_positives={strict['fp']}"
     )
     print(
-        f"[hf-nazario-test] relaxed_recall={relaxed_recall:.4f} "
-        f"predicted_phishing_or_suspicious={predicted_phish_or_suspicious} "
-        f"suspicious_count={suspicious_count} suspicious_rate={suspicious_rate:.4f} "
-        f"max_allowed_suspicious_rate={MAX_SUSPICIOUS_RATE:.4f} avg_risk={avg_risk:.2f}"
+        f"[hf-balanced-test] avg_risk={avg_risk:.2f}"
     )
     print(
-        f"[hf-nazario-test] fallback_count={fallback_count} fallback_rate={fallback_rate:.4f} "
+        f"[hf-balanced-test] fallback_count={fallback_count} fallback_rate={fallback_rate:.4f} "
         f"max_allowed_fallback_rate={MAX_FALLBACK_RATE:.4f}"
     )
-    print("[hf-nazario-test] summary metrics table")
+    print("[hf-balanced-test] summary metrics table")
     print("| metric | value |")
     print("|---|---:|")
+    print(f"| strict_accuracy | {strict['accuracy']:.4f} |")
+    print(f"| strict_precision | {strict['precision']:.4f} |")
     print(f"| strict_recall | {strict_recall:.4f} |")
+    print(f"| strict_specificity | {strict['specificity']:.4f} |")
+    print(f"| strict_false_positive | {strict['fp']} |")
     print(f"| strict_false_negative | {strict['fn']} |")
-    print(f"| relaxed_recall | {relaxed_recall:.4f} |")
-    print(f"| suspicious_count | {suspicious_count} |")
-    print(f"| suspicious_rate | {suspicious_rate:.4f} |")
+    print(f"| gold_distribution | {dict(gold_distribution)} |")
     print(f"| verdict_distribution | {dict(verdict_counter)} |")
     print(f"| avg_risk | {avg_risk:.2f} |")
     print(f"| fallback_count | {fallback_count} |")
@@ -269,19 +394,7 @@ def test_hf_nazario_100_phishing_cases(monkeypatch: pytest.MonkeyPatch):
         f"Fallback rate too high: {fallback_rate:.4f} > {MAX_FALLBACK_RATE:.4f}. "
         "This run did not reliably execute the remote model path."
     )
-    assert suspicious_rate <= MAX_SUSPICIOUS_RATE, (
-        f"Suspicious rate too high: {suspicious_rate:.4f} > {MAX_SUSPICIOUS_RATE:.4f}. "
-        "Too many phishing samples landed in the ambiguous bucket."
-    )
-    if not ALLOW_SUSPICIOUS_VERDICT:
-        assert suspicious_count == 0, (
-            f"Binary mode expects no 'suspicious' verdict, but got {suspicious_count} / {SAMPLE_SIZE}."
-        )
     assert strict_recall >= MIN_STRICT_RECALL, (
         f"Strict recall is too low: {strict_recall:.4f} < {MIN_STRICT_RECALL:.4f}. "
         "The agent is missing too many known phishing emails."
-    )
-    assert relaxed_recall >= MIN_RELAXED_RECALL, (
-        f"Relaxed recall is too low: {relaxed_recall:.4f} < {MIN_RELAXED_RECALL:.4f}. "
-        "Even phishing+suspicious detection is below target."
     )

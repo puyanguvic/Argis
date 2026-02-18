@@ -74,3 +74,14 @@ def test_low_score_can_promote_to_suspicious_with_mid_judge_confidence():
         suspicious_max_score=34,
     )
     assert verdict == "suspicious"
+
+
+def test_near_suspicious_band_with_uncertain_benign_stays_suspicious():
+    verdict = _merge_judge_verdict(
+        deterministic_score=23,
+        judge_verdict="benign",
+        judge_confidence=0.4,
+        suspicious_min_score=24,
+        suspicious_max_score=34,
+    )
+    assert verdict == "suspicious"

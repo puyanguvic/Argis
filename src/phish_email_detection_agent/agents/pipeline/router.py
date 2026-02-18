@@ -74,6 +74,11 @@ def merge_judge_verdict(
     if deterministic_score < suspicious_min_score:
         if clean_judge == "suspicious" and judge_confidence >= active.judge_override_mid_band_confidence:
             return "suspicious"
+        # Near the suspicious band, avoid overly confident benign outcomes when the judge itself is uncertain.
+        # This preserves recall on text-only cases where deterministic signals are meaningful but incomplete.
+        near_suspicious_floor = max(1, suspicious_min_score - 10)
+        if deterministic_score >= near_suspicious_floor and judge_confidence < active.judge_override_mid_band_confidence:
+            return "suspicious"
         return "benign"
     if deterministic_score > suspicious_max_score:
         return "phishing"

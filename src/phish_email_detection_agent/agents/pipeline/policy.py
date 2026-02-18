@@ -12,8 +12,8 @@ class PipelinePolicy:
     context_trigger_score: int = 35
     suspicious_min_score: int = 30
     suspicious_max_score: int = 34
-    judge_promote_low_to_suspicious_confidence: float = 0.80
-    judge_override_mid_band_confidence: float = 0.65
+    judge_promote_low_to_suspicious_confidence: float = 0.75
+    judge_override_mid_band_confidence: float = 0.58
 
     def normalized(self) -> "PipelinePolicy":
         review = max(1, int(self.pre_score_review_threshold))
@@ -34,4 +34,3 @@ class PipelinePolicy:
                 0.0, min(1.0, float(self.judge_override_mid_band_confidence))
             ),
         )
-

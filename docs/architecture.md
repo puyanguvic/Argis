@@ -1,38 +1,38 @@
 # Architecture
 
-- `core/`: config, logging, errors.
-- `tools/`: deterministic utilities and analyzers.
-- `tools/plugins/`: auto-discovered `tool_*` plugin functions.
-- `agents/contracts.py`: structured schemas for router/investigator/final output.
-- `tools/preprocessing.py`: parse text/json/eml input, hidden-link extraction, attachment hashes.
-- `tools/url_analysis.py`: sandbox-safe fetch policy + html phishing signal extraction.
-- `tools/attachment_analysis.py`: file-type detection and deep static-safe attachment analysis.
-- `tools/domain_intel.py`: domain heuristics (punycode, typosquat, risky tld).
-- `agents/risk_fusion.py`: weighted risk fusion (`text/url/domain/attachment/ocr`).
-- `agents/providers.py`: model factory (`openai` native; `local` via LiteLLM, local runtime with Ollama).
-- `agents/tool_registry.py`: built-in + plugin + external tool registration.
-- `agents/service.py`: multi-agent orchestration workflow.
-- `app/`: assembly and runtime runners.
-- `ui/`: Gradio demo.
-- `src/phish_email_detection_agent/configs/default.yaml`: runtime defaults + provider profiles.
+## Design principles for phishing AI agent
 
-## Multi-agent flow
+1. Evidence-first: deterministic analyzers build a typed `EvidencePack` before any LLM call.
+2. Least privilege: network/file-heavy capabilities are opt-in and policy-gated.
+3. Fail-safe: if remote judge is unavailable or errors, deterministic fallback still returns a verdict.
+4. Explainability: all final outputs carry indicators, evidence, and provenance timing/errors.
+5. Composable pipeline: planner/executor/judge are isolated stages with explicit runtime contracts.
 
-Current implementation follows a modular execution pipeline:
+## Code layout
 
-1. `planner`: produce execution plan from pre-score route and runtime capability.
-2. `executor`: orchestrate end-to-end stage execution and event streaming.
-3. `evidence_builder`: build deterministic `EvidencePack` from headers/URLs/web/attachments/NLP cues.
-4. `judge`: run model judge on redacted evidence and merge with deterministic risk policy.
-5. `router`: normalize route/path and calibrate final verdict + score + confidence.
+- `src/phish_email_detection_agent/domain/`: core data models and parsing (`email/`, `url/`, `attachment/`, `evidence.py`).
+- `src/phish_email_detection_agent/tools/`: deterministic analyzers (header/domain/url fetch/attachment/text/OCR/ASR).
+- `src/phish_email_detection_agent/agents/pipeline/`: stage-based orchestration primitives (`evidence_stage`, `planner`, `executor`, `judge`, `router`, `policy`, `runtime`).
+- `src/phish_email_detection_agent/orchestrator/pipeline.py`: `AgentService` composition root and evidence pack construction.
+- `src/phish_email_detection_agent/providers/`: model provider adapters (OpenAI, Ollama/LiteLLM path).
+- `src/phish_email_detection_agent/config/`: env+yaml config system (`defaults.yaml`).
+- `src/phish_email_detection_agent/api/`, `src/phish_email_detection_agent/ui/`, `src/phish_email_detection_agent/cli.py`: delivery interfaces.
 
-The concrete modules live under `src/phish_email_detection_agent/agents/pipeline/`.
-Shared stage thresholds are centralized in `agents/pipeline/policy.py` (`PipelinePolicy`).
+## Execution flow
+
+1. Parse input (`domain.email.parse.parse_input_payload`).
+2. Build deterministic evidence (`agents.pipeline.evidence_stage.EvidenceStage` via orchestrator wiring).
+3. Plan execution path (`agents.pipeline.planner.Planner`).
+4. Conditionally run judge (`review/deep` routes only, remote-capability gated).
+5. Merge/calibrate verdict (`agents.pipeline.router`) or fallback deterministically.
+6. Emit trace events for each stage (`orchestrator.tracing`).
+
+Judge gating for `allow` route is policy-driven (`never | sampled | always`) with deterministic sampling support.
 
 ## Security defaults
 
-- URL fetch disabled by default (`MY_AGENT_APP_ENABLE_URL_FETCH=false`).
-- URL sandbox backend is configurable (`internal | firejail | docker`).
-- Private network access denied (`MY_AGENT_APP_ALLOW_PRIVATE_NETWORK=false`).
-- Redirect count, timeout and response-size are bounded.
-- OCR/audio transcription disabled by default; explicit opt-in required.
+- URL fetch off by default: `MY_AGENT_APP_ENABLE_URL_FETCH=false`.
+- Private network blocked by default: `MY_AGENT_APP_ALLOW_PRIVATE_NETWORK=false`.
+- Safe fetch limits enabled: timeout, redirects, response size.
+- OCR/audio transcription off by default; explicit opt-in.
+- Judge receives redacted evidence (`evidence/redact.py`) instead of raw artifacts.

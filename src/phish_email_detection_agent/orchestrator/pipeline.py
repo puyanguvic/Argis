@@ -9,7 +9,6 @@ import mimetypes
 import os
 from pathlib import Path
 import re
-import time
 from typing import Any
 from urllib.parse import urlparse
 
@@ -19,6 +18,7 @@ from phish_email_detection_agent.agents.contracts import (
     TriageResult,
 )
 from phish_email_detection_agent.agents.pipeline.evidence_builder import EvidenceBuilder
+from phish_email_detection_agent.agents.pipeline.evidence_stage import EvidenceStage
 from phish_email_detection_agent.agents.pipeline.executor import PipelineExecutor
 from phish_email_detection_agent.agents.pipeline.judge import JudgeEngine
 from phish_email_detection_agent.agents.pipeline.policy import PipelinePolicy
@@ -771,247 +771,28 @@ def _should_collect_deep_context(
     return False
 
 
+_EVIDENCE_STAGE = EvidenceStage(
+    extract_urls_from_html_fn=extract_urls_from_html,
+    extract_urls_fn=extract_urls,
+    summarize_chain_flags_fn=summarize_chain_flags,
+    analyze_headers_fn=analyze_headers,
+    safe_fetch_policy_fn=_safe_fetch_policy,
+    attachment_policy_fn=_attachment_policy,
+    domain_policy_fn=_domain_policy,
+    infer_url_signals_fn=_infer_url_signals,
+    build_nlp_cues_fn=_build_nlp_cues,
+    build_attachment_signals_fn=_build_attachment_signals,
+    compute_pre_score_fn=_compute_pre_score,
+    should_collect_deep_context_fn=_should_collect_deep_context,
+    build_web_signals_fn=_build_web_signals,
+    analyze_attachments_fn=analyze_attachments,
+    enrich_attachments_with_static_scan_fn=_enrich_attachments_with_static_scan,
+    clip_score_fn=_clip_score,
+)
+
+
 def _build_evidence_pack(email: EmailInput, service: "AgentService") -> tuple[EvidencePack, dict[str, Any]]:
-    timings: dict[str, int] = {}
-    provenance: dict[str, list[str]] = {"limits_hit": [], "errors": []}
-
-    safe_fetch_policy = _safe_fetch_policy(service)
-    attachment_policy = _attachment_policy(service)
-    domain_policy = _domain_policy(service)
-
-    t_start = time.perf_counter()
-    html_url_meta = extract_urls_from_html(email.body_html or "")
-    combined_urls = list(dict.fromkeys(email.urls + extract_urls(email.text) + extract_urls(email.body_text)))
-    combined_urls = list(dict.fromkeys(combined_urls + html_url_meta["urls"]))
-    chain_flags = summarize_chain_flags(email)
-    if html_url_meta["hidden_links"]:
-        chain_flags.append("hidden_html_links")
-    timings["parse"] = int((time.perf_counter() - t_start) * 1000)
-
-    t_header = time.perf_counter()
-    header_signals = analyze_headers(
-        headers=email.headers,
-        headers_raw=email.headers_raw,
-        sender=email.sender,
-        reply_to=email.reply_to,
-    )
-    timings["header_intel"] = int((time.perf_counter() - t_header) * 1000)
-
-    t_url = time.perf_counter()
-    url_signals, domain_reports = _infer_url_signals(
-        combined_urls,
-        service=service,
-        fetch_policy=safe_fetch_policy,
-        domain_policy=domain_policy,
-        provenance=provenance,
-    )
-    timings["url_intel"] = int((time.perf_counter() - t_url) * 1000)
-
-    t_nlp = time.perf_counter()
-    nlp_cues = _build_nlp_cues(email)
-    timings["nlp_cues"] = int((time.perf_counter() - t_nlp) * 1000)
-
-    t_att = time.perf_counter()
-    attachment_signals = _build_attachment_signals(email.attachments)
-    timings["attachment_prescan"] = int((time.perf_counter() - t_att) * 1000)
-
-    pre_score = _compute_pre_score(
-        header_signals=header_signals,
-        url_signals=url_signals,
-        web_signals=[],
-        attachment_signals=attachment_signals,
-        nlp_cues=nlp_cues,
-        review_threshold=service.pipeline_policy.pre_score_review_threshold,
-        deep_threshold=service.pipeline_policy.pre_score_deep_threshold,
-        url_suspicious_weight=service.precheck_url_suspicious_weight,
-    )
-
-    deep_trigger = _should_collect_deep_context(
-        pre_score,
-        url_signals,
-        attachment_signals,
-        service.pipeline_policy.context_trigger_score,
-    )
-
-    web_signals: list[dict[str, Any]] = []
-    url_target_reports: list[dict[str, Any]] = []
-    attachment_bundle: dict[str, Any] = {
-        "reports": [],
-        "risky": [],
-        "risky_count": 0,
-        "extracted_urls": [],
-    }
-
-    if deep_trigger:
-        t_web = time.perf_counter()
-        web_signals, url_target_reports = _build_web_signals(
-            url_signals,
-            fetch_policy=safe_fetch_policy,
-            provenance=provenance,
-        )
-        timings["web_snapshot"] = int((time.perf_counter() - t_web) * 1000)
-
-        t_att_deep = time.perf_counter()
-        attachment_bundle = analyze_attachments(email.attachments, policy=attachment_policy)
-        nested_urls = _enrich_attachments_with_static_scan(attachment_signals, attachment_bundle)
-        if nested_urls:
-            chain_flags.append("nested_url_in_attachment")
-        timings["attachment_intel"] = int((time.perf_counter() - t_att_deep) * 1000)
-
-        if nested_urls:
-            extra_signals, extra_domain_reports = _infer_url_signals(
-                nested_urls,
-                service=service,
-                fetch_policy=safe_fetch_policy,
-                domain_policy=domain_policy,
-                provenance=provenance,
-            )
-            if extra_signals:
-                url_signals.extend(extra_signals)
-                domain_reports.extend(extra_domain_reports)
-
-        pre_score = _compute_pre_score(
-            header_signals=header_signals,
-            url_signals=url_signals,
-            web_signals=web_signals,
-            attachment_signals=attachment_signals,
-            nlp_cues=nlp_cues,
-            review_threshold=service.pipeline_policy.pre_score_review_threshold,
-            deep_threshold=service.pipeline_policy.pre_score_deep_threshold,
-            url_suspicious_weight=service.precheck_url_suspicious_weight,
-        )
-
-    email_meta = {
-        "message_id": email.message_id,
-        "date": email.date,
-        "sender": email.sender,
-        "to": email.to,
-        "cc": email.cc,
-        "subject": email.subject,
-        "reply_to": email.reply_to,
-        "return_path": email.return_path,
-        "urls_count": len(url_signals),
-        "attachments_count": len(attachment_signals),
-    }
-
-    evidence_pack = EvidencePack.model_validate(
-        {
-            "email_meta": email_meta,
-            "header_signals": header_signals,
-            "url_signals": url_signals,
-            "web_signals": web_signals,
-            "attachment_signals": attachment_signals,
-            "nlp_cues": nlp_cues,
-            "pre_score": pre_score,
-            "provenance": {
-                "timing_ms": timings,
-                "limits_hit": list(dict.fromkeys(provenance["limits_hit"])),
-                "errors": list(dict.fromkeys(provenance["errors"])),
-            },
-        }
-    )
-
-    suspicious_urls = [
-        str(item.get("url", ""))
-        for item in url_signals
-        if isinstance(item, dict) and item.get("risk_flags")
-    ]
-    risky_attachments = [
-        str(item.get("filename", ""))
-        for item in attachment_signals
-        if isinstance(item, dict) and item.get("risk_flags")
-    ]
-    indicators = list(dict.fromkeys(pre_score.get("reasons", []) + chain_flags))
-
-    text_score = int(
-        (
-            float(nlp_cues.get("urgency", 0.0))
-            + float(nlp_cues.get("threat_language", 0.0))
-            + float(nlp_cues.get("payment_or_giftcard", 0.0))
-            + float(nlp_cues.get("credential_request", 0.0))
-        )
-        / 4
-        * 100
-    )
-    url_score = max(
-        [
-            _clip_score(len(item.get("risk_flags", [])) * 14)
-            for item in url_signals
-            if isinstance(item, dict)
-        ],
-        default=0,
-    )
-    domain_score = max(
-        [int(item.get("risk_score", 0)) for item in domain_reports if isinstance(item, dict)],
-        default=0,
-    )
-    attachment_score = max(
-        [_clip_score(len(item.get("risk_flags", [])) * 15) for item in attachment_signals if isinstance(item, dict)],
-        default=0,
-    )
-    ocr_score = max(
-        [
-            int(item.get("details", {}).get("risk_score", 0))
-            for item in attachment_bundle.get("reports", [])
-            if isinstance(item, dict) and item.get("type") == "image"
-        ],
-        default=0,
-    )
-
-    precheck = {
-        "chain_flags": list(dict.fromkeys(chain_flags)),
-        "hidden_links": html_url_meta["hidden_links"],
-        "combined_urls": list(dict.fromkeys([str(item.get("url", "")) for item in url_signals if item.get("url")])),
-        "url_checks": [
-            {"url": str(item.get("url", "")), "suspicious": bool(item.get("risk_flags"))}
-            for item in url_signals
-            if isinstance(item, dict)
-        ],
-        "url_target_reports": url_target_reports,
-        "domain_reports": domain_reports,
-        "attachment_checks": [
-            {
-                "name": str(item.get("filename", "")),
-                "risk_score": _clip_score(len(item.get("risk_flags", [])) * 16),
-                "type": str(item.get("mime", "")),
-            }
-            for item in attachment_signals
-            if isinstance(item, dict)
-        ],
-        "attachment_reports": attachment_bundle.get("reports", []),
-        "attachment_extracted_urls": attachment_bundle.get("extracted_urls", []),
-        "keyword_hits": [],
-        "suspicious_urls": list(dict.fromkeys([item for item in suspicious_urls if item])),
-        "risky_attachments": list(dict.fromkeys([item for item in risky_attachments if item])),
-        "indicators": indicators,
-        "component_scores": {
-            "text": text_score,
-            "url": url_score,
-            "domain": _clip_score(domain_score),
-            "attachment": attachment_score,
-            "ocr": _clip_score(ocr_score),
-        },
-        "heuristic_score": int(evidence_pack.pre_score.risk_score),
-        "fusion": {
-            "risk_score": int(evidence_pack.pre_score.risk_score),
-            "risk_level": (
-                "high"
-                if int(evidence_pack.pre_score.risk_score) >= 70
-                else "medium"
-                if int(evidence_pack.pre_score.risk_score) >= 35
-                else "low"
-            ),
-            "verdict": "phishing" if int(evidence_pack.pre_score.risk_score) >= 35 else "benign",
-        },
-        "fetch_policy": {
-            "enabled": safe_fetch_policy.enabled,
-            "backend": safe_fetch_policy.sandbox_backend,
-            "allow_private_network": safe_fetch_policy.allow_private_network,
-            "max_bytes": safe_fetch_policy.max_bytes,
-            "max_redirects": safe_fetch_policy.max_redirects,
-        },
-    }
-    return evidence_pack, precheck
+    return _EVIDENCE_STAGE.build(email, service)
 
 
 def _fallback_result(
@@ -1124,14 +905,14 @@ class AgentService:
     pipeline_policy: PipelinePolicy = field(default_factory=PipelinePolicy)
     _executor: PipelineExecutor | None = field(default=None, init=False, repr=False)
 
-    def _can_call_remote(self) -> bool:
+    def can_call_remote(self) -> bool:
         if importlib.util.find_spec("agents") is None:
             return False
         if self.provider == "openai":
             return bool(self.api_key or os.getenv("OPENAI_API_KEY"))
         return True
 
-    def _build_common_kwargs(self) -> dict[str, object]:
+    def build_common_kwargs(self) -> dict[str, object]:
         from agents import ModelSettings
 
         registry = ToolRegistry()
@@ -1150,8 +931,18 @@ class AgentService:
             "model_settings": ModelSettings(temperature=self.temperature),
         }
 
-    def _event(self, stage: str, status: str, message: str, data: dict[str, Any] | None = None) -> TraceEvent:
+    def event(self, stage: str, status: str, message: str, data: dict[str, Any] | None = None) -> TraceEvent:
         return make_event(stage=stage, status=status, message=message, data=data)
+
+    # Backward-compatible private aliases for callers that still use the previous interface.
+    def _can_call_remote(self) -> bool:
+        return self.can_call_remote()
+
+    def _build_common_kwargs(self) -> dict[str, object]:
+        return self.build_common_kwargs()
+
+    def _event(self, stage: str, status: str, message: str, data: dict[str, Any] | None = None) -> TraceEvent:
+        return self.event(stage=stage, status=status, message=message, data=data)
 
     def _get_executor(self) -> PipelineExecutor:
         if self._executor is None:

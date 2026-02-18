@@ -9,6 +9,7 @@ from typing import Any
 from phish_email_detection_agent.agents.pipeline.evidence_builder import EvidenceBuilder
 from phish_email_detection_agent.agents.pipeline.judge import JudgeEngine
 from phish_email_detection_agent.agents.pipeline.planner import Planner
+from phish_email_detection_agent.agents.pipeline.runtime import PipelineRuntime
 
 
 ParseInputFn = Callable[[str], Any]
@@ -23,7 +24,7 @@ class PipelineExecutor:
     judge: JudgeEngine
     fallback_builder: FallbackFn
 
-    def analyze_stream(self, *, service: Any, text: str) -> Generator[dict[str, Any], None, None]:
+    def analyze_stream(self, *, service: PipelineRuntime, text: str) -> Generator[dict[str, Any], None, None]:
         email = self.parse_input(text)
         evidence_pack, precheck = self.evidence_builder.build(email, service)
         fallback = self.fallback_builder(
@@ -37,17 +38,18 @@ class PipelineExecutor:
         plan = self.planner.plan(
             evidence_pack=evidence_pack,
             has_content=has_content,
-            can_call_remote=service._can_call_remote(),
+            can_call_remote=service.can_call_remote(),
+            pipeline_policy=service.pipeline_policy,
         )
 
         if not plan.has_content:
             final = fallback.model_dump(mode="json")
             final["precheck"] = precheck
-            yield service._event("init", "done", "Input empty; return fallback result.")
+            yield service.event("init", "done", "Input empty; return fallback result.")
             yield {"type": "final", "result": final}
             return
 
-        yield service._event(
+        yield service.event(
             "init",
             "done",
             "Input parsed.",
@@ -58,7 +60,7 @@ class PipelineExecutor:
                 "chain_flags": precheck.get("chain_flags", []),
             },
         )
-        yield service._event(
+        yield service.event(
             "header_intel",
             "done",
             "Header analysis completed.",
@@ -68,7 +70,7 @@ class PipelineExecutor:
                 "confidence": evidence_pack.header_signals.confidence,
             },
         )
-        yield service._event(
+        yield service.event(
             "url_intel",
             "done",
             "URL analysis completed.",
@@ -77,13 +79,13 @@ class PipelineExecutor:
                 "suspicious_url_count": len(precheck.get("suspicious_urls", [])),
             },
         )
-        yield service._event(
+        yield service.event(
             "pre_score",
             "done",
             "Deterministic pre-score ready.",
             data=evidence_pack.pre_score.model_dump(mode="json"),
         )
-        yield service._event(
+        yield service.event(
             "planner",
             "done",
             "Planner generated execution plan.",
@@ -96,7 +98,7 @@ class PipelineExecutor:
         )
 
         if evidence_pack.web_signals or precheck.get("attachment_reports"):
-            yield service._event(
+            yield service.event(
                 "deep_context",
                 "done",
                 "Conditional web/attachment context collected.",
@@ -109,11 +111,11 @@ class PipelineExecutor:
         if not plan.should_invoke_judge:
             final = fallback.model_dump(mode="json")
             final["precheck"] = precheck
-            yield service._event("runtime", "fallback", "Remote model unavailable; using deterministic fallback.")
+            yield service.event("runtime", "fallback", "Remote model unavailable; using deterministic fallback.")
             yield {"type": "final", "result": final}
             return
 
-        yield service._event("judge", "running", "Judge agent is evaluating the evidence pack.")
+        yield service.event("judge", "running", "Judge agent is evaluating the evidence pack.")
         judge_result = self.judge.evaluate(
             service=service,
             email=email,
@@ -125,13 +127,13 @@ class PipelineExecutor:
             final = fallback.model_dump(mode="json")
             final["precheck"] = precheck
             err_name = type(judge_result.error).__name__ if judge_result.error is not None else "UnknownError"
-            yield service._event("runtime", "error", f"Judge failed: {err_name}. Use fallback.")
+            yield service.event("runtime", "error", f"Judge failed: {err_name}. Use fallback.")
             yield {"type": "final", "result": final}
             return
 
         judge_output = judge_result.judge_output
         if judge_output is not None:
-            yield service._event(
+            yield service.event(
                 "judge",
                 "done",
                 "Judge completed.",
@@ -142,10 +144,10 @@ class PipelineExecutor:
                     "top_evidence": len(judge_output.top_evidence),
                 },
             )
-        yield service._event("judge", "done", "Final verdict ready.")
+        yield service.event("judge", "done", "Final verdict ready.")
         yield {"type": "final", "result": judge_result.final_result}
 
-    def analyze(self, *, service: Any, text: str) -> dict[str, Any]:
+    def analyze(self, *, service: PipelineRuntime, text: str) -> dict[str, Any]:
         final: dict[str, Any] | None = None
         for event in self.analyze_stream(service=service, text=text):
             if event.get("type") == "final":

@@ -66,6 +66,9 @@ class AppConfig(BaseModel):
     context_trigger_score: int = Field(default=35)
     suspicious_min_score: int = Field(default=30)
     suspicious_max_score: int = Field(default=34)
+    judge_allow_mode: str = Field(default="never")
+    judge_allow_sample_rate: float = Field(default=0.0)
+    judge_allow_sample_salt: str = Field(default="argis")
     default_config_path: str = Field(default=str(DEFAULT_CONFIG_PATH))
 
 
@@ -533,6 +536,27 @@ def load_config(
             ),
             34,
         ),
+        "judge_allow_mode": _parse_str(
+            _pick_env(
+                "MY_AGENT_APP_JUDGE_ALLOW_MODE",
+                selected.get("judge_allow_mode", merged.get("judge_allow_mode", "never")),
+            ),
+            "never",
+        ),
+        "judge_allow_sample_rate": _parse_float(
+            _pick_env(
+                "MY_AGENT_APP_JUDGE_ALLOW_SAMPLE_RATE",
+                selected.get("judge_allow_sample_rate", merged.get("judge_allow_sample_rate", 0.0)),
+            ),
+            0.0,
+        ),
+        "judge_allow_sample_salt": _parse_str(
+            _pick_env(
+                "MY_AGENT_APP_JUDGE_ALLOW_SAMPLE_SALT",
+                selected.get("judge_allow_sample_salt", merged.get("judge_allow_sample_salt", "argis")),
+            ),
+            "argis",
+        ),
         "default_config_path": str(default_path),
     }
 
@@ -547,6 +571,7 @@ def load_config(
 
     if int(payload["suspicious_max_score"]) < int(payload["suspicious_min_score"]):
         payload["suspicious_max_score"] = int(payload["suspicious_min_score"])
+    payload["judge_allow_sample_rate"] = max(0.0, min(1.0, float(payload["judge_allow_sample_rate"])))
 
     cfg = AppConfig.model_validate(payload)
     return cfg, merged

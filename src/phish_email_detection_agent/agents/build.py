@@ -23,6 +23,9 @@ def create_agent(
         context_trigger_score=env_cfg.context_trigger_score,
         suspicious_min_score=env_cfg.suspicious_min_score,
         suspicious_max_score=env_cfg.suspicious_max_score,
+        judge_allow_mode=env_cfg.judge_allow_mode,
+        judge_allow_sample_rate=env_cfg.judge_allow_sample_rate,
+        judge_allow_sample_salt=env_cfg.judge_allow_sample_salt,
     ).normalized()
     agent = AgentService(
         provider=env_cfg.provider,
@@ -99,6 +102,9 @@ def create_agent(
         "context_trigger_score": env_cfg.context_trigger_score,
         "suspicious_min_score": env_cfg.suspicious_min_score,
         "suspicious_max_score": env_cfg.suspicious_max_score,
+        "judge_allow_mode": env_cfg.judge_allow_mode,
+        "judge_allow_sample_rate": env_cfg.judge_allow_sample_rate,
+        "judge_allow_sample_salt": env_cfg.judge_allow_sample_salt,
         "agents_sdk": True,
         "config": yaml_cfg,
     }

@@ -43,6 +43,9 @@ pre_score_deep_threshold: 70
 context_trigger_score: 35
 suspicious_min_score: 30
 suspicious_max_score: 34
+judge_allow_mode: never
+judge_allow_sample_rate: 0.0
+judge_allow_sample_salt: argis
 
 profiles:
   openai:
@@ -100,6 +103,9 @@ profiles:
     context_trigger_score: 35
     suspicious_min_score: 30
     suspicious_max_score: 34
+    judge_allow_mode: never
+    judge_allow_sample_rate: 0.0
+    judge_allow_sample_salt: argis
 
   ollama:
     provider: local
@@ -159,3 +165,6 @@ profiles:
     context_trigger_score: 35
     suspicious_min_score: 30
     suspicious_max_score: 34
+    judge_allow_mode: never
+    judge_allow_sample_rate: 0.0
+    judge_allow_sample_salt: argis

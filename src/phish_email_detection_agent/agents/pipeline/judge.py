@@ -13,6 +13,7 @@ from phish_email_detection_agent.agents.pipeline.router import (
     merge_judge_verdict,
     normalize_score_for_verdict,
 )
+from phish_email_detection_agent.agents.pipeline.runtime import PipelineRuntime
 from phish_email_detection_agent.agents.prompts import JUDGE_PROMPT
 from phish_email_detection_agent.evidence.redact import redact_value
 
@@ -28,7 +29,7 @@ class JudgeEngine:
     def evaluate(
         self,
         *,
-        service: Any,
+        service: PipelineRuntime,
         email: Any,
         evidence_pack: Any,
         precheck: dict[str, Any],
@@ -37,7 +38,7 @@ class JudgeEngine:
         try:
             from agents import Agent, AgentOutputSchema, Runner
 
-            common = service._build_common_kwargs()
+            common = service.build_common_kwargs()
             judge_agent = Agent(
                 name="argis-evidence-judge-agent",
                 instructions=JUDGE_PROMPT,

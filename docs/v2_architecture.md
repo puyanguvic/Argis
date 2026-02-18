@@ -6,13 +6,14 @@ Build an end-to-end phishing detector that can reason over the full attack chain
 
 `email text/html -> embedded URL -> remote page -> downloaded/attached payload`.
 
-## Pipeline
+## Pipeline (current)
 
-1. Input normalization (`tools/preprocessing.py`)
-1. URL and domain analysis (`tools/url_analysis.py`, `tools/domain_intel.py`)
-1. Attachment deep analysis (`tools/attachment_analysis.py`)
-1. Multi-modal risk fusion (`agents/risk_fusion.py`)
-1. Agent orchestration (`agents/service.py`)
+1. Input normalization and EML/JSON parsing (`domain/email/parse.py`).
+1. Header and URL/domain evidence extraction (`tools/intel/*`, `domain/url/*`).
+1. Conditional deep context collection via safe URL fetch and attachment static/deep analysis (`tools/url_fetch/service.py`, `tools/attachment/analyze.py`).
+1. Evidence pack assembly (`orchestrator/pipeline.py::_build_evidence_pack`).
+1. Planner + executor + judge orchestration (`agents/pipeline/*`).
+1. Fallback or merged final verdict (`agents/pipeline/router.py`).
 
 ## Security-first execution model
 
@@ -30,6 +31,16 @@ Build an end-to-end phishing detector that can reason over the full attack chain
 - `indicators`: merged text/url/attachment/chain indicators
 - `evidence`: deterministic reports for URLs/domains/attachments and component scores
 - `precheck`: raw deterministic analyzer output for reproducible experiments
+
+Judge input is redacted evidence pack to reduce prompt injection and sensitive data exposure.
+
+## Architectural updates in this round
+
+- Added explicit `PipelineRuntime` contract (`agents/pipeline/runtime.py`) to decouple stages from service internals.
+- Extracted evidence assembly into dedicated stage module (`agents/pipeline/evidence_stage.py`).
+- Judge invocation is now route-gated (`review/deep`) instead of always-on when remote model exists.
+- Added configurable `allow`-route judge gating (`never|sampled|always`, deterministic sampling).
+- Updated architecture docs to align with real module paths and runtime composition.
 
 ## Research extension points
 

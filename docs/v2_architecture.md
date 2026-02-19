@@ -15,6 +15,14 @@ Build an end-to-end phishing detector that can reason over the full attack chain
 1. Planner + executor + judge orchestration (`agents/pipeline/*`).
 1. Fallback or merged final verdict (`agents/pipeline/router.py`).
 
+### Fixed curated skill chain
+
+Evidence construction now executes a fixed whitelist-driven skill chain (no dynamic skill generation):
+
+`EmailSurface -> HeaderAnalysis -> URLRisk -> NLPCues -> AttachmentSurface -> (optional) PageContentAnalysis -> (optional) AttachmentDeepAnalysis -> RiskFusion`
+
+Each skill is capped at `<= 5` declared steps through registry metadata and emits execution trace in `precheck.skill_trace`.
+
 ## Security-first execution model
 
 - URL fetch is opt-in only (`MY_AGENT_APP_ENABLE_URL_FETCH=false` by default).

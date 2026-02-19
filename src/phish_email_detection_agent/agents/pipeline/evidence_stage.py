@@ -6,8 +6,29 @@ from dataclasses import dataclass
 import time
 from typing import Any, Callable
 
+from phish_email_detection_agent.agents.skills import SkillRegistry, SkillSpec
 from phish_email_detection_agent.domain.email.models import EmailInput
 from phish_email_detection_agent.domain.evidence import EvidencePack
+
+_SKILL_EMAIL_SURFACE = "EmailSurface"
+_SKILL_HEADER_ANALYSIS = "HeaderAnalysis"
+_SKILL_URL_RISK = "URLRisk"
+_SKILL_NLP_CUES = "NLPCues"
+_SKILL_ATTACHMENT_SURFACE = "AttachmentSurface"
+_SKILL_PAGE_CONTENT = "PageContentAnalysis"
+_SKILL_ATTACHMENT_DEEP = "AttachmentDeepAnalysis"
+_SKILL_RISK_FUSION = "RiskFusion"
+
+_FIXED_SKILL_CHAIN = (
+    _SKILL_EMAIL_SURFACE,
+    _SKILL_HEADER_ANALYSIS,
+    _SKILL_URL_RISK,
+    _SKILL_NLP_CUES,
+    _SKILL_ATTACHMENT_SURFACE,
+    _SKILL_PAGE_CONTENT,
+    _SKILL_ATTACHMENT_DEEP,
+    _SKILL_RISK_FUSION,
+)
 
 
 @dataclass(frozen=True)
@@ -32,58 +53,140 @@ class EvidenceStage:
     def build(self, email: EmailInput, service: Any) -> tuple[EvidencePack, dict[str, Any]]:
         timings: dict[str, int] = {}
         provenance: dict[str, list[str]] = {"limits_hit": [], "errors": []}
+        skill_trace: list[dict[str, Any]] = []
+        executed_skills: list[str] = []
+
+        registry = SkillRegistry(allowed_names=set(_FIXED_SKILL_CHAIN))
+        registry.register(
+            spec=SkillSpec(
+                name=_SKILL_EMAIL_SURFACE,
+                description="Extract visible/hidden links and normalize initial message surface.",
+            ),
+            runner=lambda: self._skill_email_surface(email),
+        )
+        registry.register(
+            spec=SkillSpec(
+                name=_SKILL_HEADER_ANALYSIS,
+                description="Parse SPF/DKIM/DMARC and relay-path anomalies.",
+            ),
+            runner=lambda: self._skill_header_analysis(email),
+        )
+        registry.register(
+            spec=SkillSpec(
+                name=_SKILL_URL_RISK,
+                description="Evaluate URL/domain risk signals from extracted links.",
+            ),
+            runner=lambda urls: self._skill_url_risk(
+                urls,
+                service=service,
+                fetch_policy=safe_fetch_policy,
+                domain_policy=domain_policy,
+                provenance=provenance,
+            ),
+        )
+        registry.register(
+            spec=SkillSpec(
+                name=_SKILL_NLP_CUES,
+                description="Extract social-engineering and credential-theft text cues.",
+            ),
+            runner=lambda: self._skill_nlp_cues(email),
+        )
+        registry.register(
+            spec=SkillSpec(
+                name=_SKILL_ATTACHMENT_SURFACE,
+                description="Classify attachment surface risk before deep scan.",
+            ),
+            runner=lambda: self._skill_attachment_surface(email.attachments),
+        )
+        registry.register(
+            spec=SkillSpec(
+                name=_SKILL_PAGE_CONTENT,
+                description="Analyze fetched page content for credential-harvest indicators.",
+            ),
+            runner=lambda url_signals, fetch_policy: self._skill_page_content(
+                url_signals=url_signals,
+                fetch_policy=fetch_policy,
+                provenance=provenance,
+            ),
+        )
+        registry.register(
+            spec=SkillSpec(
+                name=_SKILL_ATTACHMENT_DEEP,
+                description="Run attachment deep scan and recover nested URL chains.",
+            ),
+            runner=lambda attachment_signals, attachment_policy: self._skill_attachment_deep(
+                attachments=email.attachments,
+                attachment_signals=attachment_signals,
+                attachment_policy=attachment_policy,
+                chain_flags=chain_flags,
+            ),
+        )
+        registry.register(
+            spec=SkillSpec(
+                name=_SKILL_RISK_FUSION,
+                description="Fuse skill outputs into deterministic pre-score route.",
+            ),
+            runner=lambda **kwargs: self._skill_risk_fusion(service=service, **kwargs),
+        )
+
+        def run_skill(name: str, *, timing_key: str | None = None, **kwargs: Any) -> Any:
+            start = time.perf_counter()
+            status = "done"
+            try:
+                return registry.run(name, **kwargs)
+            except Exception:
+                status = "error"
+                raise
+            finally:
+                elapsed_ms = int((time.perf_counter() - start) * 1000)
+                if timing_key is not None:
+                    timings[timing_key] = elapsed_ms
+                spec = registry.spec(name)
+                executed_skills.append(spec.name)
+                skill_trace.append(
+                    {
+                        "name": spec.name,
+                        "version": spec.version,
+                        "max_steps": spec.max_steps,
+                        "status": status,
+                        "elapsed_ms": elapsed_ms,
+                    }
+                )
 
         safe_fetch_policy = self.safe_fetch_policy_fn(service)
         attachment_policy = self.attachment_policy_fn(service)
         domain_policy = self.domain_policy_fn(service)
 
-        t_start = time.perf_counter()
-        html_url_meta = self.extract_urls_from_html_fn(email.body_html or "")
-        combined_urls = list(
-            dict.fromkeys(email.urls + self.extract_urls_fn(email.text) + self.extract_urls_fn(email.body_text))
+        html_url_meta, combined_urls, chain_flags = run_skill(
+            _SKILL_EMAIL_SURFACE,
+            timing_key="parse",
         )
-        combined_urls = list(dict.fromkeys(combined_urls + html_url_meta["urls"]))
-        chain_flags = self.summarize_chain_flags_fn(email)
-        if html_url_meta["hidden_links"]:
-            chain_flags.append("hidden_html_links")
-        timings["parse"] = int((time.perf_counter() - t_start) * 1000)
-
-        t_header = time.perf_counter()
-        header_signals = self.analyze_headers_fn(
-            headers=email.headers,
-            headers_raw=email.headers_raw,
-            sender=email.sender,
-            reply_to=email.reply_to,
+        header_signals = run_skill(
+            _SKILL_HEADER_ANALYSIS,
+            timing_key="header_intel",
         )
-        timings["header_intel"] = int((time.perf_counter() - t_header) * 1000)
-
-        t_url = time.perf_counter()
-        url_signals, domain_reports = self.infer_url_signals_fn(
-            combined_urls,
-            service=service,
-            fetch_policy=safe_fetch_policy,
-            domain_policy=domain_policy,
-            provenance=provenance,
+        url_signals: list[dict[str, Any]] = []
+        domain_reports: list[dict[str, Any]] = []
+        url_signals, domain_reports = run_skill(
+            _SKILL_URL_RISK,
+            timing_key="url_intel",
+            urls=combined_urls,
         )
-        timings["url_intel"] = int((time.perf_counter() - t_url) * 1000)
-
-        t_nlp = time.perf_counter()
-        nlp_cues = self.build_nlp_cues_fn(email)
-        timings["nlp_cues"] = int((time.perf_counter() - t_nlp) * 1000)
-
-        t_att = time.perf_counter()
-        attachment_signals = self.build_attachment_signals_fn(email.attachments)
-        timings["attachment_prescan"] = int((time.perf_counter() - t_att) * 1000)
-
-        pre_score = self.compute_pre_score_fn(
+        nlp_cues = run_skill(
+            _SKILL_NLP_CUES,
+            timing_key="nlp_cues",
+        )
+        attachment_signals = run_skill(
+            _SKILL_ATTACHMENT_SURFACE,
+            timing_key="attachment_prescan",
+        )
+        pre_score = run_skill(
+            _SKILL_RISK_FUSION,
             header_signals=header_signals,
             url_signals=url_signals,
             web_signals=[],
             attachment_signals=attachment_signals,
             nlp_cues=nlp_cues,
-            review_threshold=service.pipeline_policy.pre_score_review_threshold,
-            deep_threshold=service.pipeline_policy.pre_score_deep_threshold,
-            url_suspicious_weight=service.precheck_url_suspicious_weight,
         )
 
         deep_trigger = self.should_collect_deep_context_fn(
@@ -103,42 +206,35 @@ class EvidenceStage:
         }
 
         if deep_trigger:
-            t_web = time.perf_counter()
-            web_signals, url_target_reports = self.build_web_signals_fn(
-                url_signals,
+            web_signals, url_target_reports = run_skill(
+                _SKILL_PAGE_CONTENT,
+                timing_key="web_snapshot",
+                url_signals=url_signals,
                 fetch_policy=safe_fetch_policy,
-                provenance=provenance,
             )
-            timings["web_snapshot"] = int((time.perf_counter() - t_web) * 1000)
-
-            t_att_deep = time.perf_counter()
-            attachment_bundle = self.analyze_attachments_fn(email.attachments, policy=attachment_policy)
-            nested_urls = self.enrich_attachments_with_static_scan_fn(attachment_signals, attachment_bundle)
-            if nested_urls:
-                chain_flags.append("nested_url_in_attachment")
-            timings["attachment_intel"] = int((time.perf_counter() - t_att_deep) * 1000)
+            attachment_bundle, nested_urls = run_skill(
+                _SKILL_ATTACHMENT_DEEP,
+                timing_key="attachment_intel",
+                attachment_signals=attachment_signals,
+                attachment_policy=attachment_policy,
+            )
 
             if nested_urls:
-                extra_signals, extra_domain_reports = self.infer_url_signals_fn(
-                    nested_urls,
-                    service=service,
-                    fetch_policy=safe_fetch_policy,
-                    domain_policy=domain_policy,
-                    provenance=provenance,
+                extra_signals, extra_domain_reports = run_skill(
+                    _SKILL_URL_RISK,
+                    urls=nested_urls,
                 )
                 if extra_signals:
                     url_signals.extend(extra_signals)
                     domain_reports.extend(extra_domain_reports)
 
-            pre_score = self.compute_pre_score_fn(
+            pre_score = run_skill(
+                _SKILL_RISK_FUSION,
                 header_signals=header_signals,
                 url_signals=url_signals,
                 web_signals=web_signals,
                 attachment_signals=attachment_signals,
                 nlp_cues=nlp_cues,
-                review_threshold=service.pipeline_policy.pre_score_review_threshold,
-                deep_threshold=service.pipeline_policy.pre_score_deep_threshold,
-                url_suspicious_weight=service.precheck_url_suspicious_weight,
             )
 
         email_meta = {
@@ -274,5 +370,98 @@ class EvidenceStage:
                 "max_bytes": safe_fetch_policy.max_bytes,
                 "max_redirects": safe_fetch_policy.max_redirects,
             },
+            "skill_whitelist": list(_FIXED_SKILL_CHAIN),
+            "skill_chain": executed_skills,
+            "skill_trace": skill_trace,
         }
         return evidence_pack, precheck
+
+    def _skill_email_surface(self, email: EmailInput) -> tuple[dict[str, Any], list[str], list[str]]:
+        html_url_meta = self.extract_urls_from_html_fn(email.body_html or "")
+        combined_urls = list(
+            dict.fromkeys(email.urls + self.extract_urls_fn(email.text) + self.extract_urls_fn(email.body_text))
+        )
+        combined_urls = list(dict.fromkeys(combined_urls + html_url_meta["urls"]))
+        chain_flags = self.summarize_chain_flags_fn(email)
+        if html_url_meta["hidden_links"]:
+            chain_flags.append("hidden_html_links")
+        return html_url_meta, combined_urls, chain_flags
+
+    def _skill_header_analysis(self, email: EmailInput) -> dict[str, Any]:
+        return self.analyze_headers_fn(
+            headers=email.headers,
+            headers_raw=email.headers_raw,
+            sender=email.sender,
+            reply_to=email.reply_to,
+        )
+
+    def _skill_url_risk(
+        self,
+        urls: list[str],
+        *,
+        service: Any,
+        fetch_policy: Any,
+        domain_policy: Any,
+        provenance: dict[str, list[str]],
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        return self.infer_url_signals_fn(
+            urls,
+            service=service,
+            fetch_policy=fetch_policy,
+            domain_policy=domain_policy,
+            provenance=provenance,
+        )
+
+    def _skill_nlp_cues(self, email: EmailInput) -> dict[str, Any]:
+        return self.build_nlp_cues_fn(email)
+
+    def _skill_attachment_surface(self, attachments: list[str]) -> list[dict[str, Any]]:
+        return self.build_attachment_signals_fn(attachments)
+
+    def _skill_page_content(
+        self,
+        *,
+        url_signals: list[dict[str, Any]],
+        fetch_policy: Any,
+        provenance: dict[str, list[str]],
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        return self.build_web_signals_fn(
+            url_signals,
+            fetch_policy=fetch_policy,
+            provenance=provenance,
+        )
+
+    def _skill_attachment_deep(
+        self,
+        *,
+        attachments: list[str],
+        attachment_signals: list[dict[str, Any]],
+        attachment_policy: Any,
+        chain_flags: list[str],
+    ) -> tuple[dict[str, Any], list[str]]:
+        attachment_bundle = self.analyze_attachments_fn(attachments, policy=attachment_policy)
+        nested_urls = self.enrich_attachments_with_static_scan_fn(attachment_signals, attachment_bundle)
+        if nested_urls:
+            chain_flags.append("nested_url_in_attachment")
+        return attachment_bundle, nested_urls
+
+    def _skill_risk_fusion(
+        self,
+        *,
+        service: Any,
+        header_signals: dict[str, Any],
+        url_signals: list[dict[str, Any]],
+        web_signals: list[dict[str, Any]],
+        attachment_signals: list[dict[str, Any]],
+        nlp_cues: dict[str, Any],
+    ) -> dict[str, Any]:
+        return self.compute_pre_score_fn(
+            header_signals=header_signals,
+            url_signals=url_signals,
+            web_signals=web_signals,
+            attachment_signals=attachment_signals,
+            nlp_cues=nlp_cues,
+            review_threshold=service.pipeline_policy.pre_score_review_threshold,
+            deep_threshold=service.pipeline_policy.pre_score_deep_threshold,
+            url_suspicious_weight=service.precheck_url_suspicious_weight,
+        )

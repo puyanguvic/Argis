@@ -51,6 +51,30 @@ EML input:
 uv run python -m phish_email_detection_agent --text '{"eml_path":"/path/to/sample.eml"}'
 ```
 
+## Skills (SkillsBench style)
+
+Argis now uses the same lightweight convention as SkillsBench: each skill is a folder containing `SKILL.md` under local `skills/`.
+
+List installable remote skills from SkillsBench:
+
+```bash
+python scripts/skillsbench_skills.py --list
+```
+
+Install specific skills into project `skills/`:
+
+```bash
+python scripts/skillsbench_skills.py --install threat-detection openai-vision image-ocr
+```
+
+By default runtime auto-discovers local skills from `skills/`. You can override path with:
+
+```bash
+export MY_AGENT_APP_SKILLS_DIR=/path/to/skills
+```
+
+API `/analyze` responses now include both `runtime.installed_skills` and top-level `skills` summary (`dir`, `count`, `names`, `installed`).
+
 ## Security policy switches
 
 Safe defaults: URL fetch is disabled, private-network access is blocked, OCR/audio transcription are off.

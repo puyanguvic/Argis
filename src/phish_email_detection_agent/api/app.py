@@ -21,5 +21,17 @@ def analyze(payload: dict[str, object]) -> dict[str, object]:
     model_override = str(model) if isinstance(model, str) and model.strip() else None
     agent, runtime = create_agent(model_override=model_override)
     result = agent.analyze(text)
+    installed_skills = runtime.get("installed_skills", [])
+    names = [
+        str(item.get("name", "")).strip()
+        for item in installed_skills
+        if isinstance(item, dict) and str(item.get("name", "")).strip()
+    ]
     result["runtime"] = runtime
+    result["skills"] = {
+        "dir": str(runtime.get("skills_dir", "")),
+        "count": len(names),
+        "names": names,
+        "installed": installed_skills if isinstance(installed_skills, list) else [],
+    }
     return result

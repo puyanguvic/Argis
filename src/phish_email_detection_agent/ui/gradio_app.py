@@ -228,6 +228,12 @@ def _format_compact_result(final: dict[str, Any], runtime: dict[str, Any]) -> st
         f"Model Used: profile={runtime.get('profile')} "
         f"provider={runtime.get('provider')} model={runtime.get('model')}"
     )
+    skill_names = _extract_skill_names(runtime)
+    skills_line = (
+        f"Loaded Skills: {len(skill_names)} ({', '.join(skill_names[:5])})"
+        if skill_names
+        else "Loaded Skills: 0"
+    )
     tags = final.get("threat_tags")
     tag_line = ""
     if isinstance(tags, list) and tags:
@@ -237,6 +243,7 @@ def _format_compact_result(final: dict[str, Any], runtime: dict[str, Any]) -> st
     if tag_line:
         lines.append(tag_line)
     lines.append(execution)
+    lines.append(skills_line)
     return "\n".join(lines)
 
 
@@ -341,6 +348,35 @@ def _format_runtime_hint(runtime: dict[str, Any]) -> str:
     return hint
 
 
+def _extract_skill_names(runtime: dict[str, Any]) -> list[str]:
+    raw = runtime.get("installed_skills", [])
+    names: list[str] = []
+    if not isinstance(raw, list):
+        return names
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        name = str(item.get("name", "")).strip()
+        if name:
+            names.append(name)
+    return names
+
+
+def _format_skills_hint(runtime: dict[str, Any]) -> str:
+    names = _extract_skill_names(runtime)
+    root = str(runtime.get("skills_dir", "")).strip()
+    if not names:
+        if root:
+            return f"Loaded Skills: 0 (dir={root})"
+        return "Loaded Skills: 0"
+    preview = ", ".join(names[:6])
+    if len(names) > 6:
+        preview += f", ... (+{len(names) - 6} more)"
+    if root:
+        return f"Loaded Skills: {len(names)} (dir={root})\n{preview}"
+    return f"Loaded Skills: {len(names)}\n{preview}"
+
+
 def _reload_provider_state(provider_mode: str):
     selected_profile = _profile_from_provider_mode(provider_mode)
     _, runtime = create_agent(profile_override=selected_profile)
@@ -354,6 +390,7 @@ def _reload_provider_state(provider_mode: str):
     return (
         gr.Dropdown(choices=choices, value=value, allow_custom_value=True),
         _format_runtime_hint(runtime),
+        _format_skills_hint(runtime),
         _format_backend_status(runtime),
     )
 
@@ -432,6 +469,7 @@ def build() -> gr.Blocks:
                 with gr.Column(scale=4, elem_classes=["panel-card"]):
                     gr.Markdown("Runtime", elem_classes=["panel-title"])
                     runtime_hint = gr.Markdown(_format_runtime_hint(runtime), elem_classes=["status-box"])
+                    skills_hint = gr.Markdown(_format_skills_hint(runtime), elem_classes=["status-box"])
                     backend_status = gr.Markdown(_format_backend_status(runtime), elem_classes=["status-box"])
                 with gr.Column(scale=3, elem_classes=["panel-card"]):
                     gr.Markdown("Execution Controls", elem_classes=["panel-title"])
@@ -467,7 +505,7 @@ def build() -> gr.Blocks:
         provider_mode.change(
             _reload_provider_state,
             inputs=[provider_mode],
-            outputs=[model, runtime_hint, backend_status],
+            outputs=[model, runtime_hint, skills_hint, backend_status],
         )
         btn.click(_stream_with_selected_model, inputs=[inp, provider_mode, model], outputs=[process, out])
     return demo

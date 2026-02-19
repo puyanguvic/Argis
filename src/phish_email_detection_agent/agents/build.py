@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from phish_email_detection_agent.agents.pipeline.policy import PipelinePolicy
+from phish_email_detection_agent.agents.skills import default_skills_dir, discover_installed_skills
 from phish_email_detection_agent.orchestrator.pipeline import AgentService
 from phish_email_detection_agent.config.settings import load_config
 
@@ -13,6 +14,7 @@ def create_agent(
     model_override: str | None = None,
 ) -> tuple[AgentService, dict[str, object]]:
     env_cfg, yaml_cfg = load_config(profile_override=profile_override)
+    local_skills = discover_installed_skills()
     active_model = model_override or env_cfg.model
     profiles = yaml_cfg.get("profiles")
     profile_map = profiles if isinstance(profiles, dict) else {}
@@ -105,6 +107,15 @@ def create_agent(
         "judge_allow_mode": env_cfg.judge_allow_mode,
         "judge_allow_sample_rate": env_cfg.judge_allow_sample_rate,
         "judge_allow_sample_salt": env_cfg.judge_allow_sample_salt,
+        "skills_dir": str(default_skills_dir()),
+        "installed_skills": [
+            {
+                "name": item.name,
+                "description": item.description,
+                "directory": item.directory,
+            }
+            for item in local_skills
+        ],
         "agents_sdk": True,
         "config": yaml_cfg,
     }

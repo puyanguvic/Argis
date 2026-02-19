@@ -51,29 +51,29 @@ EML input:
 uv run python -m phish_email_detection_agent --text '{"eml_path":"/path/to/sample.eml"}'
 ```
 
-## Skills (SkillsBench style)
+## Skillpacks (SkillsBench style)
 
-Argis now uses the same lightweight convention as SkillsBench: each skill is a folder containing `SKILL.md` under local `skills/`.
+Argis now uses the same lightweight convention as SkillsBench: each skillpack is a folder containing `SKILL.md` under local `skillpacks/`.
 
-List installable remote skills from SkillsBench:
-
-```bash
-python scripts/skillsbench_skills.py --list
-```
-
-Install specific skills into project `skills/`:
+List installable remote skillpacks from SkillsBench:
 
 ```bash
-python scripts/skillsbench_skills.py --install threat-detection openai-vision image-ocr
+python scripts/skillsbench_skillpacks.py --list
 ```
 
-By default runtime auto-discovers local skills from `skills/`. You can override path with:
+Install specific skillpacks into project `skillpacks/`:
 
 ```bash
-export MY_AGENT_APP_SKILLS_DIR=/path/to/skills
+python scripts/skillsbench_skillpacks.py --install threat-detection openai-vision image-ocr
 ```
 
-API `/analyze` responses now include both `runtime.installed_skills` and top-level `skills` summary (`dir`, `count`, `names`, `installed`).
+By default runtime auto-discovers local skillpacks from `skillpacks/`. You can override path with:
+
+```bash
+export MY_AGENT_APP_SKILLPACKS_DIR=/path/to/skillpacks
+```
+
+API `/analyze` responses now include both `runtime.installed_skillpacks` and top-level `skillpacks` summary (`dir`, `count`, `names`, `installed`).
 It also includes `runtime.builtin_tools` and top-level `tools` summary (`count`, `names`, `builtin`).
 
 ## Security policy switches
@@ -115,6 +115,19 @@ export MY_AGENT_APP_PROFILE=ollama
 uv run python -m phish_email_detection_agent --model ollama/qwen2.5:3b --text "review this email"
 ```
 
+## Testing
+
+Quick local verification:
+
+```bash
+ruff check src tests docs scripts
+pytest -k 'not hf_phishing_email_balanced_sample'
+```
+
+Detailed test layout and suite guidance:
+
+- `docs/testing.md`
+
 ## Layout
 
 ```text
@@ -126,7 +139,7 @@ src/phish_email_detection_agent/
     url/
     attachment/
     evidence.py
-  skills/
+  policy/
   orchestrator/
     pipeline.py
     stages/

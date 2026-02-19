@@ -1,4 +1,4 @@
-from phish_email_detection_agent.skills.fixed_chain import (
+from phish_email_detection_agent.policy.fixed_chain import (
     FIXED_SKILL_CHAIN,
     SKILL_ATTACHMENT_DEEP,
     SKILL_ATTACHMENT_SURFACE,

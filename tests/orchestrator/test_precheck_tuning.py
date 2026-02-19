@@ -37,6 +37,8 @@ profiles:
 
 
 def test_env_override_precheck_weight_changes_score(monkeypatch):
+    monkeypatch.setenv("MY_AGENT_APP_PROFILE", "openai")
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.setenv("MY_AGENT_APP_PRECHECK_URL_SUSPICIOUS_WEIGHT", "24")
     baseline = json.loads(run_once(SUSPICIOUS_FINANCE_SAMPLE))
     monkeypatch.setenv("MY_AGENT_APP_PRECHECK_URL_SUSPICIOUS_WEIGHT", "1")

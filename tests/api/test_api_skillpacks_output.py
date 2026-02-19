@@ -10,13 +10,13 @@ class _FakeAgent:
         return {"verdict": "benign", "echo": text}
 
 
-def test_analyze_exposes_skills_summary(monkeypatch):
+def test_analyze_exposes_skillpack_summary(monkeypatch):
     runtime = {
         "profile": "ollama",
         "provider": "local",
         "model": "ollama/qwen2.5:7b",
-        "skills_dir": "/tmp/skills",
-        "installed_skills": [
+        "skillpacks_dir": "/tmp/skillpacks",
+        "installed_skillpacks": [
             {"name": "image-ocr", "description": "ocr"},
             {"name": "pdf-reading", "description": "pdf"},
         ],
@@ -33,12 +33,13 @@ def test_analyze_exposes_skills_summary(monkeypatch):
     result = api_app.analyze({"text": "hello"})
 
     assert result["runtime"] == runtime
-    assert result["skills"] == {
-        "dir": "/tmp/skills",
+    assert result["skillpacks"] == {
+        "dir": "/tmp/skillpacks",
         "count": 2,
         "names": ["image-ocr", "pdf-reading"],
-        "installed": runtime["installed_skills"],
+        "installed": runtime["installed_skillpacks"],
     }
+    assert "skills" not in result
     assert result["tools"] == {
         "count": 2,
         "names": ["normalize_text", "extract_urls"],

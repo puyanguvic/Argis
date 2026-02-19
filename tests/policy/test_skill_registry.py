@@ -1,9 +1,6 @@
-import json
-
 import pytest
 
-from phish_email_detection_agent.skills import SkillExecutionError, SkillRegistry, SkillSpec
-from phish_email_detection_agent.cli import run_once
+from phish_email_detection_agent.policy import SkillExecutionError, SkillRegistry, SkillSpec
 
 
 def test_skill_registry_rejects_non_whitelisted_skill():
@@ -30,8 +27,8 @@ def test_skill_registry_errors_on_unknown_execution():
         registry.run("NotRegistered")
 
 
-def test_precheck_exposes_fixed_skill_chain():
-    result = json.loads(run_once("Subject: hello\n\nquick ping"))
+def test_precheck_exposes_fixed_skill_chain(run_fallback_once):
+    result = run_fallback_once("Subject: hello\n\nquick ping")
     precheck = result["precheck"]
     assert "skill_whitelist" in precheck
     assert "skill_chain" in precheck

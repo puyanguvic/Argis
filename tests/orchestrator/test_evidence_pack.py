@@ -1,15 +1,10 @@
-import json
-
-from phish_email_detection_agent.cli import run_once
-
-
-def test_result_contains_evidence_pack_contract():
+def test_result_contains_evidence_pack_contract(run_fallback_once):
     payload = """Subject: Action required
 
 Please verify your account:
 https://bit.ly/reset-account
 """
-    result = json.loads(run_once(payload))
+    result = run_fallback_once(payload)
     evidence = result.get("evidence", {})
     pack = evidence.get("evidence_pack", {})
     assert isinstance(pack, dict)

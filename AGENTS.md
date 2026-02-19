@@ -19,17 +19,17 @@ The primary goals are:
 
 The codebase follows a control-stack architecture:
 
-1. `skills` (Policy Layer)
+1. `policy` (Policy Layer)
 2. `tools` (Execution Layer)
 3. `orchestrator` (Control Stack + Stage Primitives)
 4. Delivery Interfaces (`api`, `ui`, `cli`)
 
 ### 2.2 Layer Responsibilities
 
-#### `skills` - Policy Layer
+#### `policy` - Policy Layer
 - Paths:
-  - `src/phish_email_detection_agent/skills/`
-  - local installable skill folders: `skills/*/SKILL.md`
+  - `src/phish_email_detection_agent/policy/`
+  - local installable skillpack folders: `skillpacks/*/SKILL.md`
 - Responsibility:
   - What to do and in what order.
   - Fixed skill-chain metadata and policy priors.
@@ -68,15 +68,15 @@ The codebase follows a control-stack architecture:
 
 Allowed dependency direction:
 
-1. `skills` -> `domain` (and lightweight policy/config types)
+1. `policy` -> `domain` (and lightweight policy/config types)
 2. `tools` -> `domain`, `infra`
-3. `orchestrator` -> `skills`, `tools`, `domain`, `providers`
+3. `orchestrator` -> `policy`, `tools`, `domain`, `providers`
 4. `api/ui/cli` -> `orchestrator`
 
 Disallowed patterns:
 
-1. `tools` importing `skills` policy logic.
-2. `skills` invoking side-effectful tool behavior directly.
+1. `tools` importing `policy` logic.
+2. `policy` invoking side-effectful tool behavior directly.
 3. High-level package `__init__.py` files causing eager circular imports.
 
 Use lazy exports when package aggregation introduces cycle risk.
@@ -139,15 +139,15 @@ Run these before considering a change complete:
 
 ```bash
 uv sync
-ruff check src tests docs
+ruff check src tests docs scripts
 pytest -k 'not hf_phishing_email_balanced_sample'
 ```
 
 Recommended targeted checks for architecture changes:
 
 ```bash
-pytest tests/test_orchestrator_control_stack.py
-pytest tests/test_text_prescore.py tests/test_pipeline_smoke.py
+pytest tests/orchestrator/test_control_stack.py
+pytest tests/orchestrator/test_text_prescore.py tests/orchestrator/test_pipeline_smoke.py
 ```
 
 ## 10. Definition of Done

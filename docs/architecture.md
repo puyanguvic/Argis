@@ -25,11 +25,11 @@ Each skill is capped at `<= 5` declared steps and emits execution trace in `prec
 
 The agent follows a 3-layer design:
 
-1. Decision / Policy Layer (`Skills`)
+1. Decision / Policy Layer (`Policy`)
 2. Execution Layer (`Tools`)
 3. Environment (external world)
 
-### 1) Decision / Policy Layer (`Skills`)
+### 1) Decision / Policy Layer (`Policy`)
 
 - Defines *when to do what* and *in which order*.
 - Encodes orchestration policies such as skill sequencing, conditional branching, and stop/continue decisions.
@@ -40,7 +40,7 @@ In this project, this layer is primarily represented by:
 - skill chain design in `orchestrator/pipeline.py`
 - route decision in `orchestrator/skill_router.py`
 - stage orchestration in `orchestrator/stages/*` (`executor`, `judge`, `runtime`)
-- skill registry, fixed-chain definitions, and local skill discovery in `src/phish_email_detection_agent/skills/*`
+- skill registry, fixed-chain definitions, and local skillpack discovery in `src/phish_email_detection_agent/policy/*`
 
 ### 2) Execution Layer (`Tools`)
 
@@ -93,7 +93,7 @@ Judge input is a redacted evidence pack to reduce prompt injection and sensitive
 ## Code layout
 
 - `src/phish_email_detection_agent/domain/`: core data models and parsing (`email/`, `url/`, `attachment/`, `evidence.py`).
-- `src/phish_email_detection_agent/skills/`: skill registry, fixed skill-chain definitions, and local installed-skill catalog discovery.
+- `src/phish_email_detection_agent/policy/`: skill registry, fixed skill-chain definitions, and local installed-skillpack catalog discovery.
 - `src/phish_email_detection_agent/tools/`: deterministic analyzers plus tool registry/catalog.
 - `src/phish_email_detection_agent/orchestrator/stages/`: stage primitives (`evidence_stage`, `evidence_builder`, `executor`, `judge`, `runtime`).
 - `src/phish_email_detection_agent/orchestrator/pipeline.py`: composition root and service wiring.

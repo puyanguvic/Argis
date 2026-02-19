@@ -20,6 +20,10 @@ def test_analyze_exposes_skills_summary(monkeypatch):
             {"name": "image-ocr", "description": "ocr"},
             {"name": "pdf-reading", "description": "pdf"},
         ],
+        "builtin_tools": [
+            {"name": "normalize_text", "description": "normalize", "module": "tools.openai.builtin"},
+            {"name": "extract_urls", "description": "urls", "module": "tools.openai.builtin"},
+        ],
     }
 
     def _fake_create_agent(*, model_override=None):
@@ -34,4 +38,9 @@ def test_analyze_exposes_skills_summary(monkeypatch):
         "count": 2,
         "names": ["image-ocr", "pdf-reading"],
         "installed": runtime["installed_skills"],
+    }
+    assert result["tools"] == {
+        "count": 2,
+        "names": ["normalize_text", "extract_urls"],
+        "builtin": runtime["builtin_tools"],
     }

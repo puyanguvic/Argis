@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from phish_email_detection_agent.agents.skills import SkillExecutionError, SkillRegistry, SkillSpec
+from phish_email_detection_agent.skills import SkillExecutionError, SkillRegistry, SkillSpec
 from phish_email_detection_agent.cli import run_once
 
 

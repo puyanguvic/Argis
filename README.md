@@ -74,6 +74,7 @@ export MY_AGENT_APP_SKILLS_DIR=/path/to/skills
 ```
 
 API `/analyze` responses now include both `runtime.installed_skills` and top-level `skills` summary (`dir`, `count`, `names`, `installed`).
+It also includes `runtime.builtin_tools` and top-level `tools` summary (`count`, `names`, `builtin`).
 
 ## Security policy switches
 
@@ -125,12 +126,29 @@ src/phish_email_detection_agent/
     url/
     attachment/
     evidence.py
+  skills/
   orchestrator/
-  agents/
+    pipeline.py
+    stages/
+      evidence_stage.py
+      evidence_builder.py
+      executor.py
+      judge.py
+      runtime.py
+    precheck.py
+    skill_router.py
+    pipeline_policy.py
+    verdict_routing.py
+    tool_executor.py
+    evidence_store.py
+    validator.py
+    evaluator.py
   providers/
   config/
   infra/
   tools/
+    catalog.py
+    registry.py
     url_fetch/
     ocr/
     asr/

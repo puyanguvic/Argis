@@ -2,21 +2,26 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import json
 from typing import Any
 
-from phish_email_detection_agent.agents.contracts import JudgeOutput, TriageResult
-from phish_email_detection_agent.agents.pipeline.router import (
+from phish_email_detection_agent.orchestrator.contracts import JudgeOutput, TriageResult
+from phish_email_detection_agent.orchestrator.prompts import JUDGE_PROMPT
+from phish_email_detection_agent.evidence.redact import redact_value
+from phish_email_detection_agent.orchestrator.validator import OnlineValidator, ValidationIssue
+from phish_email_detection_agent.orchestrator.stages.runtime import PipelineRuntime
+from phish_email_detection_agent.orchestrator.verdict_routing import (
     compute_confidence,
     map_route_to_path,
     merge_judge_verdict,
     normalize_score_for_verdict,
 )
-from phish_email_detection_agent.agents.pipeline.runtime import PipelineRuntime
-from phish_email_detection_agent.agents.prompts import JUDGE_PROMPT
-from phish_email_detection_agent.evidence.redact import redact_value
 from phish_email_detection_agent.tools.text.text_model import derive_email_labels
+
+
+class JudgeValidationError(RuntimeError):
+    """Raised when merged judge output violates online guardrails."""
 
 
 @dataclass
@@ -24,9 +29,16 @@ class JudgeRunResult:
     final_result: dict[str, Any] | None
     judge_output: JudgeOutput | None
     error: Exception | None = None
+    validation_issues: list[ValidationIssue] = field(default_factory=list)
 
 
+@dataclass
 class JudgeEngine:
+    validator: OnlineValidator = field(default_factory=OnlineValidator)
+
+    def validate_final_result(self, final_result: dict[str, Any]) -> list[ValidationIssue]:
+        return self.validator.validate_triage_result(final_result)
+
     def evaluate(
         self,
         *,
@@ -126,6 +138,24 @@ class JudgeEngine:
                 },
             ).model_dump(mode="json")
             final["precheck"] = precheck
-            return JudgeRunResult(final_result=final, judge_output=judge_output, error=None)
+            validation_issues = self.validate_final_result(final)
+            final["validation_issues"] = [
+                {"code": item.code, "message": item.message, "severity": item.severity}
+                for item in validation_issues
+            ]
+            has_errors = any(item.severity == "error" for item in validation_issues)
+            if has_errors:
+                return JudgeRunResult(
+                    final_result=None,
+                    judge_output=judge_output,
+                    error=JudgeValidationError("Judge result failed online validation."),
+                    validation_issues=validation_issues,
+                )
+            return JudgeRunResult(
+                final_result=final,
+                judge_output=judge_output,
+                error=None,
+                validation_issues=validation_issues,
+            )
         except Exception as exc:
             return JudgeRunResult(final_result=None, judge_output=None, error=exc)

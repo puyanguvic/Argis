@@ -6,28 +6,18 @@ from dataclasses import dataclass
 import time
 from typing import Any, Callable
 
-from phish_email_detection_agent.agents.skills import SkillRegistry, SkillSpec
 from phish_email_detection_agent.domain.email.models import EmailInput
 from phish_email_detection_agent.domain.evidence import EvidencePack
-
-_SKILL_EMAIL_SURFACE = "EmailSurface"
-_SKILL_HEADER_ANALYSIS = "HeaderAnalysis"
-_SKILL_URL_RISK = "URLRisk"
-_SKILL_NLP_CUES = "NLPCues"
-_SKILL_ATTACHMENT_SURFACE = "AttachmentSurface"
-_SKILL_PAGE_CONTENT = "PageContentAnalysis"
-_SKILL_ATTACHMENT_DEEP = "AttachmentDeepAnalysis"
-_SKILL_RISK_FUSION = "RiskFusion"
-
-_FIXED_SKILL_CHAIN = (
-    _SKILL_EMAIL_SURFACE,
-    _SKILL_HEADER_ANALYSIS,
-    _SKILL_URL_RISK,
-    _SKILL_NLP_CUES,
-    _SKILL_ATTACHMENT_SURFACE,
-    _SKILL_PAGE_CONTENT,
-    _SKILL_ATTACHMENT_DEEP,
-    _SKILL_RISK_FUSION,
+from phish_email_detection_agent.skills import FIXED_SKILL_CHAIN, SkillRegistry, fixed_skill_spec
+from phish_email_detection_agent.skills.fixed_chain import (
+    SKILL_ATTACHMENT_DEEP,
+    SKILL_ATTACHMENT_SURFACE,
+    SKILL_EMAIL_SURFACE,
+    SKILL_HEADER_ANALYSIS,
+    SKILL_NLP_CUES,
+    SKILL_PAGE_CONTENT,
+    SKILL_RISK_FUSION,
+    SKILL_URL_RISK,
 )
 
 
@@ -56,26 +46,17 @@ class EvidenceStage:
         skill_trace: list[dict[str, Any]] = []
         executed_skills: list[str] = []
 
-        registry = SkillRegistry(allowed_names=set(_FIXED_SKILL_CHAIN))
+        registry = SkillRegistry(allowed_names=set(FIXED_SKILL_CHAIN))
         registry.register(
-            spec=SkillSpec(
-                name=_SKILL_EMAIL_SURFACE,
-                description="Extract visible/hidden links and normalize initial message surface.",
-            ),
+            spec=fixed_skill_spec(SKILL_EMAIL_SURFACE),
             runner=lambda: self._skill_email_surface(email),
         )
         registry.register(
-            spec=SkillSpec(
-                name=_SKILL_HEADER_ANALYSIS,
-                description="Parse SPF/DKIM/DMARC and relay-path anomalies.",
-            ),
+            spec=fixed_skill_spec(SKILL_HEADER_ANALYSIS),
             runner=lambda: self._skill_header_analysis(email),
         )
         registry.register(
-            spec=SkillSpec(
-                name=_SKILL_URL_RISK,
-                description="Evaluate URL/domain risk signals from extracted links.",
-            ),
+            spec=fixed_skill_spec(SKILL_URL_RISK),
             runner=lambda urls: self._skill_url_risk(
                 urls,
                 service=service,
@@ -85,24 +66,15 @@ class EvidenceStage:
             ),
         )
         registry.register(
-            spec=SkillSpec(
-                name=_SKILL_NLP_CUES,
-                description="Extract social-engineering and credential-theft text cues.",
-            ),
+            spec=fixed_skill_spec(SKILL_NLP_CUES),
             runner=lambda: self._skill_nlp_cues(email),
         )
         registry.register(
-            spec=SkillSpec(
-                name=_SKILL_ATTACHMENT_SURFACE,
-                description="Classify attachment surface risk before deep scan.",
-            ),
+            spec=fixed_skill_spec(SKILL_ATTACHMENT_SURFACE),
             runner=lambda: self._skill_attachment_surface(email.attachments),
         )
         registry.register(
-            spec=SkillSpec(
-                name=_SKILL_PAGE_CONTENT,
-                description="Analyze fetched page content for credential-harvest indicators.",
-            ),
+            spec=fixed_skill_spec(SKILL_PAGE_CONTENT),
             runner=lambda url_signals, fetch_policy: self._skill_page_content(
                 url_signals=url_signals,
                 fetch_policy=fetch_policy,
@@ -110,10 +82,7 @@ class EvidenceStage:
             ),
         )
         registry.register(
-            spec=SkillSpec(
-                name=_SKILL_ATTACHMENT_DEEP,
-                description="Run attachment deep scan and recover nested URL chains.",
-            ),
+            spec=fixed_skill_spec(SKILL_ATTACHMENT_DEEP),
             runner=lambda attachment_signals, attachment_policy: self._skill_attachment_deep(
                 attachments=email.attachments,
                 attachment_signals=attachment_signals,
@@ -122,10 +91,7 @@ class EvidenceStage:
             ),
         )
         registry.register(
-            spec=SkillSpec(
-                name=_SKILL_RISK_FUSION,
-                description="Fuse skill outputs into deterministic pre-score route.",
-            ),
+            spec=fixed_skill_spec(SKILL_RISK_FUSION),
             runner=lambda **kwargs: self._skill_risk_fusion(service=service, **kwargs),
         )
 
@@ -158,30 +124,30 @@ class EvidenceStage:
         domain_policy = self.domain_policy_fn(service)
 
         html_url_meta, combined_urls, chain_flags = run_skill(
-            _SKILL_EMAIL_SURFACE,
+            SKILL_EMAIL_SURFACE,
             timing_key="parse",
         )
         header_signals = run_skill(
-            _SKILL_HEADER_ANALYSIS,
+            SKILL_HEADER_ANALYSIS,
             timing_key="header_intel",
         )
         url_signals: list[dict[str, Any]] = []
         domain_reports: list[dict[str, Any]] = []
         url_signals, domain_reports = run_skill(
-            _SKILL_URL_RISK,
+            SKILL_URL_RISK,
             timing_key="url_intel",
             urls=combined_urls,
         )
         nlp_cues = run_skill(
-            _SKILL_NLP_CUES,
+            SKILL_NLP_CUES,
             timing_key="nlp_cues",
         )
         attachment_signals = run_skill(
-            _SKILL_ATTACHMENT_SURFACE,
+            SKILL_ATTACHMENT_SURFACE,
             timing_key="attachment_prescan",
         )
         pre_score = run_skill(
-            _SKILL_RISK_FUSION,
+            SKILL_RISK_FUSION,
             header_signals=header_signals,
             url_signals=url_signals,
             web_signals=[],
@@ -207,13 +173,13 @@ class EvidenceStage:
 
         if deep_trigger:
             web_signals, url_target_reports = run_skill(
-                _SKILL_PAGE_CONTENT,
+                SKILL_PAGE_CONTENT,
                 timing_key="web_snapshot",
                 url_signals=url_signals,
                 fetch_policy=safe_fetch_policy,
             )
             attachment_bundle, nested_urls = run_skill(
-                _SKILL_ATTACHMENT_DEEP,
+                SKILL_ATTACHMENT_DEEP,
                 timing_key="attachment_intel",
                 attachment_signals=attachment_signals,
                 attachment_policy=attachment_policy,
@@ -221,7 +187,7 @@ class EvidenceStage:
 
             if nested_urls:
                 extra_signals, extra_domain_reports = run_skill(
-                    _SKILL_URL_RISK,
+                    SKILL_URL_RISK,
                     urls=nested_urls,
                 )
                 if extra_signals:
@@ -229,7 +195,7 @@ class EvidenceStage:
                     domain_reports.extend(extra_domain_reports)
 
             pre_score = run_skill(
-                _SKILL_RISK_FUSION,
+                SKILL_RISK_FUSION,
                 header_signals=header_signals,
                 url_signals=url_signals,
                 web_signals=web_signals,
@@ -370,7 +336,7 @@ class EvidenceStage:
                 "max_bytes": safe_fetch_policy.max_bytes,
                 "max_redirects": safe_fetch_policy.max_redirects,
             },
-            "skill_whitelist": list(_FIXED_SKILL_CHAIN),
+            "skill_whitelist": list(FIXED_SKILL_CHAIN),
             "skill_chain": executed_skills,
             "skill_trace": skill_trace,
         }

@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-from phish_email_detection_agent.agents.pipeline.policy import PipelinePolicy
-from phish_email_detection_agent.agents.skills import default_skills_dir, discover_installed_skills
-from phish_email_detection_agent.orchestrator.pipeline import AgentService
 from phish_email_detection_agent.config.settings import load_config
+from phish_email_detection_agent.orchestrator.pipeline import AgentService
+from phish_email_detection_agent.orchestrator.pipeline_policy import PipelinePolicy
+from phish_email_detection_agent.skills import default_skills_dir, discover_installed_skills
+from phish_email_detection_agent.tools.catalog import discover_builtin_tools
 
 
 def create_agent(
@@ -15,6 +16,7 @@ def create_agent(
 ) -> tuple[AgentService, dict[str, object]]:
     env_cfg, yaml_cfg = load_config(profile_override=profile_override)
     local_skills = discover_installed_skills()
+    builtin_tools = discover_builtin_tools()
     active_model = model_override or env_cfg.model
     profiles = yaml_cfg.get("profiles")
     profile_map = profiles if isinstance(profiles, dict) else {}
@@ -115,6 +117,14 @@ def create_agent(
                 "directory": item.directory,
             }
             for item in local_skills
+        ],
+        "builtin_tools": [
+            {
+                "name": item.name,
+                "description": item.description,
+                "module": item.module,
+            }
+            for item in builtin_tools
         ],
         "agents_sdk": True,
         "config": yaml_cfg,

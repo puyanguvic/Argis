@@ -12,8 +12,8 @@ Build an end-to-end phishing detector that reasons over the full attack chain:
 2. Header and URL/domain evidence extraction (`tools/intel/*`, `domain/url/*`).
 3. Conditional deep context collection via safe URL fetch and attachment static/deep analysis (`tools/url_fetch/service.py`, `tools/attachment/analyze.py`).
 4. Evidence pack assembly (`orchestrator/pipeline.py::_build_evidence_pack`).
-5. Planner + executor + judge orchestration (`agents/pipeline/*`).
-6. Fallback or merged final verdict (`agents/pipeline/router.py`).
+5. Skill routing + executor + judge orchestration (`orchestrator/skill_router.py`, `orchestrator/stages/*`).
+6. Fallback or merged final verdict (`orchestrator/verdict_routing.py`).
 
 Evidence construction uses a fixed whitelist-driven skill chain:
 
@@ -38,7 +38,9 @@ The agent follows a 3-layer design:
 In this project, this layer is primarily represented by:
 
 - skill chain design in `orchestrator/pipeline.py`
-- stage orchestration in `agents/pipeline/*` (`planner`, `executor`, `router`, `policy`)
+- route decision in `orchestrator/skill_router.py`
+- stage orchestration in `orchestrator/stages/*` (`executor`, `judge`, `runtime`)
+- skill registry, fixed-chain definitions, and local skill discovery in `src/phish_email_detection_agent/skills/*`
 
 ### 2) Execution Layer (`Tools`)
 
@@ -91,9 +93,12 @@ Judge input is a redacted evidence pack to reduce prompt injection and sensitive
 ## Code layout
 
 - `src/phish_email_detection_agent/domain/`: core data models and parsing (`email/`, `url/`, `attachment/`, `evidence.py`).
-- `src/phish_email_detection_agent/tools/`: deterministic analyzers (header/domain/url fetch/attachment/text/OCR/ASR).
-- `src/phish_email_detection_agent/agents/pipeline/`: stage-based orchestration (`evidence_stage`, `planner`, `executor`, `judge`, `router`, `policy`, `runtime`).
-- `src/phish_email_detection_agent/orchestrator/pipeline.py`: composition root and evidence pack construction.
+- `src/phish_email_detection_agent/skills/`: skill registry, fixed skill-chain definitions, and local installed-skill catalog discovery.
+- `src/phish_email_detection_agent/tools/`: deterministic analyzers plus tool registry/catalog.
+- `src/phish_email_detection_agent/orchestrator/stages/`: stage primitives (`evidence_stage`, `evidence_builder`, `executor`, `judge`, `runtime`).
+- `src/phish_email_detection_agent/orchestrator/pipeline.py`: composition root and service wiring.
+- `src/phish_email_detection_agent/orchestrator/precheck.py`: deterministic precheck signal extraction and score fusion rules.
+- `src/phish_email_detection_agent/orchestrator/skill_router.py`, `src/phish_email_detection_agent/orchestrator/pipeline_policy.py`, `src/phish_email_detection_agent/orchestrator/verdict_routing.py`, `src/phish_email_detection_agent/orchestrator/tool_executor.py`, `src/phish_email_detection_agent/orchestrator/evidence_store.py`, `src/phish_email_detection_agent/orchestrator/validator.py`, `src/phish_email_detection_agent/orchestrator/evaluator.py`: control-stack modules for routing, policy, verdict calibration, execution normalization, evidence identity, online guardrails, and offline evaluation.
 - `src/phish_email_detection_agent/providers/`: model provider adapters (OpenAI, Ollama/LiteLLM path).
 - `src/phish_email_detection_agent/config/`: env+yaml config (`defaults.yaml`).
 - `src/phish_email_detection_agent/api/`, `src/phish_email_detection_agent/ui/`, `src/phish_email_detection_agent/cli.py`: delivery interfaces.

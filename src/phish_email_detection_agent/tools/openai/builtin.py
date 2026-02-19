@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from typing import Callable
 
-from phish_email_detection_agent.agents.router import route_text
 from phish_email_detection_agent.domain.attachment.detect import classify_attachment
 from phish_email_detection_agent.domain.email.parse import parse_input_payload
 from phish_email_detection_agent.domain.url.extract import (
     extract_urls as extract_urls_from_text,
     is_suspicious_url,
 )
+from phish_email_detection_agent.orchestrator.policy import route_text
 from phish_email_detection_agent.tools.attachment.analyze import AttachmentPolicy, analyze_attachments
 from phish_email_detection_agent.tools.intel.domain_intel import analyze_domain
 from phish_email_detection_agent.tools.text.text_model import (

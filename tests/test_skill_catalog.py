@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from phish_email_detection_agent.agents.skills.catalog import default_skills_dir, discover_installed_skills
+from phish_email_detection_agent.skills.catalog import default_skills_dir, discover_installed_skills
 
 
 def test_default_skills_dir_supports_env_override(monkeypatch, tmp_path: Path):

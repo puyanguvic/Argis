@@ -6,7 +6,7 @@ import argparse
 from dataclasses import dataclass, field
 import json
 
-from phish_email_detection_agent.agents.build import create_agent
+from phish_email_detection_agent.orchestrator.build import create_agent
 
 
 @dataclass

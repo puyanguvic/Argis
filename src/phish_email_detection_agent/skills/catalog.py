@@ -23,8 +23,8 @@ def default_skills_dir() -> Path:
     configured = os.getenv("MY_AGENT_APP_SKILLS_DIR", "").strip()
     if configured:
         return Path(configured).expanduser()
-    # repo-root/src/phish_email_detection_agent/agents/skills/catalog.py -> repo-root/skills
-    return Path(__file__).resolve().parents[4] / "skills"
+    # repo-root/src/phish_email_detection_agent/skills/catalog.py -> repo-root/skills
+    return Path(__file__).resolve().parents[3] / "skills"
 
 
 def _parse_front_matter(text: str) -> dict[str, str]:

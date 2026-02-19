@@ -1,10 +1,10 @@
-"""Pipeline runtime contracts used by planner/executor/judge stages."""
+"""Pipeline runtime contracts used by routing/executor/judge stages."""
 
 from __future__ import annotations
 
 from typing import Any, Protocol
 
-from phish_email_detection_agent.agents.pipeline.policy import PipelinePolicy
+from phish_email_detection_agent.orchestrator.pipeline_policy import PipelinePolicy
 
 
 class PipelineRuntime(Protocol):

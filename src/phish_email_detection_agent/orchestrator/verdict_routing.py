@@ -1,8 +1,8 @@
-"""Routing and verdict calibration helpers for modular pipeline."""
+"""Route mapping and verdict calibration helpers."""
 
 from __future__ import annotations
 
-from phish_email_detection_agent.agents.pipeline.policy import PipelinePolicy
+from phish_email_detection_agent.orchestrator.pipeline_policy import PipelinePolicy
 
 
 def map_route_to_path(route: str) -> str:

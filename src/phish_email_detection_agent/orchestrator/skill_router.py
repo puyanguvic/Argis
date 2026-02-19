@@ -1,17 +1,17 @@
-"""Planning stage for modular phishing analysis pipeline."""
+"""Skill-oriented route selection for predefined workflows."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 import hashlib
 
-from phish_email_detection_agent.agents.pipeline.policy import PipelinePolicy
-from phish_email_detection_agent.agents.pipeline.router import map_route_to_path
 from phish_email_detection_agent.domain.evidence import EvidencePack
+from phish_email_detection_agent.orchestrator.pipeline_policy import PipelinePolicy
+from phish_email_detection_agent.orchestrator.verdict_routing import map_route_to_path
 
 
 @dataclass
-class ExecutionPlan:
+class SkillExecutionPlan:
     has_content: bool
     route: str
     path: str
@@ -19,7 +19,10 @@ class ExecutionPlan:
     reasons: list[str] = field(default_factory=list)
 
 
-class Planner:
+@dataclass
+class SkillRouter:
+    """Routes execution within predefined skill workflows."""
+
     def _sample_allow_route(self, *, evidence_pack: EvidencePack, policy: PipelinePolicy) -> bool:
         sample_rate = float(policy.judge_allow_sample_rate)
         if sample_rate <= 0:
@@ -63,7 +66,7 @@ class Planner:
         has_content: bool,
         can_call_remote: bool,
         pipeline_policy: PipelinePolicy | None = None,
-    ) -> ExecutionPlan:
+    ) -> SkillExecutionPlan:
         active_policy = (pipeline_policy or PipelinePolicy()).normalized()
         route = str(evidence_pack.pre_score.route)
         reasons = list(evidence_pack.pre_score.reasons)
@@ -74,7 +77,7 @@ class Planner:
             evidence_pack=evidence_pack,
             policy=active_policy,
         )
-        return ExecutionPlan(
+        return SkillExecutionPlan(
             has_content=has_content,
             route=route,
             path=map_route_to_path(route),

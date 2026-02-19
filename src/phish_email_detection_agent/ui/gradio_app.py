@@ -11,7 +11,7 @@ from typing import Any
 
 import gradio as gr
 
-from phish_email_detection_agent.agents.build import create_agent
+from phish_email_detection_agent.orchestrator.build import create_agent
 
 PROVIDER_MODE_TO_PROFILE = {
     "api": "openai",

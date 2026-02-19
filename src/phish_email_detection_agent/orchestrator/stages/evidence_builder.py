@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any, Callable
 
 from phish_email_detection_agent.domain.evidence import EvidencePack
-from phish_email_detection_agent.agents.pipeline.runtime import PipelineRuntime
+from phish_email_detection_agent.orchestrator.stages.runtime import PipelineRuntime
 
 
 BuildEvidenceFn = Callable[[Any, PipelineRuntime], tuple[EvidencePack, dict[str, Any]]]

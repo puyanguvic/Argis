@@ -1,4 +1,4 @@
-"""Centralized policy parameters for planner/judge/router stages."""
+"""Centralized policy parameters for skill routing and judge calibration."""
 
 from __future__ import annotations
 

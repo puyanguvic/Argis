@@ -1,4 +1,4 @@
-"""Prompt templates for multi-agent workflow."""
+"""Prompt templates for orchestration workflow."""
 
 BASE_POLICY = """You are Argis, a professional phishing detection system.
 Focus on evidence from text, URLs, domains, HTML, images/audio clues and attachments.

@@ -1,26 +1,36 @@
-"""Executor stage orchestrating planner/evidence_builder/judge/router."""
+"""Executor stage orchestrating skill routing, evidence, and judge flow."""
 
 from __future__ import annotations
 
 from collections.abc import Callable, Generator
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Protocol
 
-from phish_email_detection_agent.agents.pipeline.evidence_builder import EvidenceBuilder
-from phish_email_detection_agent.agents.pipeline.judge import JudgeEngine
-from phish_email_detection_agent.agents.pipeline.planner import Planner
-from phish_email_detection_agent.agents.pipeline.runtime import PipelineRuntime
+from phish_email_detection_agent.orchestrator.stages.evidence_builder import EvidenceBuilder
+from phish_email_detection_agent.orchestrator.stages.judge import JudgeEngine
+from phish_email_detection_agent.orchestrator.stages.runtime import PipelineRuntime
 
 
 ParseInputFn = Callable[[str], Any]
 FallbackFn = Callable[..., Any]
 
 
+class SkillRouterEngine(Protocol):
+    def plan(
+        self,
+        *,
+        evidence_pack: Any,
+        has_content: bool,
+        can_call_remote: bool,
+        pipeline_policy: Any | None = None,
+    ) -> Any: ...
+
+
 @dataclass
 class PipelineExecutor:
     parse_input: ParseInputFn
     evidence_builder: EvidenceBuilder
-    planner: Planner
+    skill_router: SkillRouterEngine
     judge: JudgeEngine
     fallback_builder: FallbackFn
 
@@ -35,7 +45,7 @@ class PipelineExecutor:
             pipeline_policy=service.pipeline_policy,
         )
         has_content = bool(email.text or email.urls or email.attachments)
-        plan = self.planner.plan(
+        plan = self.skill_router.plan(
             evidence_pack=evidence_pack,
             has_content=has_content,
             can_call_remote=service.can_call_remote(),
@@ -86,9 +96,9 @@ class PipelineExecutor:
             data=evidence_pack.pre_score.model_dump(mode="json"),
         )
         yield service.event(
-            "planner",
+            "skill_router",
             "done",
-            "Planner generated execution plan.",
+            "Skill router generated execution plan.",
             data={
                 "route": plan.route,
                 "path": plan.path,

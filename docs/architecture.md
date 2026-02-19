@@ -21,6 +21,54 @@ Evidence construction uses a fixed whitelist-driven skill chain:
 
 Each skill is capped at `<= 5` declared steps and emits execution trace in `precheck.skill_trace`.
 
+## Agent design paradigm
+
+The agent follows a 3-layer design:
+
+1. Decision / Policy Layer (`Skills`)
+2. Execution Layer (`Tools`)
+3. Environment (external world)
+
+### 1) Decision / Policy Layer (`Skills`)
+
+- Defines *when to do what* and *in which order*.
+- Encodes orchestration policies such as skill sequencing, conditional branching, and stop/continue decisions.
+- Owns high-level control flow (e.g., when to trigger optional deep page or attachment analysis).
+
+In this project, this layer is primarily represented by:
+
+- skill chain design in `orchestrator/pipeline.py`
+- stage orchestration in `agents/pipeline/*` (`planner`, `executor`, `router`, `policy`)
+
+### 2) Execution Layer (`Tools`)
+
+- Defines *what can be done* through deterministic capabilities.
+- Performs concrete actions such as parsing, URL/domain intel, safe fetch, and attachment analysis.
+- Exposes bounded, auditable operations to the policy layer.
+
+In this project, this layer is primarily represented by:
+
+- `tools/intel/*`
+- `tools/url_fetch/service.py`
+- `tools/attachment/analyze.py`
+- other deterministic analyzers under `src/phish_email_detection_agent/tools/`
+
+### 3) Environment (external world)
+
+This layer includes real-world inputs and systems the agent interacts with:
+
+- incoming email content (text/html, headers, attachments)
+- remote URLs/pages and network responses
+- file artifacts and runtime/sandbox constraints
+
+### Model responsibility
+
+The model is responsible for task understanding and reasoning across layers:
+
+- interprets task context and evidence
+- applies policy/skill logic to decide next actions
+- synthesizes outputs (including final verdict and rationale) from tool-produced evidence
+
 ## Security-first execution model
 
 - URL fetch is opt-in only (`MY_AGENT_APP_ENABLE_URL_FETCH=false` by default).

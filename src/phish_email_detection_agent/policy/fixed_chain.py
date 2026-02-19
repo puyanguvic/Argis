@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from phish_email_detection_agent.skills.registry import SkillSpec
+from phish_email_detection_agent.policy.registry import SkillSpec
 
 
 @dataclass(frozen=True)

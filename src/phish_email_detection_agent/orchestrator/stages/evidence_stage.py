@@ -8,8 +8,8 @@ from typing import Any, Callable
 
 from phish_email_detection_agent.domain.email.models import EmailInput
 from phish_email_detection_agent.domain.evidence import EvidencePack
-from phish_email_detection_agent.skills import FIXED_SKILL_CHAIN, SkillRegistry, fixed_skill_spec
-from phish_email_detection_agent.skills.fixed_chain import (
+from phish_email_detection_agent.policy import FIXED_SKILL_CHAIN, SkillRegistry, fixed_skill_spec
+from phish_email_detection_agent.policy.fixed_chain import (
     SKILL_ATTACHMENT_DEEP,
     SKILL_ATTACHMENT_SURFACE,
     SKILL_EMAIL_SURFACE,

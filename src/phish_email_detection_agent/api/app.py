@@ -21,19 +21,20 @@ def analyze(payload: dict[str, object]) -> dict[str, object]:
     model_override = str(model) if isinstance(model, str) and model.strip() else None
     agent, runtime = create_agent(model_override=model_override)
     result = agent.analyze(text)
-    installed_skills = runtime.get("installed_skills", [])
+    installed_skillpacks = runtime.get("installed_skillpacks", [])
+    skillpacks_dir = str(runtime.get("skillpacks_dir", ""))
     builtin_tools = runtime.get("builtin_tools", [])
     names = [
         str(item.get("name", "")).strip()
-        for item in installed_skills
+        for item in installed_skillpacks
         if isinstance(item, dict) and str(item.get("name", "")).strip()
     ]
     result["runtime"] = runtime
-    result["skills"] = {
-        "dir": str(runtime.get("skills_dir", "")),
+    result["skillpacks"] = {
+        "dir": skillpacks_dir,
         "count": len(names),
         "names": names,
-        "installed": installed_skills if isinstance(installed_skills, list) else [],
+        "installed": installed_skillpacks if isinstance(installed_skillpacks, list) else [],
     }
     tool_names = [
         str(item.get("name", "")).strip()

@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from phish_email_detection_agent.config.settings import load_config
-from phish_email_detection_agent.orchestrator.pipeline import AgentService
 from phish_email_detection_agent.orchestrator.pipeline_policy import PipelinePolicy
-from phish_email_detection_agent.skills import default_skills_dir, discover_installed_skills
+from phish_email_detection_agent.orchestrator.pipeline import AgentService
+from phish_email_detection_agent.policy import default_skillpacks_dir, discover_installed_skillpacks
 from phish_email_detection_agent.tools.catalog import discover_builtin_tools
 
 
@@ -15,7 +15,7 @@ def create_agent(
     model_override: str | None = None,
 ) -> tuple[AgentService, dict[str, object]]:
     env_cfg, yaml_cfg = load_config(profile_override=profile_override)
-    local_skills = discover_installed_skills()
+    local_skillpacks = discover_installed_skillpacks()
     builtin_tools = discover_builtin_tools()
     active_model = model_override or env_cfg.model
     profiles = yaml_cfg.get("profiles")
@@ -109,14 +109,14 @@ def create_agent(
         "judge_allow_mode": env_cfg.judge_allow_mode,
         "judge_allow_sample_rate": env_cfg.judge_allow_sample_rate,
         "judge_allow_sample_salt": env_cfg.judge_allow_sample_salt,
-        "skills_dir": str(default_skills_dir()),
-        "installed_skills": [
+        "skillpacks_dir": str(default_skillpacks_dir()),
+        "installed_skillpacks": [
             {
                 "name": item.name,
                 "description": item.description,
                 "directory": item.directory,
             }
-            for item in local_skills
+            for item in local_skillpacks
         ],
         "builtin_tools": [
             {

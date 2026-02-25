@@ -88,7 +88,7 @@ The model is responsible for task understanding and reasoning across layers:
 - `evidence`: deterministic reports for URLs/domains/attachments and component scores
 - `precheck`: raw deterministic analyzer output for reproducible experiments
 
-Judge input is a redacted evidence pack to reduce prompt injection and sensitive data exposure.
+Judge input is a redacted, budgeted `JudgeContext` (derived from `EvidencePack`) to reduce prompt injection and sensitive data exposure.
 
 ## Code layout
 

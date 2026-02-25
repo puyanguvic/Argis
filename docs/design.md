@@ -107,6 +107,40 @@ Primary output contract:
 6. Auditability: high-risk verdicts must be evidence-backed with provenance sufficient for debugging and incident response.
 7. Budget enforcement: context and artifact processing must respect explicit caps (tokens/bytes/items) and record truncation/omissions in provenance.
 
+## System boundary and deployment assumptions
+
+Argis is designed as a **stateless analysis service** with a deterministic execution core.
+
+Deployment assumptions:
+
+1. **Service form**
+
+   * Argis runs as a stateless service instance.
+   * Horizontal scaling is achieved via multiple replicas behind a load balancer.
+   * No cross-request state is required for correctness.
+
+2. **Execution locality**
+
+   * All deterministic analysis runs in-process.
+   * Optional model calls are external (LLM provider or local runtime).
+   * Optional deep analysis (URL fetch, OCR, ASR) is sandboxed and bounded.
+
+3. **Artifact handling**
+
+   * By default, artifacts are held in-memory for the duration of the request.
+   * Persistent storage (object store or database) is optional and policy-controlled.
+   * Artifact identity (`artifact_id`, hash) is stable within the request scope.
+
+4. **External dependencies (optional)**
+
+   * LLM provider (OpenAI / LiteLLM / Ollama)
+   * URL fetch sandbox (internal / container / firejail)
+   * External artifact storage (future or deployment-specific)
+
+Non-goal:
+
+Argis is not a workflow engine or long-lived agent runtime; each request is independent and side-effect bounded.
+
 ## Architecture overview
 
 Argis follows a control-stack architecture (layered design):
@@ -243,6 +277,32 @@ Current FastAPI endpoint: `src/phish_email_detection_agent/api/app.py`.
 2. Returns analysis result plus `runtime`, `skillpacks`, and `tools` metadata.
 3. Online results also include deterministic diagnostics under `precheck`; judge runs also include `validation_issues`.
 
+## End-to-end data flow
+
+```mermaid
+flowchart LR
+  IN[EmailInput]
+  EVID[EvidencePack]
+  ART[Artifacts\n(bytes/html/text)]
+  CTX[JudgeContext]
+  OUT[TriageResult]
+
+  IN --> EVID
+  EVID --> ART
+  EVID --> CTX
+  ART --> CTX
+  CTX --> OUT
+```
+
+Data object roles:
+
+1. **EvidencePack**: canonical deterministic signals and metadata.
+2. **Artifacts**: large raw or derived content referenced by `artifact_id`.
+3. **JudgeContext**: budgeted projection used for model input.
+4. **TriageResult**: final external response.
+
+Artifacts may be in-memory or persisted depending on deployment policy.
+
 ## Runtime flow and failure semantics
 
 Online execution is orchestrated by `src/phish_email_detection_agent/orchestrator/stages/executor.py::PipelineExecutor`.
@@ -281,6 +341,20 @@ Failure semantics (must hold):
 1. Empty input returns deterministic fallback.
 2. Remote/model path unavailable returns deterministic fallback.
 3. Judge failure or invalid output returns deterministic fallback.
+
+### Fallback reasons (taxonomy)
+
+Fallback responses may be triggered by:
+
+* `empty_input`
+* `policy_blocked`
+* `judge_unavailable`
+* `judge_error`
+* `validation_failed`
+* `budget_exceeded`
+* `provider_timeout`
+
+The fallback reason should be recorded in runtime metadata for observability.
 
 ## Deterministic kernel design
 
@@ -333,6 +407,26 @@ Important distinction:
 
 1. `allow|review|deep` is a deterministic routing label for workflow selection.
 2. Final `verdict` is separately derived/merged and can still be `phishing` at lower routes.
+
+### Risk score semantics
+
+The `risk_score` is a **monotonic heuristic confidence measure**, not a calibrated probability.
+
+Properties:
+
+1. Range: integer-like value in `[0, 100]`.
+2. Monotonicity: higher score indicates stronger phishing evidence.
+3. Composition: deterministic aggregation of multiple signal categories.
+4. Calibration: threshold tuning is performed offline using benchmark datasets.
+5. Interpretation bands:
+
+| Score range | Interpretation                       |
+| ----------- | ------------------------------------ |
+| 0–29        | Low risk (benign leaning)            |
+| 30–69       | Medium risk (ambiguous / suspicious) |
+| 70–100      | High risk (phishing likely)          |
+
+The score is designed for **ranking and routing**, not for probabilistic decision-making.
 
 ### Determinism and reproducibility boundaries
 
@@ -431,6 +525,18 @@ Judge outputs:
 2. Merged by explicit rules (`src/phish_email_detection_agent/orchestrator/verdict_routing.py`).
 3. Validated by `OnlineValidator` (`src/phish_email_detection_agent/orchestrator/validator.py`).
 
+Judge output requirements:
+
+1. Each high-impact claim (risk reason, indicator, or verdict justification) should reference:
+
+   * `artifact_id`, and/or
+   * `snippet_id`, and/or
+   * signal category
+2. The validator checks that referenced evidence exists.
+3. Unsupported claims are rejected and treated as judge failure.
+
+This prevents hallucinated evidence from influencing decisions.
+
 Merge principles:
 
 1. Deterministic score >= phishing threshold remains phishing.
@@ -449,6 +555,27 @@ Do not rely on prompts alone to enforce safety. Side-effect policy must be enfor
 1. If a function tool accepts a model-controlled `enable_*` flag for side effects (fetch/OCR/ASR), it creates a policy bypass risk.
 2. Preferred pattern: the tool implementation derives enablement from `AgentService` (or an equivalent runtime policy object) rather than from model-supplied arguments.
 3. If a tool must expose a toggle (for interactive use), it must still hard-check the runtime policy and refuse when disabled.
+
+### Judge authority and override rules
+
+The judge operates under strict bounded authority.
+
+1. The judge **cannot introduce new evidence**; all claims must reference existing evidence.
+2. Deterministic high-risk decisions cannot be downgraded below `suspicious` unless explicitly allowed by policy.
+3. The judge cannot override:
+
+   * side-effect policy
+   * safety blocks
+   * validation constraints
+4. Judge influence is bounded by policy-defined merge thresholds.
+5. If the judge output:
+
+   * lacks evidence references, or
+   * violates schema or policy
+
+   the system returns the deterministic fallback result.
+
+The deterministic kernel remains the primary decision authority.
 
 ## Interactions
 
@@ -494,8 +621,36 @@ These items are important to track explicitly because they affect safety, mainta
 1. `src/phish_email_detection_agent/orchestrator/evidence_store.py` provides stable evidence IDs, but the online pipeline currently relies on `EvidencePack` as the primary evidence container (no store/graph integration yet).
 2. `src/phish_email_detection_agent/orchestrator/tool_executor.py` provides a normalized execution wrapper, but the deterministic kernel currently calls tools directly (no unified retry/telemetry contract yet).
 3. Skillpacks are discovered and surfaced, but do not currently participate in the default deterministic skill chain. If skillpacks become executable policy, the integration must preserve whitelist semantics and bounded side effects.
-4. Routing has two representations in the repo (`allow|review|deep` vs `FAST|STANDARD|DEEP`). Keep contracts explicit to avoid confusing UI/API consumers.
-5. Judge context budgeting/compaction is currently described as a design requirement, but needs to be made a first-class module (explicit budgets, truncation provenance, and a `JudgeContext` builder) to prevent prompt bloat and improve tool-to-judge handoff quality.
+4. Judge context budgeting/compaction is currently described as a design requirement, but needs to be made a first-class module (explicit budgets, truncation provenance, and a `JudgeContext` builder) to prevent prompt bloat and improve tool-to-judge handoff quality.
+
+### Routing contract
+
+Two routing representations exist and are formally mapped:
+
+| Pre-score route | Execution path | Meaning                           |
+| --------------- | -------------- | --------------------------------- |
+| allow           | FAST           | Minimal analysis, no deep context |
+| review          | STANDARD       | Normal analysis, judge optional   |
+| deep            | DEEP           | Deep context collection enabled   |
+
+Contract:
+
+1. `allow|review|deep` is **internal deterministic routing**.
+2. `FAST|STANDARD|DEEP` is the **external execution terminology** used in logs, metrics, and UI.
+3. External APIs must not expose ambiguous or mixed routing labels.
+
+## Implementation status
+
+| Component                            | Status      |
+| ------------------------------------ | ----------- |
+| EvidenceStage deterministic pipeline | Implemented |
+| Pre-score routing                    | Implemented |
+| Judge integration                    | Implemented |
+| Online validation                    | Implemented |
+| JudgeContext budgeting module        | Partial     |
+| Evidence store integration           | Planned     |
+| ToolExecutor unified execution       | Partial     |
+| Telemetry dashboards                 | Planned     |
 
 ## Safety, security, and privacy
 
@@ -538,6 +693,41 @@ Mitigations (current and required):
 1. Redaction masks emails and obvious tokens and sanitizes URL query params.
 2. Judge receives redacted evidence; raw content should be treated as sensitive.
 3. Any future persistence of evidence should have an explicit retention policy.
+
+### Artifact retention and lifecycle
+
+Default behavior:
+
+1. Artifacts are stored in-memory and discarded after request completion.
+2. No persistent storage is required for normal operation.
+
+Optional persistent mode (deployment-specific):
+
+1. Artifacts may be stored in an external object store.
+2. Retention period must be explicitly configured.
+3. Access must be restricted and audited.
+4. Artifact deletion policies must comply with organizational privacy requirements.
+
+Provenance should record whether artifacts were persisted or transient.
+
+## Performance model
+
+Execution latency depends on the selected execution path.
+
+| Path     | Characteristics                     | Dominant cost |
+| -------- | ----------------------------------- | ------------- |
+| FAST     | Deterministic only                  | CPU-bound     |
+| STANDARD | Deterministic + optional judge      | Model latency |
+| DEEP     | Network fetch + artifact processing | Network + CPU |
+
+Latency contributors:
+
+1. EvidenceStage: CPU-bound parsing and feature extraction.
+2. URL fetch: network latency and redirect handling.
+3. Attachment processing: I/O and text extraction.
+4. Judge: external provider latency.
+
+Timeouts and byte limits are enforced per stage to bound worst-case latency.
 
 ## Observability and operations
 

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from html.parser import HTMLParser
 import ipaddress
 import json
 from pathlib import Path
@@ -15,6 +14,9 @@ from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import urljoin, urlparse
 from urllib.request import HTTPErrorProcessor, Request, build_opener
+
+from phish_email_detection_agent.tools.text.encoding import analyze_url_obfuscation
+from phish_email_detection_agent.tools.url_fetch.html_compaction import compact_html
 
 
 @dataclass
@@ -39,56 +41,6 @@ class _NoRedirect(HTTPErrorProcessor):
         return response
 
     https_response = http_response
-
-
-class _HtmlFeatureParser(HTMLParser):
-    def __init__(self) -> None:
-        super().__init__()
-        self.form_count = 0
-        self.password_fields = 0
-        self.otp_fields = 0
-        self.iframe_count = 0
-        self.external_scripts = 0
-        self.external_links = 0
-        self.title = ""
-        self._in_title = False
-        self.text_fragments: list[str] = []
-
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        lower = tag.lower()
-        attr_map = {k.lower(): (v or "") for k, v in attrs}
-        if lower == "title":
-            self._in_title = True
-        if lower == "form":
-            self.form_count += 1
-        elif lower == "input" and attr_map.get("type", "").lower() == "password":
-            self.password_fields += 1
-        elif lower == "input":
-            input_type = attr_map.get("type", "").lower()
-            input_name = attr_map.get("name", "").lower()
-            if "otp" in input_type or "otp" in input_name or "code" in input_name:
-                self.otp_fields += 1
-        elif lower == "iframe":
-            self.iframe_count += 1
-        elif lower == "script":
-            src = attr_map.get("src", "").strip().lower()
-            if src.startswith(("http://", "https://", "//")):
-                self.external_scripts += 1
-        elif lower == "link":
-            href = attr_map.get("href", "").strip().lower()
-            if href.startswith(("http://", "https://", "//")):
-                self.external_links += 1
-
-    def handle_data(self, data: str) -> None:
-        clean = " ".join(data.split())
-        if clean:
-            self.text_fragments.append(clean)
-            if self._in_title and not self.title:
-                self.title = clean[:160]
-
-    def handle_endtag(self, tag: str) -> None:
-        if tag.lower() == "title":
-            self._in_title = False
 
 
 def _repo_root() -> Path:
@@ -406,52 +358,59 @@ def safe_fetch_url(url: str, policy: SafeFetchPolicy | None = None) -> dict[str,
 
 
 def analyze_html_content(html: str) -> dict[str, Any]:
-    parser = _HtmlFeatureParser()
-    parser.feed(html or "")
-    full_text = " ".join(parser.text_fragments).lower()
-    suspicious_keywords = [
-        token
-        for token in (
-            "verify account",
-            "password",
-            "urgent",
-            "suspended",
-            "security check",
-            "wallet",
-            "invoice",
-            "mfa",
-        )
-        if token in full_text
-    ]
-    brand_hits = [
-        token
-        for token in ("microsoft", "paypal", "apple", "google", "dhl", "amazon", "bank")
-        if token in full_text
-    ]
+    compacted = compact_html(html or "")
+    features = compacted.get("features", {}) if isinstance(compacted.get("features"), dict) else {}
+
+    form_count = int(features.get("form_count", 0) or 0)
+    password_fields = int(features.get("password_fields", 0) or 0)
+    otp_fields = int(features.get("otp_fields", 0) or 0)
+    iframe_count = int(features.get("iframes", 0) or 0)
+    external_scripts = int(features.get("external_scripts", 0) or 0)
+    external_links = int(features.get("external_links", 0) or 0)
+    external_resource_count = external_scripts + external_links + iframe_count
+
+    suspicious_keywords = compacted.get("suspicious_keywords", [])
+    brand_hits = compacted.get("brand_hits", [])
 
     score = 0
-    score += min(20, parser.form_count * 8)
-    score += min(20, parser.password_fields * 12)
-    external_resource_count = parser.external_scripts + parser.external_links + parser.iframe_count
-    score += min(15, parser.external_scripts * 5)
-    score += min(10, parser.iframe_count * 5)
-    score += min(20, len(suspicious_keywords) * 6)
-    if brand_hits and (parser.password_fields > 0 or parser.form_count > 0):
+    score += min(20, form_count * 8)
+    score += min(20, password_fields * 12)
+    score += min(15, external_scripts * 5)
+    score += min(10, iframe_count * 5)
+    if isinstance(suspicious_keywords, list):
+        score += min(20, len(suspicious_keywords) * 6)
+    if brand_hits and (password_fields > 0 or form_count > 0):
         score += 15
+    if compacted.get("meta_refresh"):
+        score += 4
+    if isinstance(compacted.get("data_uri_reports"), list) and compacted["data_uri_reports"]:
+        score += 3
+
     return {
-        "login_forms": parser.form_count,
-        "form_count": parser.form_count,
-        "password_fields": parser.password_fields,
-        "has_password_field": parser.password_fields > 0,
-        "has_otp_field": parser.otp_fields > 0,
-        "otp_fields": parser.otp_fields,
-        "external_scripts": parser.external_scripts,
+        "login_forms": form_count,
+        "form_count": form_count,
+        "password_fields": password_fields,
+        "has_password_field": password_fields > 0,
+        "has_otp_field": otp_fields > 0,
+        "otp_fields": otp_fields,
+        "external_scripts": external_scripts,
         "external_resource_count": external_resource_count,
-        "iframes": parser.iframe_count,
-        "title": parser.title,
-        "suspicious_keywords": suspicious_keywords,
-        "brand_hits": brand_hits,
+        "iframes": iframe_count,
+        "title": str(compacted.get("title", ""))[:160],
+        "suspicious_keywords": suspicious_keywords if isinstance(suspicious_keywords, list) else [],
+        "brand_hits": brand_hits if isinstance(brand_hits, list) else [],
         "impersonation_score": min(100, score),
+        # Context compaction fields (bounded; safe to include in precheck evidence).
+        "visible_text_sample": str(compacted.get("visible_text_sample", ""))[:4000],
+        "snippets": compacted.get("snippets", []),
+        "outbound_links": compacted.get("outbound_links", []),
+        "outbound_domains": compacted.get("outbound_domains", []),
+        "external_script_srcs": compacted.get("external_script_srcs", []),
+        "form_actions": compacted.get("form_actions", []),
+        "meta_refresh": bool(compacted.get("meta_refresh", False)),
+        "meta_refresh_targets": compacted.get("meta_refresh_targets", []),
+        "data_uri_reports": compacted.get("data_uri_reports", []),
+        "decode": compacted.get("decode", {}),
     }
 
 
@@ -460,15 +419,19 @@ def analyze_url_target(url: str, policy: SafeFetchPolicy | None = None) -> dict[
     html_analysis: dict[str, Any] = {}
     if fetch.get("status") == "ok" and isinstance(fetch.get("html"), str):
         html_analysis = analyze_html_content(fetch.get("html", ""))
+    obfuscation = analyze_url_obfuscation(str(fetch.get("final_url") or url))
     result = {
         "url": url,
         "fetch": fetch,
         "html_analysis": html_analysis,
+        "url_obfuscation": obfuscation,
     }
     risk = 0
     if fetch.get("status") in {"blocked", "network_error", "timeout", "sandbox_error"}:
         risk += 20
     if isinstance(html_analysis, dict):
         risk += int(html_analysis.get("impersonation_score", 0) * 0.6)
+    if isinstance(obfuscation, dict) and obfuscation.get("flags"):
+        risk += 6
     result["risk_score"] = min(100, risk)
     return result

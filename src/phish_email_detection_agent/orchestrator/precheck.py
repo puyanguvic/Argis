@@ -12,6 +12,7 @@ from phish_email_detection_agent.domain.attachment.detect import classify_attach
 from phish_email_detection_agent.domain.email.models import EmailInput
 from phish_email_detection_agent.domain.url.extract import canonicalize_url, is_suspicious_url
 from phish_email_detection_agent.tools.intel.domain_intel import DomainIntelPolicy, analyze_domain
+from phish_email_detection_agent.tools.text.encoding import analyze_url_obfuscation
 from phish_email_detection_agent.tools.text.text_model import contains_phishing_keywords
 from phish_email_detection_agent.tools.url_fetch.service import (
     SafeFetchPolicy,
@@ -238,6 +239,29 @@ def infer_url_signals(
             if len(redirect_chain) >= fetch_policy.max_redirects:
                 provenance["limits_hit"].append("url_expand_redirect_limit")
 
+        obfuscation = analyze_url_obfuscation(expanded_url)
+        nested_urls: list[str] = []
+        if isinstance(obfuscation, dict):
+            ob_flags = obfuscation.get("flags", [])
+            ob_flags_set = {str(flag) for flag in ob_flags if isinstance(flag, str)}
+            if "percent_encoded_query" in ob_flags_set:
+                risk_flags.append("encoded-query")
+            if "base64_decoded_query_value" in ob_flags_set:
+                risk_flags.append("base64-query")
+            if "nested_url_in_query" in ob_flags_set:
+                risk_flags.append("nested-url-param")
+            nested_urls = [
+                str(item)
+                for item in obfuscation.get("nested_urls", [])
+                if isinstance(item, str) and item.strip()
+            ]
+            if nested_urls:
+                risk_flags.append("query-redirect")
+            if "query_param_cap_hit" in ob_flags_set:
+                provenance["limits_hit"].append("url_query_param_cap_hit")
+            if "nested_url_cap_hit" in ob_flags_set:
+                provenance["limits_hit"].append("url_query_nested_url_cap_hit")
+
         final_domain = (urlparse(expanded_url).hostname or host).lower()
         typosquat = domain_report.get("typosquat_brands") if isinstance(domain_report, dict) else []
         brand = ""
@@ -272,6 +296,7 @@ def infer_url_signals(
                 "redirect_chain": redirect_chain,
                 "final_domain": final_domain,
                 "is_punycode": "xn--" in final_domain,
+                "nested_urls": nested_urls,
                 "looks_like_brand": {
                     "brand": brand,
                     "similarity": similarity,

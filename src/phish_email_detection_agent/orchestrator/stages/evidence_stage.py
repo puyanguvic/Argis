@@ -284,10 +284,30 @@ class EvidenceStage:
             default=0,
         )
 
+        nested_urls_from_query: list[str] = []
+        for signal in url_signals:
+            nested = signal.get("nested_urls", [])
+            if isinstance(nested, list):
+                nested_urls_from_query.extend(
+                    str(item).strip() for item in nested if isinstance(item, str) and str(item).strip()
+                )
+        nested_urls_from_query = list(dict.fromkeys(nested_urls_from_query))
+        if len(nested_urls_from_query) > 20:
+            provenance["limits_hit"].append("query_nested_url_cap_hit")
+            nested_urls_from_query = nested_urls_from_query[:20]
+
+        combined_urls = [
+            str(item.get("url", ""))
+            for item in url_signals
+            if isinstance(item, dict) and str(item.get("url", "")).strip()
+        ]
+        combined_urls = list(dict.fromkeys(combined_urls + nested_urls_from_query))
+
         precheck = {
             "chain_flags": list(dict.fromkeys(chain_flags)),
             "hidden_links": html_url_meta["hidden_links"],
-            "combined_urls": list(dict.fromkeys([str(item.get("url", "")) for item in url_signals if item.get("url")])),
+            "combined_urls": combined_urls,
+            "nested_urls_from_query": nested_urls_from_query,
             "url_checks": [
                 {"url": str(item.get("url", "")), "suspicious": bool(item.get("risk_flags"))}
                 for item in url_signals

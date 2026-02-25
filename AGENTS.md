@@ -157,7 +157,7 @@ A change is done only if all are true:
 1. Architecture boundaries are preserved.
 2. No import-cycle regressions were introduced.
 3. Relevant tests were added/updated and pass.
-4. `README.md` and `docs/architecture.md` reflect behavior changes.
+4. `README.md`, `docs/design.md`, and `docs/manual.md` reflect behavior changes.
 5. Deprecated or compatibility-only code introduced by the change is tracked and time-bounded.
 
 ## 11. Prohibited Changes

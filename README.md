@@ -126,7 +126,12 @@ pytest -k 'not hf_phishing_email_balanced_sample'
 
 Detailed test layout and suite guidance:
 
-- `docs/testing.md`
+- `docs/manual.md` (see “Testing”)
+
+## Documentation
+
+- `docs/design.md`
+- `docs/manual.md`
 
 ## Layout
 

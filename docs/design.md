@@ -8,21 +8,16 @@ Last updated: 2026-02-25
 
 ## Introduction
 
-Argis is a phishing email detection system built as an agentic control stack with a deterministic kernel.
+Argis is a **policy-centric AI agent** for phishing email detection. It accepts email-like inputs (text/JSON/EML) and returns a `TriageResult` with a verdict, a bounded risk score, actionable indicators, and machine-referenceable evidence.
 
-It accepts email-like inputs (text/JSON/EML) and produces a `TriageResult` with a verdict, a bounded risk score, actionable
-indicators, and machine-referenceable evidence. By default it runs without external side effects; optional deep analysis and
-a model judge can be enabled via configuration.
+Argis is engineered for security workloads where operational control and auditability matter as much as detection quality. The agent is **deterministic by default** (no external side effects), and optional deep analysis (e.g., safe URL fetching, attachment expansion) or an optional model judge can be enabled via configuration under explicit runtime policy.
 
 Key design choices:
 
-1. Deterministic-first: construct an `EvidencePack` and a calibrated pre-score before any model involvement.
-2. Layered architecture: `policy` (what/when) + `tools` (atomic capabilities) + `orchestrator` (control flow) + delivery interfaces.
-3. Evidence-backed outcomes: high-risk verdicts must be supported by explicit, machine-referenceable signals.
-4. Policy-gated side effects: network fetching, OCR, and audio transcription are opt-in and bounded.
-5. Optional judge: a model can act as a constrained advisor; its output is merged by explicit rules and validated online.
-6. Software-engineering KPIs still apply: accuracy, latency, CPU/memory/network cost, stability, reliability, and auditability.
-7. Budgeted context: large artifacts (attachments/pages) are processed into bounded summaries and machine-referenceable evidence, not blindly inlined into model prompts.
+1. **Evidence-first**: build an `EvidencePack` and a calibrated pre-score before any model involvement.
+2. **Policy-centric control**: routing depth, side effects, and budgets are governed centrally by policy, not by individual skills.
+3. **Bounded model role**: when enabled, the model acts as a constrained advisor whose output is merged and validated; deterministic fallback is always available.
+4. **Budgeted context**: large artifacts are compacted into bounded, referenceable evidence rather than being inlined into prompts.
 
 ## Background
 
@@ -31,6 +26,8 @@ This project treats agent engineering as an evolution of software engineering, n
 1. Traditional software building blocks still exist: modules, contracts, deterministic logic, tests, and SLOs.
 2. The model introduces a new control pattern: probabilistic reasoning under explicit policy constraints.
 3. `tools` and `skills` preserve composability and auditability by keeping the system modular.
+
+In Argis, an **AI agent is a software architecture pattern**: a controlled execution environment that composes deterministic components with policy-governed, bounded model reasoning. This reframes the model as a component within the architecture rather than the execution engine itself, which is critical for operating under security constraints (auditability, predictable behavior, and safe failure modes).
 
 Concept mapping:
 
@@ -107,6 +104,8 @@ Primary output contract:
 3. Reliability: always return a valid result via deterministic fallback.
 4. Maintainability: stable contracts, clear boundaries, no import-cycle regressions.
 5. Operational performance: predictable latency profiles with stage-level visibility.
+6. Auditability: high-risk verdicts must be evidence-backed with provenance sufficient for debugging and incident response.
+7. Budget enforcement: context and artifact processing must respect explicit caps (tokens/bytes/items) and record truncation/omissions in provenance.
 
 ## Architecture overview
 
@@ -116,6 +115,13 @@ Argis follows a control-stack architecture (layered design):
 2. `tools` layer: atomic capabilities (bounded execution).
 3. `orchestrator` layer: runtime wiring, routing, judge merge, validation.
 4. delivery interfaces: `api/ui/cli` call orchestrator only.
+
+Role separation (control vs execution):
+
+- **Policy** governs *decisions* (routing depth, side-effect enablement, model invocation, and budgets).
+- **Skills** perform *work* (structured analysis that produces evidence) but do not decide whether they should run or whether side effects are allowed.
+- **Tools** are atomic capabilities called by skills, each with explicit bounds and contracts.
+- **Orchestrator** coordinates execution, enforces policy decisions, and assembles the final `TriageResult`.
 
 Dependency direction (enforced):
 
@@ -277,6 +283,18 @@ Failure semantics (must hold):
 3. Judge failure or invalid output returns deterministic fallback.
 
 ## Deterministic kernel design
+
+### Evidence-first execution
+
+Argis follows an evidence-first execution model:
+
+1. Deterministic skills and tools construct an `EvidencePack`.
+2. A calibrated pre-score is computed and recorded as `allow|review|deep`.
+3. The route selects an execution path (`FAST|STANDARD|DEEP`) and gates optional deep context collection.
+4. Model usage (judge) is optional and policy-gated; its output is merged and validated.
+5. On any failure (model unavailable, judge error, validation failure), Argis returns a deterministic fallback result.
+
+The model, when enabled, acts as a constrained advisor: it consumes a bounded and redacted `JudgeContext` and returns a structured proposal that must pass online validation.
 
 ### Fixed skill chain
 

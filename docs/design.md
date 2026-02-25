@@ -283,7 +283,7 @@ Current FastAPI endpoint: `src/phish_email_detection_agent/api/app.py`.
 flowchart LR
   IN[EmailInput]
   EVID[EvidencePack]
-  ART[Artifacts\n(bytes/html/text)]
+  ART[Artifacts<br/>bytes/html/text]
   CTX[JudgeContext]
   OUT[TriageResult]
 

@@ -1,5 +1,7 @@
 # Operations Runbook
 
+> Legacy page notice (2026-03-05): this content is now maintained in [/argis/operations/runbook](/argis/operations/runbook).
+
 This runbook documents first-response procedures for common runtime failures.
 
 ## Quick triage

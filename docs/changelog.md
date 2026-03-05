@@ -1,5 +1,7 @@
 # Changelog (Web Summary)
 
+> Update (2026-03-05): documentation updates and announcements are now also published in [/blog/](/blog/).
+
 Canonical changelog file: [CHANGELOG.md](https://github.com/puyanguvic/Argis/blob/main/CHANGELOG.md)
 
 ## 2026-03-05

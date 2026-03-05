@@ -1,5 +1,7 @@
 # Migration Guide
 
+> Migration note (2026-03-05): API-oriented migration context is now grouped under [/api/](/api/) and [/api/guides-concepts](/api/guides-concepts).
+
 This guide covers migration for clients updating to `v0.1.1`.
 
 ## Who should read this

@@ -2,18 +2,17 @@
 
 This site is the web documentation for **Argis**, a phishing email detection agent with deterministic-first analysis and policy-controlled runtime behavior.
 
-## Start Here
+## Main Sections
 
-- [Manual](./manual): runbook, configuration, API usage, and testing commands.
-- [Design](./design): architecture model, contracts, runtime flow, and guardrails.
-- [API Contract](./api-contract): request/response schema, errors, and compatibility expectations.
-- [Migration Guide](./migration-guide): behavior changes and caller migration checklist.
-- [Runbook](./runbook): production troubleshooting and incident handling steps.
-- [Observability](./observability): metrics, logs, and dashboard recommendations.
-- [Security Boundary](./security-boundary): trust boundaries for API vs local runtime.
-- [Release Gates](./release-gates): required checks and release readiness criteria.
-- [Changelog](./changelog): release-facing summary of recent changes.
-- [Release Notes](./releases): links to GitHub release pages.
+- [Argis](./argis/): product usage, concepts, and configuration guides.
+- [API](./api/): guides, concepts, and API reference links.
+- [Blog](./blog/): project blog and updates.
+
+Key Argis paths:
+
+- [Getting Started](./argis/getting-started/overview)
+- [Architecture](./argis/architecture/)
+- [Operations](./argis/operations/)
 
 ## Current Focus (v0.1.1)
 

@@ -3,6 +3,19 @@
 Status: Living document
 Last updated: 2026-02-25
 
+## Docs Structure Update
+
+This page remains valid, but documentation is now organized into dedicated sections:
+
+- Argis docs: [/argis/](/argis/)
+- API docs: [/api/](/api/)
+- Blog: [/blog/](/blog/)
+
+If you are new to Argis, start with:
+
+- [/argis/getting-started/overview](/argis/getting-started/overview)
+- [/argis/getting-started/quickstart](/argis/getting-started/quickstart)
+
 ## Overview
 
 Argis is a phishing email detection agent stack with a deterministic-first kernel and an optional model judge.

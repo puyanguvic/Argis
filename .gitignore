@@ -11,3 +11,4 @@ __pycache__/
 .gradio/
 dist/
 build/
+node_modules/

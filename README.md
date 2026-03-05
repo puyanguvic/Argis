@@ -137,6 +137,12 @@ Detailed test layout and suite guidance:
 
 ## Documentation
 
+- `docs/index.md`
+- `docs/argis/`
+- `docs/argis/architecture/`
+- `docs/argis/operations/`
+- `docs/api/`
+- `docs/blog/`
 - `docs/design.md`
 - `docs/manual.md`
 

@@ -1,5 +1,8 @@
 # Argis Phishing Email Detection Agent — Design
 
+> Legacy page notice (2026-03-05): architecture docs are now organized under [/argis/architecture/](/argis/architecture/).
+> Start from [Design Overview](/argis/architecture/design-overview) and [Runtime Flow](/argis/architecture/runtime-flow).
+
 Author(s): Argis contributors
 Status: Living document
 Last updated: 2026-02-25

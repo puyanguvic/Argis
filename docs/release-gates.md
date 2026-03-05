@@ -1,5 +1,7 @@
 # Release Gates
 
+> Legacy page notice (2026-03-05): this content is now maintained in [/argis/operations/release-gates](/argis/operations/release-gates).
+
 Use this checklist before publishing a release.
 
 ## Required checks

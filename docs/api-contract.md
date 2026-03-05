@@ -1,5 +1,13 @@
 # API Contract
 
+## Docs Structure Update
+
+The API docs are now organized under:
+
+- API Home: [/api/](/api/)
+- Guides and Concepts: [/api/guides-concepts](/api/guides-concepts)
+- API Reference: [/api/reference](/api/reference)
+
 This page defines the stable contract for `POST /analyze`.
 
 ## Request

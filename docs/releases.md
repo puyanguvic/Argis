@@ -1,5 +1,7 @@
 # Release Notes
 
+> Update (2026-03-05): release-related documentation updates may also appear in [/blog/](/blog/).
+
 ## Latest
 
 - [v0.1.1 - API hardening and fallback reliability](https://github.com/puyanguvic/Argis/releases/tag/v0.1.1)

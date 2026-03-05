@@ -1,5 +1,7 @@
 # Observability
 
+> Legacy page notice (2026-03-05): this content is now maintained in [/argis/operations/observability](/argis/operations/observability).
+
 This page defines recommended metrics and logs for online analysis reliability.
 
 ## Core counters

@@ -1,5 +1,7 @@
 # Security Boundary
 
+> Legacy page notice (2026-03-05): this content is now maintained in [/argis/operations/security-boundary](/argis/operations/security-boundary).
+
 Argis uses different trust boundaries for API and local runtime contexts.
 
 ## Boundary model

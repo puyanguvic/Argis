@@ -4,8 +4,11 @@ from __future__ import annotations
 
 from collections.abc import Callable, Generator
 from dataclasses import dataclass
+from types import SimpleNamespace
 from typing import Any, Protocol
 
+from phish_email_detection_agent.domain.email.models import EmailInput
+from phish_email_detection_agent.domain.evidence import EvidencePack
 from phish_email_detection_agent.orchestrator.stages.evidence_builder import EvidenceBuilder
 from phish_email_detection_agent.orchestrator.stages.judge import JudgeEngine
 from phish_email_detection_agent.orchestrator.stages.runtime import PipelineRuntime
@@ -13,6 +16,13 @@ from phish_email_detection_agent.orchestrator.stages.runtime import PipelineRunt
 
 ParseInputFn = Callable[[str], Any]
 FallbackFn = Callable[..., Any]
+_FALLBACK_EMPTY_INPUT = "empty_input"
+_FALLBACK_REMOTE_UNAVAILABLE = "remote_unavailable"
+_FALLBACK_PARSE_ERROR = "parse_error"
+_FALLBACK_EVIDENCE_ERROR = "evidence_build_error"
+_FALLBACK_ROUTER_ERROR = "skill_router_error"
+_FALLBACK_JUDGE_ERROR = "judge_error"
+_FALLBACK_NO_FINAL_RESULT = "no_final_result"
 
 
 class SkillRouterEngine(Protocol):
@@ -26,6 +36,40 @@ class SkillRouterEngine(Protocol):
     ) -> Any: ...
 
 
+def _minimal_email_input(text: str) -> EmailInput:
+    return EmailInput(text=str(text or ""))
+
+
+def _minimal_evidence_pack() -> EvidencePack:
+    return EvidencePack.model_validate(
+        {
+            "email_meta": {"message_id": "fallback"},
+            "header_signals": {},
+            "pre_score": {
+                "risk_score": 35,
+                "route": "review",
+                "reasons": ["runtime:fallback"],
+            },
+        }
+    )
+
+
+def _minimal_precheck(email: Any) -> dict[str, Any]:
+    raw_urls = getattr(email, "urls", [])
+    urls = [str(item).strip() for item in raw_urls if isinstance(item, str) and str(item).strip()]
+    return {
+        "chain_flags": [],
+        "combined_urls": list(dict.fromkeys(urls)),
+        "indicators": ["runtime:fallback"],
+    }
+
+
+def _reason_with_error(reason_code: str, error: Exception | None) -> str:
+    if error is None:
+        return reason_code
+    return f"{reason_code}:{type(error).__name__}"
+
+
 @dataclass
 class PipelineExecutor:
     parse_input: ParseInputFn
@@ -34,27 +78,166 @@ class PipelineExecutor:
     judge: JudgeEngine
     fallback_builder: FallbackFn
 
+    def _build_emergency_result(
+        self,
+        *,
+        service: PipelineRuntime,
+        email: Any,
+        precheck: dict[str, Any],
+        fallback_reason: str,
+        error: Exception | None = None,
+    ) -> dict[str, Any]:
+        combined_urls = precheck.get("combined_urls", []) if isinstance(precheck, dict) else []
+        urls = [
+            str(item).strip()
+            for item in combined_urls
+            if isinstance(item, str) and str(item).strip()
+        ]
+        attachments = getattr(email, "attachments", [])
+        safe_attachments = [str(item) for item in attachments] if isinstance(attachments, list) else []
+
+        evidence_error = type(error).__name__ if error is not None else ""
+        return {
+            "verdict": "phishing",
+            "reason": "Deterministic fallback failed; emergency response emitted.",
+            "path": "STANDARD",
+            "risk_score": 35,
+            "confidence": 0.35,
+            "email_label": "phish_email",
+            "is_spam": False,
+            "is_phish_email": True,
+            "spam_score": 8,
+            "threat_tags": ["fallback-error"],
+            "indicators": ["runtime:fallback_emergency"],
+            "recommended_actions": [
+                "Do not click unknown links",
+                "Escalate to analyst review before user interaction",
+            ],
+            "input": str(getattr(email, "text", "")),
+            "urls": urls,
+            "attachments": safe_attachments,
+            "provider_used": f"{service.provider}:fallback",
+            "evidence": {
+                "error": evidence_error,
+                "precheck": precheck if isinstance(precheck, dict) else {},
+            },
+            "precheck": precheck if isinstance(precheck, dict) else {},
+            "fallback_reason": fallback_reason,
+        }
+
+    def _build_fallback_result(
+        self,
+        *,
+        service: PipelineRuntime,
+        email: Any,
+        evidence_pack: Any,
+        precheck: dict[str, Any],
+        reason_code: str,
+        error: Exception | None = None,
+    ) -> dict[str, Any]:
+        fallback_reason = _reason_with_error(reason_code, error)
+        try:
+            fallback_output = self.fallback_builder(
+                email,
+                service.provider,
+                evidence_pack,
+                precheck,
+                pipeline_policy=service.pipeline_policy,
+            )
+            if hasattr(fallback_output, "model_dump"):
+                final = fallback_output.model_dump(mode="json")
+            elif isinstance(fallback_output, dict):
+                final = dict(fallback_output)
+            else:
+                raise TypeError("Unsupported fallback output type.")
+            if not isinstance(final, dict):
+                raise TypeError("Fallback output must be dict-like.")
+            final["precheck"] = precheck
+            final["fallback_reason"] = fallback_reason
+            return final
+        except Exception as fallback_exc:
+            emergency_reason = f"{fallback_reason}:fallback_builder_error:{type(fallback_exc).__name__}"
+            return self._build_emergency_result(
+                service=service,
+                email=email,
+                precheck=precheck,
+                fallback_reason=emergency_reason,
+                error=error or fallback_exc,
+            )
+
     def analyze_stream(self, *, service: PipelineRuntime, text: str) -> Generator[dict[str, Any], None, None]:
-        email = self.parse_input(text)
-        evidence_pack, precheck = self.evidence_builder.build(email, service)
-        fallback = self.fallback_builder(
-            email,
-            service.provider,
-            evidence_pack,
-            precheck,
-            pipeline_policy=service.pipeline_policy,
-        )
+        email: Any = _minimal_email_input(text)
+        evidence_pack: Any = _minimal_evidence_pack()
+        precheck: dict[str, Any] = _minimal_precheck(email)
+
+        try:
+            email = self.parse_input(text)
+            precheck = _minimal_precheck(email)
+        except Exception as exc:
+            final = self._build_fallback_result(
+                service=service,
+                email=email,
+                evidence_pack=evidence_pack,
+                precheck=precheck,
+                reason_code=_FALLBACK_PARSE_ERROR,
+                error=exc,
+            )
+            yield service.event("runtime", "error", f"Input parse failed: {type(exc).__name__}. Using fallback.")
+            yield {"type": "final", "result": final}
+            return
+
+        try:
+            evidence_pack, precheck = self.evidence_builder.build(email, service)
+        except Exception as exc:
+            final = self._build_fallback_result(
+                service=service,
+                email=email,
+                evidence_pack=evidence_pack,
+                precheck=precheck,
+                reason_code=_FALLBACK_EVIDENCE_ERROR,
+                error=exc,
+            )
+            yield service.event(
+                "runtime",
+                "error",
+                f"Evidence build failed: {type(exc).__name__}. Using fallback.",
+            )
+            yield {"type": "final", "result": final}
+            return
+
         has_content = bool(email.text or email.urls or email.attachments)
-        plan = self.skill_router.plan(
-            evidence_pack=evidence_pack,
-            has_content=has_content,
-            can_call_remote=service.can_call_remote(),
-            pipeline_policy=service.pipeline_policy,
-        )
+        try:
+            plan = self.skill_router.plan(
+                evidence_pack=evidence_pack,
+                has_content=has_content,
+                can_call_remote=service.can_call_remote(),
+                pipeline_policy=service.pipeline_policy,
+            )
+        except Exception as exc:
+            final = self._build_fallback_result(
+                service=service,
+                email=email,
+                evidence_pack=evidence_pack,
+                precheck=precheck,
+                reason_code=_FALLBACK_ROUTER_ERROR,
+                error=exc,
+            )
+            yield service.event(
+                "runtime",
+                "error",
+                f"Skill routing failed: {type(exc).__name__}. Using fallback.",
+            )
+            yield {"type": "final", "result": final}
+            return
 
         if not plan.has_content:
-            final = fallback.model_dump(mode="json")
-            final["precheck"] = precheck
+            final = self._build_fallback_result(
+                service=service,
+                email=email,
+                evidence_pack=evidence_pack,
+                precheck=precheck,
+                reason_code=_FALLBACK_EMPTY_INPUT,
+            )
             yield service.event("init", "done", "Input empty; return fallback result.")
             yield {"type": "final", "result": final}
             return
@@ -119,23 +302,44 @@ class PipelineExecutor:
             )
 
         if not plan.should_invoke_judge:
-            final = fallback.model_dump(mode="json")
-            final["precheck"] = precheck
+            final = self._build_fallback_result(
+                service=service,
+                email=email,
+                evidence_pack=evidence_pack,
+                precheck=precheck,
+                reason_code=_FALLBACK_REMOTE_UNAVAILABLE,
+            )
             yield service.event("runtime", "fallback", "Remote model unavailable; using deterministic fallback.")
             yield {"type": "final", "result": final}
             return
 
         yield service.event("judge", "running", "Judge agent is evaluating the evidence pack.")
+        try:
+            fallback_for_judge = self.fallback_builder(
+                email,
+                service.provider,
+                evidence_pack,
+                precheck,
+                pipeline_policy=service.pipeline_policy,
+            )
+        except Exception:
+            fallback_for_judge = SimpleNamespace(recommended_actions=[], reason="")
         judge_result = self.judge.evaluate(
             service=service,
             email=email,
             evidence_pack=evidence_pack,
             precheck=precheck,
-            fallback=fallback,
+            fallback=fallback_for_judge,
         )
         if judge_result.error is not None or judge_result.final_result is None:
-            final = fallback.model_dump(mode="json")
-            final["precheck"] = precheck
+            final = self._build_fallback_result(
+                service=service,
+                email=email,
+                evidence_pack=evidence_pack,
+                precheck=precheck,
+                reason_code=_FALLBACK_JUDGE_ERROR,
+                error=judge_result.error,
+            )
             err_name = type(judge_result.error).__name__ if judge_result.error is not None else "UnknownError"
             yield service.event("runtime", "error", f"Judge failed: {err_name}. Use fallback.")
             yield {"type": "final", "result": final}
@@ -166,12 +370,10 @@ class PipelineExecutor:
                     final = result
         if final is not None:
             return final
-        email = self.parse_input(text)
-        evidence_pack, precheck = self.evidence_builder.build(email, service)
-        return self.fallback_builder(
-            email,
-            service.provider,
-            evidence_pack,
-            precheck,
-            pipeline_policy=service.pipeline_policy,
-        ).model_dump(mode="json")
+        email = _minimal_email_input(text)
+        return self._build_emergency_result(
+            service=service,
+            email=email,
+            precheck=_minimal_precheck(email),
+            fallback_reason=_FALLBACK_NO_FINAL_RESULT,
+        )

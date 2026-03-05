@@ -1,3 +1,8 @@
+---
+title: API Contract
+description: Stable low-level wire contract for POST /analyze, including request rules, response guarantees, and error codes.
+---
+
 # API Contract
 
 This page defines the stable low-level contract for `POST /analyze`.
@@ -15,6 +20,10 @@ This page defines the stable low-level contract for `POST /analyze`.
 - `text` (required, string)
 - `model` (optional, string)
 - `debug_evidence` (optional, boolean-like)
+
+## Transport-Level Rule
+
+The request body must be a JSON object, and `text` must be present as a string. Even when you are sending structured message data, that structure is carried inside the string value of `text`.
 
 ## `text` Payload Modes
 
@@ -50,6 +59,10 @@ Disallowed in API mode:
 
 - `eml_path`
 
+### Why `eml_path` Is Disallowed
+
+The API is treated as an untrusted boundary. Local filesystem paths would leak host assumptions into a remote caller contract, so API mode accepts inline content only.
+
 ## Attachment Schema
 
 `attachments` must be a list of objects such as:
@@ -61,6 +74,8 @@ Rejected patterns:
 
 - raw string arrays such as `["invoice.pdf"]`
 - path-like values such as `../x`, `/tmp/x`, `C:\\x`, or `file://...`
+
+The API treats attachment entries as logical identifiers for analysis context, not as direct filesystem access instructions.
 
 ## Response Shape
 
@@ -77,6 +92,8 @@ When fallback is used:
 - `provider_used` ends with `:fallback`
 - `fallback_reason` is present
 
+The `fallback_reason` field is part of the observable runtime contract for degraded execution. It is important for operators even when the HTTP status is still `200`.
+
 ## Evidence Behavior
 
 Default behavior:
@@ -86,6 +103,8 @@ Default behavior:
 Debug behavior with `debug_evidence=true`:
 
 - full evidence details are returned for internal diagnostics
+
+This distinction is intentional. API consumers often cross a wider trust boundary than local CLI users.
 
 ## Error Format
 
@@ -106,3 +125,13 @@ Known error codes:
 - `unsupported_eml_path`
 - `invalid_attachment_schema`
 - `unsafe_attachment_path`
+
+## Stability Guidance
+
+Callers should treat these fields as the stable public contract:
+
+- request: `text`, `model`, `debug_evidence`
+- response: core triage fields, `provider_used`, `fallback_reason`, `precheck`, `runtime`, `skillpacks`, `tools`
+- errors: `detail.code`, `detail.message`
+
+Callers should avoid tightly coupling to every nested field inside `runtime.config` or other implementation-detail-heavy substructures.

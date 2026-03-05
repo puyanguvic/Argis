@@ -67,6 +67,18 @@ export default withMermaid(
       }
     },
     themeConfig: {
+      outline: {
+        level: [2, 3],
+        label: "On This Page"
+      },
+      docFooter: {
+        prev: "Previous",
+        next: "Next"
+      },
+      editLink: {
+        pattern: "https://github.com/puyanguvic/Argis/edit/main/docs/:path",
+        text: "Edit this page"
+      },
       nav: [
         { text: "Home", link: "/" },
         { text: "Docs", link: "/argis/" },
@@ -83,7 +95,8 @@ export default withMermaid(
               { text: "Overview", link: "/argis/getting-started/overview" },
               { text: "Quickstart", link: "/argis/getting-started/quickstart" },
               { text: "Explore", link: "/argis/getting-started/explore" },
-              { text: "Concepts", link: "/argis/getting-started/concepts" }
+              { text: "Concepts", link: "/argis/getting-started/concepts" },
+              { text: "Glossary", link: "/argis/getting-started/glossary" }
             ]
           },
           {
@@ -104,7 +117,7 @@ export default withMermaid(
               { text: "Agents.md", link: "/argis/configurations/agents-md" },
               { text: "MCP", link: "/argis/configurations/mcp" },
               { text: "Skills", link: "/argis/configurations/skills" },
-              { text: "Context Manage", link: "/argis/configurations/context-manage" }
+              { text: "Context Management", link: "/argis/configurations/context-management" }
             ]
           },
           {
@@ -122,7 +135,8 @@ export default withMermaid(
               { text: "Runbook", link: "/argis/operations/runbook" },
               { text: "Observability", link: "/argis/operations/observability" },
               { text: "Security Boundary", link: "/argis/operations/security-boundary" },
-              { text: "Release Gates", link: "/argis/operations/release-gates" }
+              { text: "Release Gates", link: "/argis/operations/release-gates" },
+              { text: "Docs Style Guide", link: "/argis/operations/docs-style-guide" }
             ]
           }
         ],

@@ -20,15 +20,7 @@ export default withMermaid(
         },
         {
           text: "Argis",
-          items: [
-            { text: "Overview", link: "/argis/getting-started/overview" },
-            { text: "Quickstart", link: "/argis/getting-started/quickstart" },
-            { text: "App", link: "/argis/using-argis/app" },
-            { text: "CLI", link: "/argis/using-argis/cli" },
-            { text: "Config File", link: "/argis/configurations/config-file" },
-            { text: "Architecture", link: "/argis/architecture/" },
-            { text: "Operations", link: "/argis/operations/" }
-          ]
+          link: "/argis/"
         },
         {
           text: "Blog",

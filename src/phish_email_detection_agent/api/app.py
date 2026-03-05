@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+from typing import Any
 
 from fastapi import FastAPI
 from fastapi import HTTPException
@@ -84,6 +85,70 @@ def _validate_json_text_input(text: str) -> None:
             )
 
 
+def _is_true(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return False
+    return str(value).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _sanitize_attachment_reports(reports: Any) -> Any:
+    if not isinstance(reports, list):
+        return reports
+    sanitized: list[Any] = []
+    for report in reports:
+        if not isinstance(report, dict):
+            sanitized.append(report)
+            continue
+        clean = dict(report)
+        clean.pop("exists", None)
+        clean.pop("sha256", None)
+        clean.pop("details", None)
+        sanitized.append(clean)
+    return sanitized
+
+
+def _sanitize_url_target_reports(reports: Any) -> Any:
+    if not isinstance(reports, list):
+        return reports
+    sanitized: list[Any] = []
+    for report in reports:
+        if not isinstance(report, dict):
+            sanitized.append(report)
+            continue
+        clean = dict(report)
+        fetch = clean.get("fetch")
+        if isinstance(fetch, dict):
+            fetch_clean = dict(fetch)
+            fetch_clean.pop("stderr", None)
+            fetch_clean.pop("command", None)
+            clean["fetch"] = fetch_clean
+        sanitized.append(clean)
+    return sanitized
+
+
+def _sanitize_precheck(precheck: Any) -> Any:
+    if not isinstance(precheck, dict):
+        return precheck
+    clean = dict(precheck)
+    clean["attachment_reports"] = _sanitize_attachment_reports(clean.get("attachment_reports"))
+    clean["url_target_reports"] = _sanitize_url_target_reports(clean.get("url_target_reports"))
+    return clean
+
+
+def _sanitize_result_for_api(result: dict[str, Any]) -> dict[str, Any]:
+    clean = dict(result)
+    clean["precheck"] = _sanitize_precheck(clean.get("precheck"))
+
+    evidence = clean.get("evidence")
+    if isinstance(evidence, dict):
+        evidence_clean = dict(evidence)
+        evidence_clean["precheck"] = _sanitize_precheck(evidence_clean.get("precheck"))
+        clean["evidence"] = evidence_clean
+    return clean
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
@@ -99,10 +164,13 @@ def analyze(payload: dict[str, object]) -> dict[str, object]:
         )
     text = raw_text
     _validate_json_text_input(text)
+    debug_evidence = _is_true(payload.get("debug_evidence"))
     model = payload.get("model")
     model_override = str(model) if isinstance(model, str) and model.strip() else None
     agent, runtime = create_agent(model_override=model_override)
     result = agent.analyze(text)
+    if not debug_evidence:
+        result = _sanitize_result_for_api(result)
     installed_skillpacks = runtime.get("installed_skillpacks", [])
     skillpacks_dir = str(runtime.get("skillpacks_dir", ""))
     builtin_tools = runtime.get("builtin_tools", [])

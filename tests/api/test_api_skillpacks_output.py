@@ -112,3 +112,120 @@ def test_analyze_accepts_structured_attachment_identifiers(monkeypatch):
         }
     )
     assert result["verdict"] == "benign"
+
+
+def test_analyze_sanitizes_sensitive_evidence_by_default(monkeypatch):
+    runtime = {
+        "profile": "ollama",
+        "provider": "local",
+        "model": "ollama/qwen2.5:7b",
+        "skillpacks_dir": "/tmp/skillpacks",
+        "installed_skillpacks": [],
+        "builtin_tools": [],
+    }
+
+    class _EvidenceAgent:
+        def analyze(self, text: str) -> dict[str, object]:
+            return {
+                "verdict": "phishing",
+                "precheck": {
+                    "attachment_reports": [
+                        {
+                            "name": "invoice.pdf",
+                            "risk_score": 80,
+                            "exists": True,
+                            "sha256": "abc123",
+                            "details": {"macro": True},
+                        }
+                    ],
+                    "url_target_reports": [
+                        {
+                            "fetch": {
+                                "status": "sandbox_error",
+                                "stderr": "trace",
+                                "command": "docker run ...",
+                            }
+                        }
+                    ],
+                },
+                "evidence": {
+                    "precheck": {
+                        "attachment_reports": [
+                            {
+                                "name": "invoice.pdf",
+                                "risk_score": 80,
+                                "exists": True,
+                                "sha256": "abc123",
+                                "details": {"macro": True},
+                            }
+                        ],
+                        "url_target_reports": [
+                            {
+                                "fetch": {
+                                    "status": "sandbox_error",
+                                    "stderr": "trace",
+                                    "command": "docker run ...",
+                                }
+                            }
+                        ],
+                    }
+                },
+            }
+
+    def _fake_create_agent(*, model_override=None):
+        return _EvidenceAgent(), runtime
+
+    monkeypatch.setattr(api_app, "create_agent", _fake_create_agent)
+    result = api_app.analyze({"text": "hello"})
+
+    report = result["precheck"]["attachment_reports"][0]
+    assert "exists" not in report
+    assert "sha256" not in report
+    assert "details" not in report
+    fetch = result["precheck"]["url_target_reports"][0]["fetch"]
+    assert "stderr" not in fetch
+    assert "command" not in fetch
+
+    evidence_report = result["evidence"]["precheck"]["attachment_reports"][0]
+    assert "exists" not in evidence_report
+    assert "sha256" not in evidence_report
+    assert "details" not in evidence_report
+
+
+def test_analyze_keeps_full_evidence_in_debug_mode(monkeypatch):
+    runtime = {
+        "profile": "ollama",
+        "provider": "local",
+        "model": "ollama/qwen2.5:7b",
+        "skillpacks_dir": "/tmp/skillpacks",
+        "installed_skillpacks": [],
+        "builtin_tools": [],
+    }
+
+    class _EvidenceAgent:
+        def analyze(self, text: str) -> dict[str, object]:
+            return {
+                "verdict": "phishing",
+                "precheck": {
+                    "attachment_reports": [
+                        {
+                            "name": "invoice.pdf",
+                            "risk_score": 80,
+                            "exists": True,
+                            "sha256": "abc123",
+                            "details": {"macro": True},
+                        }
+                    ],
+                },
+            }
+
+    def _fake_create_agent(*, model_override=None):
+        return _EvidenceAgent(), runtime
+
+    monkeypatch.setattr(api_app, "create_agent", _fake_create_agent)
+    result = api_app.analyze({"text": "hello", "debug_evidence": True})
+
+    report = result["precheck"]["attachment_reports"][0]
+    assert report["exists"] is True
+    assert report["sha256"] == "abc123"
+    assert report["details"] == {"macro": True}

@@ -1,0 +1,45 @@
+<svg width="1200" height="640" viewBox="0 0 1200 640" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Context Engineering in Argis</title>
+  <desc id="desc">A diagram showing bounded evidence-first context flowing through the Argis control stack.</desc>
+  <rect width="1200" height="640" rx="28" fill="#F4F1EA"/>
+  <rect x="32" y="32" width="1136" height="576" rx="24" fill="url(#bg)"/>
+  <circle cx="168" cy="140" r="72" fill="#E9DED0"/>
+  <circle cx="1072" cy="508" r="96" fill="#E5E7D8"/>
+  <rect x="88" y="86" width="284" height="140" rx="20" fill="#FFFDF8" stroke="#B98B5F" stroke-width="2"/>
+  <text x="116" y="128" fill="#6C4022" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700">Email Inputs</text>
+  <text x="116" y="162" fill="#4D4D4D" font-family="Arial, sans-serif" font-size="18">Body, headers, URLs,</text>
+  <text x="116" y="188" fill="#4D4D4D" font-family="Arial, sans-serif" font-size="18">attachments, EML metadata</text>
+  <rect x="458" y="66" width="284" height="176" rx="20" fill="#FFFDF8" stroke="#5D8C7B" stroke-width="2"/>
+  <text x="486" y="108" fill="#224B41" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700">EvidencePack</text>
+  <text x="486" y="144" fill="#4D4D4D" font-family="Arial, sans-serif" font-size="18">Normalized signals,</text>
+  <text x="486" y="170" fill="#4D4D4D" font-family="Arial, sans-serif" font-size="18">provenance, precheck inputs,</text>
+  <text x="486" y="196" fill="#4D4D4D" font-family="Arial, sans-serif" font-size="18">bounded collection results</text>
+  <rect x="828" y="86" width="284" height="140" rx="20" fill="#FFFDF8" stroke="#40689B" stroke-width="2"/>
+  <text x="856" y="128" fill="#233D64" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700">Route-Aware</text>
+  <text x="856" y="162" fill="#4D4D4D" font-family="Arial, sans-serif" font-size="18">FAST, STANDARD, DEEP</text>
+  <text x="856" y="188" fill="#4D4D4D" font-family="Arial, sans-serif" font-size="18">carry different context budgets</text>
+  <rect x="174" y="342" width="316" height="170" rx="20" fill="#FFFDF8" stroke="#A9634E" stroke-width="2"/>
+  <text x="202" y="384" fill="#6A2E21" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">Policy And Tools</text>
+  <text x="202" y="420" fill="#4D4D4D" font-family="Arial, sans-serif" font-size="18">Policy sets thresholds and ordering.</text>
+  <text x="202" y="446" fill="#4D4D4D" font-family="Arial, sans-serif" font-size="18">Tools perform deterministic,</text>
+  <text x="202" y="472" fill="#4D4D4D" font-family="Arial, sans-serif" font-size="18">bounded evidence collection.</text>
+  <rect x="570" y="324" width="460" height="206" rx="20" fill="#FFFDF8" stroke="#7A6A55" stroke-width="2"/>
+  <text x="598" y="366" fill="#4B4032" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">Validated Operational Output</text>
+  <text x="598" y="404" fill="#4D4D4D" font-family="Arial, sans-serif" font-size="18">Verdict, risk score, selected evidence,</text>
+  <text x="598" y="430" fill="#4D4D4D" font-family="Arial, sans-serif" font-size="18">runtime metadata, fallback reason,</text>
+  <text x="598" y="456" fill="#4D4D4D" font-family="Arial, sans-serif" font-size="18">and trust-boundary aware sanitization.</text>
+  <path d="M372 156H438" stroke="#8B6A49" stroke-width="4" stroke-linecap="round"/>
+  <path d="M742 156H808" stroke="#5D7FA8" stroke-width="4" stroke-linecap="round"/>
+  <path d="M332 342V256H600V242" stroke="#A9634E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M800 324V266" stroke="#7A6A55" stroke-width="4" stroke-linecap="round"/>
+  <path d="M970 226V292H970" stroke="#40689B" stroke-width="4" stroke-linecap="round"/>
+  <path d="M438 156L425 148V164L438 156Z" fill="#8B6A49"/>
+  <path d="M808 156L795 148V164L808 156Z" fill="#5D7FA8"/>
+  <text x="96" y="574" fill="#4B4032" font-family="Arial, sans-serif" font-size="22">Context engineering in Argis is a controlled information flow, not a larger prompt.</text>
+  <defs>
+    <linearGradient id="bg" x1="72" y1="52" x2="1128" y2="588" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF9EF"/>
+      <stop offset="1" stop-color="#F2F5EE"/>
+    </linearGradient>
+  </defs>
+</svg>

@@ -157,6 +157,10 @@ export default withMermaid(
             text: "Tech Docs",
             items: [
               {
+                text: "Context Engineering In Argis",
+                link: "/blog/technical-docs/context-engineering-for-deterministic-agents"
+              },
+              {
                 text: "When One GPU Is No Longer Enough",
                 link: "/blog/technical-docs/when-one-gpu-is-no-longer-enough"
               }

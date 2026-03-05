@@ -14,6 +14,7 @@ Project updates, tech docs, and implementation playbooks.
 
 ## Tech Docs
 
+- [Context Engineering In Argis](./technical-docs/context-engineering-for-deterministic-agents)
 - [When One GPU Is No Longer Enough](./technical-docs/when-one-gpu-is-no-longer-enough)
 
 ## Cookbook

@@ -1,0 +1,41 @@
+<svg width="1200" height="520" viewBox="0 0 1200 520" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Context budget by route</title>
+  <desc id="desc">A route-based context budget diagram for FAST, STANDARD, and DEEP paths in Argis.</desc>
+  <rect width="1200" height="520" rx="28" fill="#F7F4EE"/>
+  <rect x="52" y="62" width="262" height="376" rx="24" fill="#FFFDF9" stroke="#7F8C8D" stroke-width="2"/>
+  <rect x="364" y="62" width="262" height="376" rx="24" fill="#FFFDF9" stroke="#9B7A4D" stroke-width="2"/>
+  <rect x="676" y="62" width="262" height="376" rx="24" fill="#FFFDF9" stroke="#4F7C6D" stroke-width="2"/>
+  <rect x="988" y="62" width="160" height="376" rx="24" fill="#FFFDF9" stroke="#3F648D" stroke-width="2"/>
+  <text x="98" y="112" fill="#4A4A4A" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">FAST</text>
+  <text x="410" y="112" fill="#6A4A20" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">STANDARD</text>
+  <text x="722" y="112" fill="#224B41" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">DEEP</text>
+  <text x="1018" y="112" fill="#233D64" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">Rule</text>
+  <text x="98" y="154" fill="#5A5A5A" font-family="Arial, sans-serif" font-size="18">Minimal context</text>
+  <text x="98" y="182" fill="#5A5A5A" font-family="Arial, sans-serif" font-size="18">Surface indicators</text>
+  <text x="98" y="210" fill="#5A5A5A" font-family="Arial, sans-serif" font-size="18">Precheck summary</text>
+  <text x="98" y="238" fill="#5A5A5A" font-family="Arial, sans-serif" font-size="18">Low-cost outcome</text>
+  <text x="410" y="154" fill="#5A5A5A" font-family="Arial, sans-serif" font-size="18">Selected evidence</text>
+  <text x="410" y="182" fill="#5A5A5A" font-family="Arial, sans-serif" font-size="18">URL and domain summary</text>
+  <text x="410" y="210" fill="#5A5A5A" font-family="Arial, sans-serif" font-size="18">Text risk cues</text>
+  <text x="410" y="238" fill="#5A5A5A" font-family="Arial, sans-serif" font-size="18">Ambiguity reduction</text>
+  <text x="722" y="154" fill="#5A5A5A" font-family="Arial, sans-serif" font-size="18">Expanded evidence</text>
+  <text x="722" y="182" fill="#5A5A5A" font-family="Arial, sans-serif" font-size="18">Fetched page features</text>
+  <text x="722" y="210" fill="#5A5A5A" font-family="Arial, sans-serif" font-size="18">Attachment deep analysis</text>
+  <text x="722" y="238" fill="#5A5A5A" font-family="Arial, sans-serif" font-size="18">OCR and rich artifacts</text>
+  <text x="1018" y="154" fill="#5A5A5A" font-family="Arial, sans-serif" font-size="18">Earn depth</text>
+  <text x="1018" y="182" fill="#5A5A5A" font-family="Arial, sans-serif" font-size="18">through score</text>
+  <text x="1018" y="210" fill="#5A5A5A" font-family="Arial, sans-serif" font-size="18">and policy</text>
+  <rect x="96" y="286" width="174" height="86" rx="16" fill="#E9EEF0"/>
+  <rect x="408" y="254" width="174" height="118" rx="16" fill="#F0E8DB"/>
+  <rect x="720" y="214" width="174" height="158" rx="16" fill="#DFECE7"/>
+  <text x="124" y="336" fill="#3F4A4D" font-family="Arial, sans-serif" font-size="20" font-weight="700">Smallest</text>
+  <text x="432" y="318" fill="#6A4A20" font-family="Arial, sans-serif" font-size="20" font-weight="700">Targeted</text>
+  <text x="432" y="346" fill="#6A4A20" font-family="Arial, sans-serif" font-size="20" font-weight="700">Expansion</text>
+  <text x="746" y="298" fill="#224B41" font-family="Arial, sans-serif" font-size="20" font-weight="700">Largest</text>
+  <text x="746" y="326" fill="#224B41" font-family="Arial, sans-serif" font-size="20" font-weight="700">Budget</text>
+  <path d="M314 250H356" stroke="#B7A48A" stroke-width="4" stroke-linecap="round"/>
+  <path d="M626 250H668" stroke="#B7A48A" stroke-width="4" stroke-linecap="round"/>
+  <path d="M356 250L343 242V258L356 250Z" fill="#B7A48A"/>
+  <path d="M668 250L655 242V258L668 250Z" fill="#B7A48A"/>
+  <text x="82" y="476" fill="#4B4032" font-family="Arial, sans-serif" font-size="22">Argis does not give every path the same context. It allocates context depth according to deterministic risk and policy.</text>
+</svg>

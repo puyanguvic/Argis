@@ -172,12 +172,6 @@ export default withMermaid(
             items: [
               { text: "Overview", link: "/blog/cookbook/" }
             ]
-          },
-          {
-            text: "Templates",
-            items: [
-              { text: "Post Template", link: "/blog/post-template" }
-            ]
           }
         ],
         "/": [

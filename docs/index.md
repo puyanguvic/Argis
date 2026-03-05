@@ -6,6 +6,12 @@ This site is the web documentation for **Argis**, a phishing email detection age
 
 - [Manual](./manual): runbook, configuration, API usage, and testing commands.
 - [Design](./design): architecture model, contracts, runtime flow, and guardrails.
+- [API Contract](./api-contract): request/response schema, errors, and compatibility expectations.
+- [Migration Guide](./migration-guide): behavior changes and caller migration checklist.
+- [Runbook](./runbook): production troubleshooting and incident handling steps.
+- [Observability](./observability): metrics, logs, and dashboard recommendations.
+- [Security Boundary](./security-boundary): trust boundaries for API vs local runtime.
+- [Release Gates](./release-gates): required checks and release readiness criteria.
 - [Changelog](./changelog): release-facing summary of recent changes.
 - [Release Notes](./releases): links to GitHub release pages.
 

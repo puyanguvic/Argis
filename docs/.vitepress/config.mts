@@ -11,6 +11,8 @@ export default defineConfig({
       { text: "Home", link: "/" },
       { text: "Design", link: "/design" },
       { text: "Manual", link: "/manual" },
+      { text: "API", link: "/api-contract" },
+      { text: "Runbook", link: "/runbook" },
       { text: "Changelog", link: "/changelog" },
       { text: "Release", link: "/releases" }
     ],
@@ -20,7 +22,18 @@ export default defineConfig({
         items: [
           { text: "Home", link: "/" },
           { text: "Manual", link: "/manual" },
-          { text: "Design", link: "/design" }
+          { text: "Design", link: "/design" },
+          { text: "API Contract", link: "/api-contract" },
+          { text: "Migration Guide", link: "/migration-guide" }
+        ]
+      },
+      {
+        text: "Operations",
+        items: [
+          { text: "Runbook", link: "/runbook" },
+          { text: "Observability", link: "/observability" },
+          { text: "Security Boundary", link: "/security-boundary" },
+          { text: "Release Gates", link: "/release-gates" }
         ]
       },
       {

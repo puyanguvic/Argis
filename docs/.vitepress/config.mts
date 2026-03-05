@@ -156,8 +156,32 @@ export default withMermaid(
           {
             text: "Blog",
             items: [
-              { text: "Blog Home", link: "/blog/" },
-              { text: "2026-03-05: IA Update", link: "/blog/2026-03-05-docs-ia-update" },
+              { text: "Blog Home", link: "/blog/" }
+            ]
+          },
+          {
+            text: "Technical Documents",
+            items: [
+              { text: "Overview", link: "/blog/technical-docs/" },
+              {
+                text: "When One GPU Is No Longer Enough",
+                link: "/blog/technical-docs/when-one-gpu-is-no-longer-enough"
+              },
+              {
+                text: "2026-03-05: IA Update",
+                link: "/blog/technical-docs/2026-03-05-docs-ia-update"
+              }
+            ]
+          },
+          {
+            text: "Cookbook",
+            items: [
+              { text: "Overview", link: "/blog/cookbook/" }
+            ]
+          },
+          {
+            text: "Templates",
+            items: [
               { text: "Post Template", link: "/blog/post-template" }
             ]
           }

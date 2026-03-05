@@ -1,3 +1,8 @@
+---
+title: "2026-03-05: Docs Information Architecture Update"
+description: Summary of the documentation site navigation redesign around canonical product, API, operations, architecture, and blog sections.
+---
+
 # 2026-03-05: Docs Information Architecture Update
 
 ## Summary

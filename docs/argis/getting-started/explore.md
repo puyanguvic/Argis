@@ -17,10 +17,10 @@ Use this map to navigate by intent.
 
 - [Config File](/argis/configurations/config-file)
 - [Rules](/argis/configurations/rules)
-- [Security Boundary](/security-boundary)
+- [Security Boundary](/argis/operations/security-boundary)
 
 ## I want architecture and reliability details
 
 - [Concepts](./concepts)
-- [Design](/design)
-- [Runbook](/runbook)
+- [Architecture](/argis/architecture/)
+- [Runbook](/argis/operations/runbook)

@@ -17,4 +17,7 @@ Argis behavior is controlled by explicit rules in policy and orchestrator compon
 - evidence-backed outcomes for risky verdicts
 - stable output shape for callers
 
-Architecture details: [Design](/design).
+Architecture details:
+
+- [Design Overview](/argis/architecture/design-overview)
+- [Runtime Flow](/argis/architecture/runtime-flow)

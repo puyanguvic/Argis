@@ -1,30 +1,50 @@
-# Argis Documentation
+---
+layout: home
+title: Argis Docs
 
-This site is the web documentation for **Argis**, a phishing email detection agent with deterministic-first analysis and policy-controlled runtime behavior.
+hero:
+  name: Argis Docs
+  text: Deterministic-first phishing email detection
+  tagline: Product guides, API contracts, architecture references, and operational playbooks for running Argis with bounded side effects and evidence-backed outputs.
+  actions:
+    - theme: brand
+      text: Start with Quickstart
+      link: /argis/getting-started/quickstart
+    - theme: alt
+      text: Explore Product Docs
+      link: /argis/
+    - theme: alt
+      text: Read the API Docs
+      link: /api/
 
-## Main Sections
+features:
+  - title: Product Guides
+    details: Start locally, choose between CLI and API workflows, and configure runtime behavior without crossing trust boundaries.
+  - title: Architecture
+    details: Understand the policy, tools, and orchestrator layers that keep Argis explicit, auditable, and deterministic by default.
+  - title: Operations
+    details: Monitor fallback behavior, keep evidence handling safe, and ship releases against documented quality gates.
+---
 
-- [Argis](./argis/): product usage, concepts, and configuration guides.
-- [API](./api/): guides, concepts, and API reference links.
-- [Blog](./blog/): project blog and updates.
+## Documentation Map
 
-Key Argis paths:
+- Start with [Overview](/argis/getting-started/overview), [Quickstart](/argis/getting-started/quickstart), and [Explore](/argis/getting-started/explore) if you are new to the project.
+- Use [Using Argis](/argis/using-argis/) for day-to-day operator and integration workflows.
+- Use [Configurations](/argis/configurations/) to tune runtime profiles, policy controls, MCP usage, and skillpack behavior.
+- Read [Architecture](/argis/architecture/) for the control-stack model and runtime flow.
+- Read [Operations](/argis/operations/) for runbooks, observability, security boundaries, and release gates.
+- Use [API](/api/) when integrating `POST /analyze` into services and pipelines.
 
-- [Getting Started](./argis/getting-started/overview)
-- [Architecture](./argis/architecture/)
-- [Operations](./argis/operations/)
+## Canonical Structure
 
-## Current Focus (v0.1.1)
+The documentation site now uses `/argis/` and `/api/` as the primary information architecture. The earlier root-level compatibility pages have been removed so the site has a single canonical structure.
 
-Recent updates shipped in `v0.1.1`:
+## Current Focus
 
-- Hardened `/analyze` API input boundaries.
-- Default evidence sanitization for API responses with explicit `debug_evidence=true` opt-in.
-- Fallback reliability improvements with `fallback_reason`.
-- Precheck tuning knobs wired to effective scoring behavior.
-- Policy-driven threshold semantics and runtime capability metadata alignment.
+Recent documentation work has focused on:
 
-For full details, see:
+- making the `/argis/` section the primary product documentation path
+- separating product docs from API docs and blog content
+- reducing duplicated entry points that previously made the site feel legacy-first
 
-- [v0.1.1 release page](https://github.com/puyanguvic/Argis/releases/tag/v0.1.1)
-- [CHANGELOG.md](https://github.com/puyanguvic/Argis/blob/main/CHANGELOG.md)
+For release-level details, see the [v0.1.1 release page](https://github.com/puyanguvic/Argis/releases/tag/v0.1.1) and [CHANGELOG.md](https://github.com/puyanguvic/Argis/blob/main/CHANGELOG.md).

@@ -1,38 +1,26 @@
 # API Contract
 
-## Docs Structure Update
+This page defines the stable low-level contract for `POST /analyze`.
 
-The API docs are now organized under:
-
-- API Home: [/api/](/api/)
-- Guides and Concepts: [/api/guides-concepts](/api/guides-concepts)
-- API Reference: [/api/reference](/api/reference)
-
-This page defines the stable contract for `POST /analyze`.
-
-## Request
-
-Endpoint:
+## Endpoint
 
 - `POST /analyze`
 
-Content type:
+## Content Type
 
 - `application/json`
 
-Top-level fields:
+## Top-Level Fields
 
 - `text` (required, string)
 - `model` (optional, string)
 - `debug_evidence` (optional, boolean-like)
 
-## `text` payload modes
+## `text` Payload Modes
 
 `text` can be plain text or a JSON-encoded string.
 
-### Plain text mode
-
-Example:
+### Plain Text Mode
 
 ```json
 {
@@ -40,9 +28,7 @@ Example:
 }
 ```
 
-### JSON mode
-
-Example:
+### JSON Mode
 
 ```json
 {
@@ -50,37 +36,37 @@ Example:
 }
 ```
 
-Allowed JSON keys (inside `text`):
+Allowed JSON keys inside `text`:
 
 - `subject`, `sender`, `reply_to`, `return_path`, `message_id`, `date`
 - `to`, `cc`
 - `text`, `body_text`, `body_html`
 - `headers`
 - `urls`
-- `attachments` (API mode: object list only)
+- `attachments`
 - `eml`, `eml_raw`
 
 Disallowed in API mode:
 
 - `eml_path`
 
-## Attachment schema (API mode)
+## Attachment Schema
 
-`attachments` must be a list of objects:
+`attachments` must be a list of objects such as:
 
 - `{ "name": "invoice.pdf" }`
 - `{ "filename": "report.docx" }`
 
 Rejected patterns:
 
-- raw string arrays (e.g., `["invoice.pdf"]`)
-- path-like values (e.g., `../x`, `/tmp/x`, `C:\\x`, `file://...`)
+- raw string arrays such as `["invoice.pdf"]`
+- path-like values such as `../x`, `/tmp/x`, `C:\\x`, or `file://...`
 
-## Response
+## Response Shape
 
 Base response includes:
 
-- triage fields (`verdict`, `risk_score`, `reason`, `confidence`, `indicators`, ...)
+- triage fields such as `verdict`, `risk_score`, `reason`, `confidence`, `indicators`
 - `precheck`
 - `runtime`
 - `skillpacks`
@@ -91,17 +77,17 @@ When fallback is used:
 - `provider_used` ends with `:fallback`
 - `fallback_reason` is present
 
-## Evidence behavior
+## Evidence Behavior
 
-Default (`debug_evidence` unset/false):
+Default behavior:
 
 - sensitive evidence fields are sanitized in API responses
 
-Debug mode (`debug_evidence=true`):
+Debug behavior with `debug_evidence=true`:
 
 - full evidence details are returned for internal diagnostics
 
-## Error format
+## Error Format
 
 Validation errors return HTTP `400` with:
 

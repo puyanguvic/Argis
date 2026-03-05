@@ -1,39 +1,48 @@
-# Argis
+# Argis Documentation
 
-Argis documentation is organized into five groups.
+This section is the canonical product documentation for Argis. Use it when you need to run the system, integrate it into workflows, tune behavior, or understand how the runtime is designed.
 
-## Getting Started
+## Recommended Reading Order
+
+1. Start with [Overview](./getting-started/overview) for the product model.
+2. Move to [Quickstart](./getting-started/quickstart) to get a local instance running.
+3. Use [Explore](./getting-started/explore) to navigate by intent.
+4. Read [Architecture](./architecture/) and [Operations](./operations/) once you need production or design detail.
+
+## By Intent
+
+### I am new to Argis
 
 - [Overview](./getting-started/overview)
 - [Quickstart](./getting-started/quickstart)
-- [Explore](./getting-started/explore)
 - [Concepts](./getting-started/concepts)
 
-## Using Argis
+### I want to use Argis
 
+- [Using Argis Overview](./using-argis/)
 - [App](./using-argis/app)
 - [CLI](./using-argis/cli)
 - [Integrations](./using-argis/integrations)
 
-## Configurations
+### I want to configure behavior
 
+- [Configurations Overview](./configurations/)
 - [Config File](./configurations/config-file)
 - [Rules](./configurations/rules)
 - [Agents.md](./configurations/agents-md)
-- [MCP](./configurations/mcp)
 - [Skills](./configurations/skills)
-- [Context Manage](./configurations/context-manage)
 
-## Architecture
+### I want system-level detail
 
-- [Architecture Home](./architecture/)
-- [Design Overview](./architecture/design-overview)
+- [Architecture](./architecture/)
 - [Runtime Flow](./architecture/runtime-flow)
-
-## Operations
-
-- [Operations Home](./operations/)
-- [Runbook](./operations/runbook)
-- [Observability](./operations/observability)
+- [Operations](./operations/)
 - [Security Boundary](./operations/security-boundary)
-- [Release Gates](./operations/release-gates)
+
+## Section Map
+
+- [Getting Started](./getting-started/overview): orientation, quickstart, and navigation paths.
+- [Using Argis](./using-argis/): local usage, service mode, and integration patterns.
+- [Configurations](./configurations/): runtime controls, policy surfaces, and context management.
+- [Architecture](./architecture/): design model, dependency rules, and execution flow.
+- [Operations](./operations/): runbooks, observability, trust boundaries, and release discipline.

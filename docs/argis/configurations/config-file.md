@@ -32,4 +32,8 @@ Configuration comes from YAML defaults and environment variables.
 
 Enable only the capabilities you need and keep side-effectful features bounded by explicit limits.
 
-Reference: [Manual](/manual).
+Related docs:
+
+- [Using Argis](/argis/using-argis/)
+- [Security Boundary](/argis/operations/security-boundary)
+- [Release Gates](/argis/operations/release-gates)

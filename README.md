@@ -133,18 +133,20 @@ pytest -k 'not hf_phishing_email_balanced_sample'
 
 Detailed test layout and suite guidance:
 
-- `docs/manual.md` (see “Testing”)
+- `docs/argis/getting-started/quickstart.md`
+- `docs/argis/operations/release-gates.md`
 
 ## Documentation
 
 - `docs/index.md`
 - `docs/argis/`
+- `docs/argis/getting-started/`
+- `docs/argis/using-argis/`
+- `docs/argis/configurations/`
 - `docs/argis/architecture/`
 - `docs/argis/operations/`
 - `docs/api/`
 - `docs/blog/`
-- `docs/design.md`
-- `docs/manual.md`
 
 ## Layout
 

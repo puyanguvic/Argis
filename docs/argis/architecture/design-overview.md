@@ -23,4 +23,8 @@ Argis follows a deterministic-first architecture for phishing detection.
 - evidence-backed risky outcomes
 - explicit migration policy for interfaces
 
-For deeper rationale and full details, see [Legacy Design Doc](/design).
+## Related Docs
+
+- [Runtime Flow](./runtime-flow)
+- [Rules](/argis/configurations/rules)
+- [Security Boundary](/argis/operations/security-boundary)

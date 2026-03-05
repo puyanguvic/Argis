@@ -17,4 +17,4 @@ When using MCP for docs or code work:
 2. fetch only relevant entries
 3. keep cross-source assumptions explicit
 
-Reference architecture constraints: [Design](/design) and `AGENTS.md`.
+Reference architecture constraints: [Design Overview](/argis/architecture/design-overview) and `AGENTS.md`.

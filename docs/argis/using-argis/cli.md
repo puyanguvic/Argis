@@ -32,4 +32,8 @@ PYTHONPATH=src uv run python -m phish_email_detection_agent --text '{"text":"Urg
 PYTHONPATH=src uv run python -m phish_email_detection_agent --text '{"eml_path":"/path/to/sample.eml"}'
 ```
 
-For full behavior details: [Manual](/manual).
+## Related Docs
+
+- [Quickstart](/argis/getting-started/quickstart)
+- [Config File](/argis/configurations/config-file)
+- [Security Boundary](/argis/operations/security-boundary)

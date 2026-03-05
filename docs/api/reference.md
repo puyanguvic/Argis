@@ -2,7 +2,7 @@
 
 This page summarizes the stable API contract for Argis.
 
-Canonical low-level contract details remain in [API Contract](/api-contract).
+Canonical low-level contract details remain in [API Contract](./contract).
 
 ## Endpoints
 

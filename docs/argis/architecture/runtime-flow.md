@@ -19,4 +19,4 @@ Related docs:
 
 - [Runbook](/argis/operations/runbook)
 - [Observability](/argis/operations/observability)
-- [Legacy Design Doc](/design)
+- [Design Overview](/argis/architecture/design-overview)

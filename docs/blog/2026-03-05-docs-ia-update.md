@@ -2,7 +2,7 @@
 
 ## Summary
 
-The documentation site navigation was redesigned into four top-level sections: `Home`, `API`, `Argis`, and `Blog`.
+The documentation site navigation was redesigned around a single canonical structure, centered on `Docs`, `API`, `Architecture`, `Operations`, and `Blog`.
 
 ## Why This Change
 
@@ -19,7 +19,10 @@ The documentation site navigation was redesigned into four top-level sections: `
 - Added `docs/api/` with:
   - Guides and Concepts
   - API Reference
+  - API Contract
+  - Migration Guide
 - Added `docs/blog/` for project blog posts.
+- Removed the old root-level compatibility pages so the site no longer presents two parallel doc structures.
 
 ## Impact
 
@@ -29,5 +32,5 @@ The documentation site navigation was redesigned into four top-level sections: `
 
 ## Follow-ups
 
-1. Continue migrating long-form legacy pages into the new section layout.
-2. Add release-driven blog posts and changelog cross-links.
+1. Add release-driven blog posts for future product and API changes.
+2. Continue expanding section landing pages so new readers can navigate by task, not by file name.

@@ -41,7 +41,7 @@ All notable changes to this project are documented in this file.
   - Commit: `d339beb`
 
 - Documentation alignment:
-  - updated `README.md`, `docs/manual.md`, and `docs/design.md`
+  - updated `README.md`, `docs/argis/`, and `docs/api/`
   - documented API input boundaries, evidence sanitization, and fallback taxonomy
   - Related issue: #12
   - Commit: `8e3459f`

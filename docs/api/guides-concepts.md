@@ -44,6 +44,7 @@ Best when you need deterministic gating before human review.
 ## Related Docs
 
 - [API Reference](./reference)
-- [API Contract](/api-contract)
-- [Runbook](/runbook)
-- [Security Boundary](/security-boundary)
+- [API Contract](./contract)
+- [Migration Guide](./migration-guide)
+- [Runbook](/argis/operations/runbook)
+- [Security Boundary](/argis/operations/security-boundary)

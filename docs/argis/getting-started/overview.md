@@ -21,4 +21,4 @@ Argis is a phishing email detection system with deterministic-first analysis and
 
 - [Quickstart](./quickstart)
 - [Concepts](./concepts)
-- [Design](/design)
+- [Architecture Overview](/argis/architecture/design-overview)

@@ -18,5 +18,6 @@ Argis uses a layered control-stack architecture.
 
 ## Where to Go Next
 
-- [Design](/design)
-- [Manual](/manual)
+- [Architecture Overview](/argis/architecture/design-overview)
+- [Runtime Flow](/argis/architecture/runtime-flow)
+- [Configurations](/argis/configurations/)

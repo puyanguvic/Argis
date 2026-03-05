@@ -1,18 +1,16 @@
 # Migration Guide
 
-> Migration note (2026-03-05): API-oriented migration context is now grouped under [/api/](/api/) and [/api/guides-concepts](/api/guides-concepts).
+Use this guide when updating API clients across behavior changes in `POST /analyze`.
 
-This guide covers migration for clients updating to `v0.1.1`.
-
-## Who should read this
+## Who Should Read This
 
 - API consumers of `POST /analyze`
-- teams parsing `precheck` / `evidence` response fields
+- teams parsing `precheck` or `evidence` response fields
 - operators relying on fallback telemetry
 
-## Behavior changes
+## v0.1.1 Behavior Changes
 
-### 1. API `eml_path` is no longer accepted
+### `eml_path` Is No Longer Accepted in API Mode
 
 Before:
 
@@ -23,7 +21,7 @@ Now:
 - API rejects `eml_path` with `unsupported_eml_path`.
 - Use inline `eml` or `eml_raw` instead.
 
-### 2. API attachments must be structured objects
+### Attachments Must Be Structured Objects
 
 Before:
 
@@ -35,27 +33,33 @@ Now:
 - raw strings fail with `invalid_attachment_schema`.
 - path-like values fail with `unsafe_attachment_path`.
 
-### 3. Evidence is sanitized by default
+### Evidence Is Sanitized by Default
 
 Before:
 
-- more detailed evidence internals could appear in API response.
+- more detailed evidence internals could appear in API responses.
 
 Now:
 
-- default API response redacts sensitive evidence details.
-- set `debug_evidence=true` for internal troubleshooting detail.
+- default API responses redact sensitive evidence details.
+- set `debug_evidence=true` only for trusted internal troubleshooting.
 
-### 4. Fallback reason is explicit
+### Fallback Reason Is Explicit
 
 Now:
 
 - fallback responses include `fallback_reason` for observability.
 
-## Upgrade checklist
+## Upgrade Checklist
 
 1. Remove `eml_path` from API payload generation.
 2. Convert attachment input to object format.
 3. Update parsers to tolerate sanitized default evidence fields.
 4. Parse and monitor `fallback_reason`.
 5. Use `debug_evidence=true` only in controlled internal contexts.
+
+## Related Docs
+
+- [API Contract](./contract)
+- [API Reference](./reference)
+- [Runbook](/argis/operations/runbook)

@@ -26,4 +26,7 @@ python scripts/skillsbench_skillpacks.py --install threat-detection openai-visio
 - runtime auto-discovers local skillpacks in `skillpacks/`
 - override discovery path with `MY_AGENT_APP_SKILLPACKS_DIR`
 
-Reference: [Manual](/manual).
+Related docs:
+
+- [Using Argis](/argis/using-argis/)
+- [Agents.md](/argis/configurations/agents-md)

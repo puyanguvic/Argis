@@ -11,8 +11,8 @@ Checklist before publishing a release.
 ## Required Documentation Updates
 
 1. update `README.md`
-2. update `docs/design.md` and/or new Argis architecture pages
-3. update `docs/manual.md`
+2. update the canonical pages under `docs/argis/architecture/`
+3. update the canonical pages under `docs/argis/operations/` or `docs/argis/using-argis/`
 4. update `CHANGELOG.md`
 
 ## API Compatibility Gate

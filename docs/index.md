@@ -1,9 +1,9 @@
 ---
 layout: home
-title: Argis Docs
+title: Argis Developers
 
 hero:
-  name: Argis Docs
+  name: Argis Developers
   text: Deterministic-first phishing email detection
   tagline: Product guides, API contracts, architecture references, and operational playbooks for running Argis with bounded side effects and evidence-backed outputs.
   actions:

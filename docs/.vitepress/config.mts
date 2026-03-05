@@ -18,7 +18,7 @@ function packageNameFromId(id: string): string | null {
 
 export default withMermaid(
   defineConfig({
-    title: "Argis Docs",
+    title: "Argis Developers",
     description: "Documentation for the Argis phishing email detection platform",
     base: "/Argis/",
     cleanUrls: true,

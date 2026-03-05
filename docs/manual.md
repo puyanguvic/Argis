@@ -84,6 +84,11 @@ EML input:
 PYTHONPATH=src uv run python -m phish_email_detection_agent --text '{"eml_path":"/path/to/sample.eml"}'
 ```
 
+Input boundary note:
+
+- `eml_path` is for local CLI usage only.
+- API `/analyze` rejects `eml_path`; send inline EML content via `eml` or `eml_raw` instead.
+
 ## Configuration
 
 Configuration is loaded from YAML defaults and environment variables:
@@ -134,7 +139,22 @@ PYTHONPATH=src uv run uvicorn phish_email_detection_agent.api.app:app --reload -
 Endpoints:
 
 - `GET /health`
-- `POST /analyze` (payload: `{ "text": "...", "model": "optional" }`)
+- `POST /analyze`
+
+`POST /analyze` request contract:
+
+- Required: `text` (string).
+- Optional: `model` (string), `debug_evidence` (boolean-like).
+- If `text` is a JSON payload:
+  - `eml_path` is rejected in API mode.
+  - `attachments` must be a list of objects with `name` or `filename`.
+  - Path-like attachment values are rejected.
+
+`POST /analyze` response notes:
+
+- Fallback responses include `fallback_reason` for observability (for example `parse_error:ValueError`, `judge_error:RuntimeError`).
+- By default, sensitive evidence details are sanitized in API responses.
+- Set `debug_evidence=true` to include full evidence details for debugging/internal use.
 
 ## UI / HF Space (optional)
 
@@ -185,4 +205,3 @@ Evaluation (slower; use as a regression checkpoint):
 ```bash
 pytest tests/evaluation/test_hf_eval_balanced_sample.py
 ```
-

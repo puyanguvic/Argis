@@ -240,7 +240,7 @@ Important fields (conceptual):
 1. `text`, `body_text`, `body_html`
 2. `headers`, `headers_raw`
 3. `urls` (explicit user-provided)
-4. `attachments` (file paths)
+4. `attachments` (logical names in API mode; local paths are allowed only in local CLI/runtime contexts)
 
 Parsing entrypoint (online): `src/phish_email_detection_agent/domain/email/parse.py::parse_input_payload`.
 
@@ -273,9 +273,12 @@ Minimum online invariants:
 
 Current FastAPI endpoint: `src/phish_email_detection_agent/api/app.py`.
 
-1. `POST /analyze`: accepts `{ "text": "...", "model": "optional" }`.
-2. Returns analysis result plus `runtime`, `skillpacks`, and `tools` metadata.
-3. Online results also include deterministic diagnostics under `precheck`; judge runs also include `validation_issues`.
+1. `POST /analyze`: accepts `{ "text": "...", "model": "optional", "debug_evidence": false }`.
+2. API rejects `eml_path` in request JSON; callers should pass inline EML content (`eml` / `eml_raw`) when needed.
+3. In API mode, `attachments` entries must be structured objects with `name`/`filename`; path-like values are rejected.
+4. Returns analysis result plus `runtime`, `skillpacks`, and `tools` metadata.
+5. Online results include deterministic diagnostics under `precheck`; judge runs include `validation_issues`.
+6. Default API responses sanitize sensitive evidence fields (for example local artifact existence/hash/raw details). `debug_evidence=true` keeps full evidence details for internal debugging.
 
 ## End-to-end data flow
 
@@ -340,21 +343,21 @@ Failure semantics (must hold):
 
 1. Empty input returns deterministic fallback.
 2. Remote/model path unavailable returns deterministic fallback.
-3. Judge failure or invalid output returns deterministic fallback.
+3. Parse failure, evidence-build failure, and skill-router failure return deterministic fallback.
+4. Judge failure or invalid output returns deterministic fallback.
 
 ### Fallback reasons (taxonomy)
 
 Fallback responses may be triggered by:
 
 * `empty_input`
-* `policy_blocked`
-* `judge_unavailable`
+* `remote_unavailable`
+* `parse_error`
+* `evidence_build_error`
+* `skill_router_error`
 * `judge_error`
-* `validation_failed`
-* `budget_exceeded`
-* `provider_timeout`
 
-The fallback reason should be recorded in runtime metadata for observability.
+Fallback responses expose `fallback_reason` in the output payload for observability.
 
 ## Deterministic kernel design
 
@@ -402,6 +405,10 @@ Key parameters (defaults from `src/phish_email_detection_agent/orchestrator/pipe
 | `context_trigger_score` | 35 | threshold to enable deep context collection |
 | `suspicious_min_score` | 30 | low band for ambiguous verdict calibration |
 | `suspicious_max_score` | 34 | high band for ambiguous verdict calibration |
+
+Derived rule:
+
+1. The phishing floor is policy-driven: `phishing_min_score = suspicious_max_score + 1` (default `35`).
 
 Important distinction:
 

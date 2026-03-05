@@ -51,6 +51,13 @@ EML input:
 uv run python -m phish_email_detection_agent --text '{"eml_path":"/path/to/sample.eml"}'
 ```
 
+API safety note:
+
+- `eml_path` is supported for local CLI usage, but **rejected** by API `/analyze`.
+- API JSON attachments must be structured objects with `name` or `filename`.
+- Path-like attachment values are rejected by API input validation.
+- API supports `debug_evidence=true` to return full unsanitized evidence details; default responses are sanitized.
+
 ## Skillpacks (SkillsBench style)
 
 Argis now uses the same lightweight convention as SkillsBench: each skillpack is a folder containing `SKILL.md` under local `skillpacks/`.

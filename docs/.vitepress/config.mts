@@ -1,6 +1,8 @@
 import { defineConfig } from "vitepress";
+import { withMermaid } from "vitepress-plugin-mermaid";
 
-export default defineConfig({
+export default withMermaid(
+  defineConfig({
   title: "Argis Docs",
   description: "Phishing email detection agent documentation",
   base: "/Argis/",
@@ -49,4 +51,5 @@ export default defineConfig({
       provider: "local"
     }
   }
-});
+  })
+);

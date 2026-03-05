@@ -188,6 +188,7 @@ def infer_url_signals(
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     signals: list[dict[str, Any]] = []
     domain_reports: list[dict[str, Any]] = []
+    domain_suspicious_threshold = max(1, int(getattr(service, "precheck_domain_suspicious_threshold", 35)))
 
     for raw in urls:
         normalized = canonicalize_url(raw)
@@ -279,6 +280,8 @@ def infer_url_signals(
                     break
 
         domain_risk = int(domain_report.get("risk_score", 0)) if isinstance(domain_report, dict) else 0
+        if domain_risk >= domain_suspicious_threshold:
+            risk_flags.append("domain-high-risk")
         signal_risk = clip_score(
             domain_risk
             + (16 if shortlink else 0)
@@ -301,6 +304,7 @@ def infer_url_signals(
                     "brand": brand,
                     "similarity": similarity,
                 },
+                "domain_risk_score": domain_risk,
                 "has_login_keywords": _url_has_login_keywords(expanded_url),
                 "risk_flags": list(dict.fromkeys(risk_flags)),
                 "confidence": confidence,
@@ -535,6 +539,18 @@ def compute_pre_score(
     review_threshold: int,
     deep_threshold: int,
     url_suspicious_weight: int,
+    domain_suspicious_threshold: int = 35,
+    url_path_token_bonus: int = 8,
+    url_path_bonus_cap: int = 24,
+    url_domain_context_divisor: int = 2,
+    url_domain_context_cap: int = 20,
+    text_keyword_weight: int = 9,
+    text_urgency_weight: int = 8,
+    text_action_weight: int = 8,
+    text_core_bonus: int = 15,
+    text_finance_combo_bonus: int = 12,
+    text_suspicious_finance_bonus: int = 12,
+    text_suspicious_urgency_bonus: int = 8,
 ) -> dict[str, Any]:
     reasons: list[str] = []
     score = 0
@@ -562,6 +578,8 @@ def compute_pre_score(
         reasons.append("header:received_chain_anomaly")
 
     url_score = 0
+    url_path_bonus = 0
+    domain_context_score = 0
     for signal in url_signals:
         flags = set(str(item) for item in signal.get("risk_flags", []))
         if flags:
@@ -571,10 +589,29 @@ def compute_pre_score(
         url_score += 14 if "login-intent" in flags else 0
         url_score += 10 if "punycode" in flags else 0
         url_score += 8 if "suspicious-pattern" in flags else 0
+        url_score += 10 if "domain-high-risk" in flags else 0
+        if bool(signal.get("has_login_keywords")):
+            url_path_bonus += max(0, int(url_path_token_bonus))
+        domain_risk_score = int(signal.get("domain_risk_score", 0) or 0)
+        if domain_risk_score >= max(1, int(domain_suspicious_threshold)):
+            url_score += 8
+        looks_like_brand = signal.get("looks_like_brand", {})
+        if isinstance(looks_like_brand, dict) and str(looks_like_brand.get("brand", "")).strip():
+            similarity = float(looks_like_brand.get("similarity", 0.0) or 0.0)
+            divisor = max(1, int(url_domain_context_divisor))
+            domain_context_score += int(max(0.0, similarity) * 100 / divisor)
         if "brand-spoof" in flags:
             reasons.append("url:brand_spoof")
         if "login-intent" in flags:
             reasons.append("url:login_intent")
+        if "domain-high-risk" in flags:
+            reasons.append("url:domain_high_risk")
+    if url_path_bonus > 0:
+        url_score += min(max(0, int(url_path_bonus_cap)), url_path_bonus)
+        reasons.append("url:path_login_pattern")
+    if domain_context_score > 0:
+        score += min(max(0, int(url_domain_context_cap)), domain_context_score)
+        reasons.append("url:brand_context")
     score += min(60, url_score)
 
     web_score = 0
@@ -609,20 +646,29 @@ def compute_pre_score(
     keyword_hits = max(0, int(nlp_cues.get("phishing_keyword_hits", 0)))
 
     nlp_score = int(
-        urgency_score * 14
+        urgency_score * max(0, int(text_urgency_weight) + 6)
         + threat_score * 16
         + payment_score * 9
         + credential_score * 18
-        + action_score * 10
+        + action_score * max(0, int(text_action_weight) + 2)
         + takeover_score * 20
         + subject_score * 18
     )
     if keyword_hits > 0:
-        nlp_score += min(24, keyword_hits * 4)
+        nlp_score += min(24, keyword_hits * max(1, int(text_keyword_weight) // 2))
         reasons.append("text:phishing_keyword_cluster")
     if credential_score > 0 and (threat_score > 0 or urgency_score > 0):
-        nlp_score += 10
+        nlp_score += min(20, max(0, int(text_core_bonus) - 5))
         reasons.append("text:credential_pressure")
+    if payment_score > 0 and (credential_score > 0 or action_score > 0):
+        nlp_score += max(0, int(text_finance_combo_bonus))
+        reasons.append("text:finance_action_combo")
+    if payment_score > 0 and (threat_score > 0 or urgency_score > 0):
+        nlp_score += max(0, int(text_suspicious_finance_bonus))
+        reasons.append("text:finance_pressure")
+    if urgency_score > 0 and (credential_score > 0 or action_score > 0):
+        nlp_score += max(0, int(text_suspicious_urgency_bonus))
+        reasons.append("text:urgency_pressure")
     if takeover_score > 0 and (credential_score > 0 or action_score > 0):
         nlp_score += 8
         reasons.append("text:account_takeover_pattern")

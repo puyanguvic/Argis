@@ -302,6 +302,8 @@ class EvidenceStage:
             if isinstance(item, dict) and str(item.get("url", "")).strip()
         ]
         combined_urls = list(dict.fromkeys(combined_urls + nested_urls_from_query))
+        pre_score_value = int(evidence_pack.pre_score.risk_score)
+        phishing_min_score = max(1, int(service.pipeline_policy.suspicious_max_score) + 1)
 
         precheck = {
             "chain_flags": list(dict.fromkeys(chain_flags)),
@@ -337,17 +339,17 @@ class EvidenceStage:
                 "attachment": attachment_score,
                 "ocr": self.clip_score_fn(ocr_score),
             },
-            "heuristic_score": int(evidence_pack.pre_score.risk_score),
+            "heuristic_score": pre_score_value,
             "fusion": {
-                "risk_score": int(evidence_pack.pre_score.risk_score),
+                "risk_score": pre_score_value,
                 "risk_level": (
                     "high"
-                    if int(evidence_pack.pre_score.risk_score) >= 70
+                    if pre_score_value >= int(service.pipeline_policy.pre_score_deep_threshold)
                     else "medium"
-                    if int(evidence_pack.pre_score.risk_score) >= 35
+                    if pre_score_value >= phishing_min_score
                     else "low"
                 ),
-                "verdict": "phishing" if int(evidence_pack.pre_score.risk_score) >= 35 else "benign",
+                "verdict": "phishing" if pre_score_value >= phishing_min_score else "benign",
             },
             "fetch_policy": {
                 "enabled": safe_fetch_policy.enabled,

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import importlib.util
+
 from phish_email_detection_agent.config.settings import load_config
 from phish_email_detection_agent.orchestrator.pipeline_policy import PipelinePolicy
 from phish_email_detection_agent.orchestrator.pipeline import AgentService
@@ -77,6 +79,7 @@ def create_agent(
         precheck_domain_synthetic_bonus=env_cfg.precheck_domain_synthetic_bonus,
         pipeline_policy=pipeline_policy,
     )
+    agents_sdk_available = importlib.util.find_spec("agents") is not None
     runtime = {
         "profile": env_cfg.profile,
         "profile_choices": profile_choices,
@@ -126,7 +129,9 @@ def create_agent(
             }
             for item in builtin_tools
         ],
-        "agents_sdk": True,
+        "agents_sdk": agents_sdk_available,
+        "agents_sdk_available": agents_sdk_available,
+        "can_call_remote": agent.can_call_remote(),
         "config": yaml_cfg,
     }
     return agent, runtime

@@ -1,6 +1,7 @@
 from phish_email_detection_agent.orchestrator.pipeline import (
     _merge_judge_verdict,
     _normalize_score_for_verdict,
+    _verdict_from_score,
 )
 
 
@@ -85,3 +86,22 @@ def test_near_suspicious_band_with_uncertain_benign_stays_suspicious():
         suspicious_max_score=34,
     )
     assert verdict == "suspicious"
+
+
+def test_verdict_threshold_uses_policy_suspicious_max_band():
+    verdict = _verdict_from_score(
+        41,
+        suspicious_min_score=24,
+        suspicious_max_score=40,
+    )
+    assert verdict == "phishing"
+
+
+def test_phishing_score_normalization_uses_policy_threshold():
+    score = _normalize_score_for_verdict(
+        30,
+        "phishing",
+        suspicious_min_score=24,
+        suspicious_max_score=40,
+    )
+    assert score >= 41

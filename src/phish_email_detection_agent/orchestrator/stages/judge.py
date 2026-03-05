@@ -85,8 +85,9 @@ class JudgeEngine:
             )
             # Final product decision is binary: collapse the ambiguous bucket.
             if merged_verdict == "suspicious":
+                phishing_min_score = max(1, int(service.pipeline_policy.suspicious_max_score) + 1)
                 merged_verdict = "phishing"
-                merged_score = max(35, int(merged_score))
+                merged_score = max(phishing_min_score, int(merged_score))
             merged_confidence = compute_confidence(
                 score=merged_score,
                 verdict=merged_verdict,

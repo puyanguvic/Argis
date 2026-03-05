@@ -182,6 +182,7 @@ def _fallback_result(
     pipeline_policy: PipelinePolicy,
 ) -> TriageResult:
     policy = pipeline_policy.normalized()
+    phishing_min_score = max(1, int(policy.suspicious_max_score) + 1)
     score = int(evidence_pack.pre_score.risk_score)
     verdict = _verdict_from_score(
         score,
@@ -190,7 +191,7 @@ def _fallback_result(
     )
     if verdict == "suspicious":
         verdict = "phishing"
-        score = max(35, score)
+        score = max(phishing_min_score, score)
     route = str(evidence_pack.pre_score.route)
 
     if verdict == "phishing":

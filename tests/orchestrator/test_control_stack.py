@@ -1,5 +1,6 @@
 from types import SimpleNamespace
 
+from phish_email_detection_agent.orchestrator.build import create_agent
 from phish_email_detection_agent.orchestrator.evidence_store import EvidenceStore
 from phish_email_detection_agent.orchestrator.skill_router import SkillRouter
 from phish_email_detection_agent.orchestrator.tool_executor import ToolExecutor
@@ -73,3 +74,14 @@ def test_online_validator_detects_invalid_payload():
     codes = {item.code for item in issues}
     assert "invalid_verdict" in codes
     assert "invalid_risk_score_range" in codes
+
+
+def test_create_agent_runtime_capability_flags(monkeypatch):
+    monkeypatch.setenv("MY_AGENT_APP_PROFILE", "openai")
+    monkeypatch.delenv("MY_AGENT_APP_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    agent, runtime = create_agent(profile_override="openai")
+
+    assert runtime["agents_sdk"] == runtime["agents_sdk_available"]
+    assert runtime["can_call_remote"] == agent.can_call_remote()
+    assert runtime["can_call_remote"] is False

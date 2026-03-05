@@ -5,6 +5,10 @@ from __future__ import annotations
 from phish_email_detection_agent.orchestrator.pipeline_policy import PipelinePolicy
 
 
+def _phishing_min_score(suspicious_max_score: int) -> int:
+    return max(1, int(suspicious_max_score) + 1)
+
+
 def map_route_to_path(route: str) -> str:
     return {
         "allow": "FAST",
@@ -14,7 +18,7 @@ def map_route_to_path(route: str) -> str:
 
 
 def verdict_from_score(score: int, *, suspicious_min_score: int, suspicious_max_score: int) -> str:
-    if score >= 35:
+    if score >= _phishing_min_score(suspicious_max_score):
         return "phishing"
     if suspicious_min_score <= score <= suspicious_max_score:
         return "suspicious"
@@ -29,8 +33,9 @@ def normalize_score_for_verdict(
     suspicious_max_score: int,
 ) -> int:
     clean_verdict = str(verdict or "").strip().lower()
+    phishing_min = _phishing_min_score(suspicious_max_score)
     if clean_verdict == "phishing":
-        return max(35, score)
+        return max(phishing_min, score)
     if clean_verdict == "suspicious":
         return max(suspicious_min_score, min(suspicious_max_score, score))
     return min(max(0, suspicious_min_score - 1), score)
@@ -46,6 +51,7 @@ def merge_judge_verdict(
     policy: PipelinePolicy | None = None,
 ) -> str:
     active = (policy or PipelinePolicy()).normalized()
+    phishing_min = _phishing_min_score(suspicious_max_score)
     low_band_promote_hi = max(
         active.judge_promote_low_to_suspicious_confidence,
         active.judge_override_mid_band_confidence,
@@ -63,7 +69,7 @@ def merge_judge_verdict(
     if clean_judge not in {"benign", "suspicious", "phishing"}:
         clean_judge = base
 
-    if deterministic_score >= 35:
+    if deterministic_score >= phishing_min:
         return "phishing"
     if deterministic_score < suspicious_min_score and clean_judge == "phishing":
         if judge_confidence >= low_band_promote_hi:
@@ -80,7 +86,7 @@ def merge_judge_verdict(
         if deterministic_score >= near_suspicious_floor and judge_confidence < active.judge_override_mid_band_confidence:
             return "suspicious"
         return "benign"
-    if deterministic_score > suspicious_max_score:
+    if deterministic_score >= phishing_min:
         return "phishing"
     if clean_judge == "suspicious":
         return "suspicious"

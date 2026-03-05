@@ -1,0 +1,19 @@
+.VPNavBar .VPNavBarSearch.search {
+  display: none;
+}
+
+.VPDocSidebarSearch {
+  padding: 10px 16px 12px;
+  border-bottom: 1px solid var(--vp-c-divider);
+  margin-bottom: 8px;
+}
+
+.VPDocSidebarSearch .VPNavBarSearch,
+.VPDocSidebarSearch #local-search {
+  width: 100%;
+}
+
+.VPDocSidebarSearch .DocSearch-Button {
+  width: 100%;
+  margin: 0;
+}

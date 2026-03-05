@@ -3,7 +3,7 @@ import { withMermaid } from "vitepress-plugin-mermaid";
 
 export default withMermaid(
   defineConfig({
-    title: "Argis Docs",
+    title: "Argis Developers",
     description: "Phishing email detection agent documentation",
     base: "/Argis/",
     cleanUrls: true,

@@ -154,12 +154,6 @@ export default withMermaid(
         ],
         "/blog/": [
           {
-            text: "Blog",
-            items: [
-              { text: "Blog Home", link: "/blog/" }
-            ]
-          },
-          {
             text: "Technical Documents",
             items: [
               { text: "Overview", link: "/blog/technical-docs/" },

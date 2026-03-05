@@ -14,7 +14,6 @@ export default withMermaid(
         {
           text: "API",
           items: [
-            { text: "API Home", link: "/api/" },
             { text: "Guides and Concepts", link: "/api/guides-concepts" },
             { text: "API Reference", link: "/api/reference" }
           ]
@@ -22,7 +21,6 @@ export default withMermaid(
         {
           text: "Argis",
           items: [
-            { text: "Argis Home", link: "/argis/" },
             { text: "Overview", link: "/argis/getting-started/overview" },
             { text: "Quickstart", link: "/argis/getting-started/quickstart" },
             { text: "App", link: "/argis/using-argis/app" },
@@ -35,7 +33,6 @@ export default withMermaid(
         {
           text: "Blog",
           items: [
-            { text: "Blog Home", link: "/blog/" },
             { text: "Latest Post", link: "/blog/2026-03-05-docs-ia-update" }
           ]
         }

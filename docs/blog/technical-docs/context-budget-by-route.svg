@@ -37,5 +37,6 @@
   <path d="M626 250H668" stroke="#B7A48A" stroke-width="4" stroke-linecap="round"/>
   <path d="M356 250L343 242V258L356 250Z" fill="#B7A48A"/>
   <path d="M668 250L655 242V258L668 250Z" fill="#B7A48A"/>
-  <text x="82" y="476" fill="#4B4032" font-family="Arial, sans-serif" font-size="22">Argis does not give every path the same context. It allocates context depth according to deterministic risk and policy.</text>
+  <text x="600" y="472" fill="#4B4032" font-family="Arial, sans-serif" font-size="22" text-anchor="middle">Argis does not give every path the same context.</text>
+  <text x="600" y="500" fill="#4B4032" font-family="Arial, sans-serif" font-size="22" text-anchor="middle">It allocates context depth according to deterministic risk and policy.</text>
 </svg>

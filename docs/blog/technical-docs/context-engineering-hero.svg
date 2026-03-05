@@ -32,7 +32,7 @@
   <path d="M742 156H808" stroke="#5D7FA8" stroke-width="4" stroke-linecap="round"/>
   <path d="M332 342V256H600V242" stroke="#A9634E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M800 324V266" stroke="#7A6A55" stroke-width="4" stroke-linecap="round"/>
-  <path d="M970 226V292H970" stroke="#40689B" stroke-width="4" stroke-linecap="round"/>
+  <path d="M970 226V266H800" stroke="#40689B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M438 156L425 148V164L438 156Z" fill="#8B6A49"/>
   <path d="M808 156L795 148V164L808 156Z" fill="#5D7FA8"/>
   <text x="96" y="574" fill="#4B4032" font-family="Arial, sans-serif" font-size="22">Context engineering in Argis is a controlled information flow, not a larger prompt.</text>

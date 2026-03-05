@@ -112,13 +112,13 @@ xml-element-1
 
 | Element&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Possible values                           | Description        |
 | ----------------------------------- | --------------------------- | ------------------------ |
-| <xml-element-1> | | Top-level element which encapsulates the config |
-|     <option1>true</> | true, false | Enable/disable option1. See XXXXXXX |
-|     <container> | | XXXXXXX |
-|       <expire>10 min</> | Time period in human units | Validity period |
-|       <method>SMS</> | [SMS \| token \| email] | XXXXXXXXX |
-|     </container> | |
-| </xml-element-1> | |
+| `<xml-element-1>` | | Top-level element which encapsulates the config |
+| `    <option1>true</>` | true, false | Enable/disable option1. See XXXXXXX |
+| `    <container>` | | XXXXXXX |
+| `      <expire>10 min</>` | Time period in human units | Validity period |
+| `      <method>SMS</>` | [SMS \| token \| email] | XXXXXXXXX |
+| `    </container>` | |
+| `</xml-element-1>` | |
 
 Describe the XML structure and the meaning of any non-obvious fields. This must contain a concrete example of a typical
 configuration. If the configuration is complex, then individual sub-elements should be explicitly explained. Try to

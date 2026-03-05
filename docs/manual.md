@@ -3,8 +3,6 @@
 Status: Living document
 Last updated: 2026-02-25
 
-[[_TOC_]]
-
 ## Overview
 
 Argis is a phishing email detection agent stack with a deterministic-first kernel and an optional model judge.

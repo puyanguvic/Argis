@@ -4,8 +4,6 @@ Author(s): Argis contributors
 Status: Living document
 Last updated: 2026-02-25
 
-[[_TOC_]]
-
 ## Introduction
 
 Argis is a **policy-centric AI agent** for phishing email detection. It accepts email-like inputs (text/JSON/EML) and returns a `TriageResult` with a verdict, a bounded risk score, actionable indicators, and machine-referenceable evidence.

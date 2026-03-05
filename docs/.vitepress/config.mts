@@ -154,16 +154,11 @@ export default withMermaid(
         ],
         "/blog/": [
           {
-            text: "Technical Documents",
+            text: "Tech Docs",
             items: [
-              { text: "Overview", link: "/blog/technical-docs/" },
               {
                 text: "When One GPU Is No Longer Enough",
                 link: "/blog/technical-docs/when-one-gpu-is-no-longer-enough"
-              },
-              {
-                text: "2026-03-05: IA Update",
-                link: "/blog/technical-docs/2026-03-05-docs-ia-update"
               }
             ]
           },

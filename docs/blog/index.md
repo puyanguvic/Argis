@@ -1,26 +1,20 @@
 ---
 title: Blog
-description: Engineering writing, technical documents, and practical implementation notes for Argis.
+description: Engineering writing, tech docs, and practical implementation notes for Argis.
 ---
 
 # Blog
 
-Project updates, technical documents, and implementation playbooks.
+Project updates, tech docs, and implementation playbooks.
 
 ## Release Tracking
 
 - [GitHub Releases](https://github.com/puyanguvic/Argis/releases)
 - [Repository Changelog](https://github.com/puyanguvic/Argis/blob/main/CHANGELOG.md)
 
-## Categories
-
-- [Technical Documents](./technical-docs/)
-- [Cookbook](./cookbook/)
-
-## Technical Documents
+## Tech Docs
 
 - [When One GPU Is No Longer Enough](./technical-docs/when-one-gpu-is-no-longer-enough)
-- [2026-03-05: Docs Information Architecture Update](./technical-docs/2026-03-05-docs-ia-update)
 
 ## Cookbook
 

@@ -64,37 +64,33 @@
   </g>
 
   <text x="146" y="322" fill="#9A3412" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">Input</text>
-  <text x="146" y="352" fill="#78716C" font-family="Arial, sans-serif" font-size="15">Normalize body, headers,</text>
-  <text x="146" y="374" fill="#78716C" font-family="Arial, sans-serif" font-size="15">URLs, attachments, and</text>
-  <text x="146" y="396" fill="#78716C" font-family="Arial, sans-serif" font-size="15">caller mode.</text>
+  <text x="146" y="352" fill="#78716C" font-family="Arial, sans-serif" font-size="14">Normalize message fields</text>
+  <text x="146" y="372" fill="#78716C" font-family="Arial, sans-serif" font-size="14">and caller mode.</text>
   <rect x="146" y="424" width="112" height="34" rx="17" fill="#FFF3E6"/>
   <text x="166" y="446" fill="#9A3412" font-family="Arial, sans-serif" font-size="15" font-weight="700">Normalize first</text>
 
   <text x="380" y="322" fill="#0F766E" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">EvidencePack</text>
-  <text x="380" y="352" fill="#78716C" font-family="Arial, sans-serif" font-size="15">Collect deterministic signals,</text>
-  <text x="380" y="374" fill="#78716C" font-family="Arial, sans-serif" font-size="15">provenance, limits, and</text>
-  <text x="380" y="396" fill="#78716C" font-family="Arial, sans-serif" font-size="15">precheck context.</text>
+  <text x="380" y="352" fill="#78716C" font-family="Arial, sans-serif" font-size="14">Collect signals, provenance,</text>
+  <text x="380" y="372" fill="#78716C" font-family="Arial, sans-serif" font-size="14">and precheck state.</text>
   <rect x="380" y="424" width="130" height="34" rx="17" fill="#EAFBF7"/>
   <text x="400" y="446" fill="#0F766E" font-family="Arial, sans-serif" font-size="15" font-weight="700">Evidence first</text>
 
   <text x="614" y="322" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">Route</text>
-  <text x="614" y="352" fill="#78716C" font-family="Arial, sans-serif" font-size="15">Map risk to FAST,</text>
-  <text x="614" y="374" fill="#78716C" font-family="Arial, sans-serif" font-size="15">STANDARD, or DEEP</text>
-  <text x="614" y="396" fill="#78716C" font-family="Arial, sans-serif" font-size="15">execution paths.</text>
+  <text x="614" y="352" fill="#78716C" font-family="Arial, sans-serif" font-size="14">Map risk to FAST, STANDARD,</text>
+  <text x="614" y="372" fill="#78716C" font-family="Arial, sans-serif" font-size="14">or DEEP paths.</text>
   <rect x="614" y="424" width="110" height="34" rx="17" fill="#EEF2FF"/>
   <text x="634" y="446" fill="#334155" font-family="Arial, sans-serif" font-size="15" font-weight="700">Earn depth</text>
 
   <text x="848" y="322" fill="#1D4ED8" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">Judge</text>
-  <text x="848" y="352" fill="#78716C" font-family="Arial, sans-serif" font-size="15">Run optional remote</text>
-  <text x="848" y="374" fill="#78716C" font-family="Arial, sans-serif" font-size="15">evaluation on prepared,</text>
-  <text x="848" y="396" fill="#78716C" font-family="Arial, sans-serif" font-size="15">route-aware context.</text>
+  <text x="848" y="352" fill="#78716C" font-family="Arial, sans-serif" font-size="14">Run optional remote review</text>
+  <text x="848" y="372" fill="#78716C" font-family="Arial, sans-serif" font-size="14">on prepared context.</text>
   <rect x="848" y="424" width="106" height="34" rx="17" fill="#EAF2FF"/>
   <text x="868" y="446" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="15" font-weight="700">Optional only</text>
 
-  <text x="1078" y="322" fill="#B45309" font-family="Georgia, 'Times New Roman', serif" font-size="24" font-weight="700">Validate + Emit</text>
-  <text x="1078" y="352" fill="#78716C" font-family="Arial, sans-serif" font-size="15">Merge, validate, and</text>
-  <text x="1078" y="374" fill="#78716C" font-family="Arial, sans-serif" font-size="15">expose runtime-visible</text>
-  <text x="1078" y="396" fill="#78716C" font-family="Arial, sans-serif" font-size="15">output and fallback state.</text>
+  <text x="1078" y="320" fill="#B45309" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">Validate</text>
+  <text x="1078" y="346" fill="#B45309" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">+ Emit</text>
+  <text x="1078" y="372" fill="#78716C" font-family="Arial, sans-serif" font-size="14">Merge validation and</text>
+  <text x="1078" y="392" fill="#78716C" font-family="Arial, sans-serif" font-size="14">visible runtime state.</text>
   <rect x="1078" y="424" width="128" height="34" rx="17" fill="#FFF3E6"/>
   <text x="1098" y="446" fill="#B45309" font-family="Arial, sans-serif" font-size="15" font-weight="700">Visible runtime state</text>
 

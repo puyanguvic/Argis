@@ -67,30 +67,30 @@
   <text x="700" y="198" text-anchor="middle" fill="#475569" font-family="Arial, sans-serif" font-size="20">AI-agent control and security evidence converge into one phishing-analysis runtime.</text>
 
   <g filter="url(#shadowCard)">
-    <rect x="104" y="262" width="300" height="310" rx="28" fill="url(#panel)" stroke="#D97706" stroke-width="1.8"/>
+  <rect x="104" y="262" width="300" height="286" rx="28" fill="url(#panel)" stroke="#D97706" stroke-width="1.8"/>
   </g>
   <text x="144" y="310" fill="#9A3412" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700">AI Agent Lens</text>
-  <text x="144" y="344" fill="#57534E" font-family="Arial, sans-serif" font-size="16">Decide what to inspect, when to expand,</text>
-  <text x="144" y="368" fill="#57534E" font-family="Arial, sans-serif" font-size="16">and how much context each path can carry.</text>
-  <rect x="144" y="404" width="204" height="42" rx="21" fill="#FFF3E6"/>
-  <text x="166" y="431" fill="#9A3412" font-family="Arial, sans-serif" font-size="17" font-weight="700">Partial Observability</text>
-  <rect x="144" y="458" width="188" height="42" rx="21" fill="#FFF3E6"/>
-  <text x="166" y="485" fill="#9A3412" font-family="Arial, sans-serif" font-size="17" font-weight="700">Budgeted Tool Use</text>
-  <rect x="144" y="512" width="180" height="42" rx="21" fill="#FFF3E6"/>
-  <text x="166" y="539" fill="#9A3412" font-family="Arial, sans-serif" font-size="17" font-weight="700">Route-Aware Depth</text>
+  <text x="144" y="344" fill="#57534E" font-family="Arial, sans-serif" font-size="16">Control inspection order and</text>
+  <text x="144" y="368" fill="#57534E" font-family="Arial, sans-serif" font-size="16">context budget by route.</text>
+  <rect x="144" y="402" width="204" height="40" rx="20" fill="#FFF3E6"/>
+  <text x="166" y="428" fill="#9A3412" font-family="Arial, sans-serif" font-size="17" font-weight="700">Partial Observability</text>
+  <rect x="144" y="454" width="188" height="40" rx="20" fill="#FFF3E6"/>
+  <text x="166" y="480" fill="#9A3412" font-family="Arial, sans-serif" font-size="17" font-weight="700">Budgeted Tool Use</text>
+  <rect x="144" y="506" width="180" height="40" rx="20" fill="#FFF3E6"/>
+  <text x="166" y="532" fill="#9A3412" font-family="Arial, sans-serif" font-size="17" font-weight="700">Route-Aware Depth</text>
 
   <g filter="url(#shadowCard)">
-    <rect x="996" y="262" width="300" height="310" rx="28" fill="url(#panel)" stroke="#2563EB" stroke-width="1.8"/>
+    <rect x="996" y="262" width="300" height="286" rx="28" fill="url(#panel)" stroke="#2563EB" stroke-width="1.8"/>
   </g>
   <text x="1036" y="310" fill="#1D4ED8" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700">Security Lens</text>
-  <text x="1036" y="344" fill="#57534E" font-family="Arial, sans-serif" font-size="16">Keep the runtime explainable, bounded,</text>
-  <text x="1036" y="368" fill="#57534E" font-family="Arial, sans-serif" font-size="16">and defensible under adversarial pressure.</text>
-  <rect x="1036" y="404" width="160" height="42" rx="21" fill="#EAF2FF"/>
-  <text x="1060" y="431" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="17" font-weight="700">Evidence First</text>
-  <rect x="1036" y="458" width="154" height="42" rx="21" fill="#EAF2FF"/>
-  <text x="1060" y="485" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="17" font-weight="700">Trust Boundary</text>
-  <rect x="1036" y="512" width="172" height="42" rx="21" fill="#EAF2FF"/>
-  <text x="1060" y="539" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="17" font-weight="700">Safe Degradation</text>
+  <text x="1036" y="344" fill="#57534E" font-family="Arial, sans-serif" font-size="16">Keep analysis explainable, bounded,</text>
+  <text x="1036" y="368" fill="#57534E" font-family="Arial, sans-serif" font-size="16">and defensible under pressure.</text>
+  <rect x="1036" y="402" width="160" height="40" rx="20" fill="#EAF2FF"/>
+  <text x="1060" y="428" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="17" font-weight="700">Evidence First</text>
+  <rect x="1036" y="454" width="154" height="40" rx="20" fill="#EAF2FF"/>
+  <text x="1060" y="480" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="17" font-weight="700">Trust Boundary</text>
+  <rect x="1036" y="506" width="172" height="40" rx="20" fill="#EAF2FF"/>
+  <text x="1060" y="532" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="17" font-weight="700">Safe Degradation</text>
 
   <path d="M404 418C456 418 482 408 550 408" stroke="url(#flowLeft)" stroke-width="8" stroke-linecap="round"/>
   <path d="M996 418C944 418 918 408 850 408" stroke="url(#flowRight)" stroke-width="8" stroke-linecap="round"/>
@@ -108,16 +108,16 @@
   <text x="700" y="270" text-anchor="middle" fill="#D7F1ED" font-family="Georgia, 'Times New Roman', serif" font-size="32" font-weight="700">Argis Control Stack</text>
 
   <text x="548" y="318" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="23" font-weight="700">1. Normalize Input</text>
-  <text x="548" y="340" fill="#475569" font-family="Arial, sans-serif" font-size="15">Normalize body, headers, URLs, and caller mode.</text>
+  <text x="548" y="340" fill="#475569" font-family="Arial, sans-serif" font-size="15">Normalize body, headers, URLs, and mode.</text>
 
   <text x="548" y="392" fill="#065F46" font-family="Georgia, 'Times New Roman', serif" font-size="23" font-weight="700">2. Build EvidencePack</text>
-  <text x="548" y="416" fill="#4B5563" font-family="Arial, sans-serif" font-size="15">Collect deterministic signals, provenance, and precheck.</text>
+  <text x="548" y="416" fill="#4B5563" font-family="Arial, sans-serif" font-size="15">Collect signals, provenance, and precheck.</text>
 
   <text x="548" y="472" fill="#9A3412" font-family="Georgia, 'Times New Roman', serif" font-size="23" font-weight="700">3. Route Depth Deliberately</text>
-  <text x="548" y="496" fill="#4B5563" font-family="Arial, sans-serif" font-size="15">Route risk into FAST, STANDARD, or DEEP paths.</text>
+  <text x="548" y="496" fill="#4B5563" font-family="Arial, sans-serif" font-size="15">Route risk into FAST, STANDARD, or DEEP.</text>
 
   <text x="548" y="552" fill="#1D4ED8" font-family="Georgia, 'Times New Roman', serif" font-size="23" font-weight="700">4. Validate Final Output</text>
-  <text x="548" y="576" fill="#4B5563" font-family="Arial, sans-serif" font-size="15">Apply judge, fallback, and evidence-backed emission.</text>
+  <text x="548" y="576" fill="#4B5563" font-family="Arial, sans-serif" font-size="15">Apply judge, fallback, and final validation.</text>
 
   <g filter="url(#shadowCard)">
     <rect x="370" y="632" width="660" height="92" rx="24" fill="url(#output)" stroke="#B45309" stroke-opacity="0.35"/>

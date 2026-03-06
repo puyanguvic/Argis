@@ -14,6 +14,7 @@ Project updates, tech docs, and implementation playbooks.
 
 ## Tech Docs
 
+- [Why Argis Treats Phishing Email Detection As A Control Stack](./technical-docs/phishing-email-detection-from-two-perspectives)
 - [Context Engineering In Argis](./technical-docs/context-engineering-for-deterministic-agents)
 - [When One GPU Is No Longer Enough](./technical-docs/when-one-gpu-is-no-longer-enough)
 

@@ -1,0 +1,115 @@
+<svg width="1400" height="780" viewBox="0 0 1400 780" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Argis phishing detection runtime flow</title>
+  <desc id="desc">A polished flow diagram showing the staged runtime path from input normalization through evidence building, routing, optional judge, validation, and final output.</desc>
+  <defs>
+    <linearGradient id="bg" x1="70" y1="30" x2="1330" y2="740" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FBF7EE"/>
+      <stop offset="0.5" stop-color="#F4F6F2"/>
+      <stop offset="1" stop-color="#EEF5F7"/>
+    </linearGradient>
+    <linearGradient id="band" x1="162" y1="212" x2="1238" y2="212" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F766E" stop-opacity="0.08"/>
+      <stop offset="0.5" stop-color="#0F172A" stop-opacity="0.04"/>
+      <stop offset="1" stop-color="#B45309" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="card1" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FFFFFF" stop-opacity="0.94"/>
+      <stop offset="1" stop-color="#F8FAFC" stop-opacity="0.98"/>
+    </linearGradient>
+    <filter id="shadow" x="80" y="140" width="1240" height="520" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="14"/>
+      <feGaussianBlur stdDeviation="18"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.0588235 0 0 0 0 0.0901961 0 0 0 0 0.164706 0 0 0 0.10 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_4"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_0_4" result="shape"/>
+    </filter>
+    <filter id="soft" x="0" y="0" width="1400" height="780" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="18"/>
+      <feGaussianBlur stdDeviation="24"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.0588235 0 0 0 0 0.0901961 0 0 0 0 0.164706 0 0 0 0.08 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_5"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_0_5" result="shape"/>
+    </filter>
+  </defs>
+
+  <rect width="1400" height="780" rx="30" fill="#F5F0E8"/>
+  <g filter="url(#soft)">
+    <rect x="32" y="32" width="1336" height="716" rx="28" fill="url(#bg)"/>
+  </g>
+
+  <circle cx="182" cy="126" r="88" fill="#F59E0B" fill-opacity="0.10"/>
+  <circle cx="1216" cy="654" r="118" fill="#14B8A6" fill-opacity="0.10"/>
+  <circle cx="1182" cy="138" r="96" fill="#2563EB" fill-opacity="0.08"/>
+
+  <rect x="520" y="62" width="360" height="34" rx="17" fill="#FFFFFF" fill-opacity="0.78" stroke="#CBD5E1"/>
+  <text x="700" y="84" text-anchor="middle" fill="#0F766E" font-family="Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="2">ARGIS TECH DOC  •  RUNTIME FLOW</text>
+
+  <text x="700" y="132" text-anchor="middle" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="44" font-weight="700">The Argis Runtime For Phishing Detection</text>
+  <text x="700" y="170" text-anchor="middle" fill="#64748B" font-family="Arial, sans-serif" font-size="22">A deterministic-first control flow that expands only when risk, policy, and evidence justify more work.</text>
+
+  <g filter="url(#shadow)">
+    <rect x="118" y="232" width="1164" height="372" rx="32" fill="url(#band)"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="160" y="276" width="180" height="208" rx="26" fill="url(#card1)" stroke="#B45309" stroke-width="1.6"/>
+    <rect x="374" y="276" width="196" height="208" rx="26" fill="url(#card1)" stroke="#0F766E" stroke-width="1.6"/>
+    <rect x="604" y="276" width="186" height="208" rx="26" fill="url(#card1)" stroke="#0F172A" stroke-width="1.6"/>
+    <rect x="824" y="276" width="176" height="208" rx="26" fill="url(#card1)" stroke="#2563EB" stroke-width="1.6"/>
+    <rect x="1034" y="276" width="200" height="208" rx="26" fill="url(#card1)" stroke="#D97706" stroke-width="1.6"/>
+  </g>
+
+  <text x="188" y="322" fill="#9A3412" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">Input</text>
+  <text x="188" y="354" fill="#78716C" font-family="Arial, sans-serif" font-size="17">Text, JSON, EML-derived</text>
+  <text x="188" y="378" fill="#78716C" font-family="Arial, sans-serif" font-size="17">fields, headers, URLs,</text>
+  <text x="188" y="402" fill="#78716C" font-family="Arial, sans-serif" font-size="17">attachments, caller mode.</text>
+  <rect x="188" y="424" width="112" height="34" rx="17" fill="#FFF3E6"/>
+  <text x="208" y="446" fill="#9A3412" font-family="Arial, sans-serif" font-size="15" font-weight="700">Normalize first</text>
+
+  <text x="404" y="322" fill="#0F766E" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">EvidencePack</text>
+  <text x="404" y="354" fill="#78716C" font-family="Arial, sans-serif" font-size="17">Deterministic signals,</text>
+  <text x="404" y="378" fill="#78716C" font-family="Arial, sans-serif" font-size="17">provenance, limits,</text>
+  <text x="404" y="402" fill="#78716C" font-family="Arial, sans-serif" font-size="17">and `precheck` inputs.</text>
+  <rect x="404" y="424" width="130" height="34" rx="17" fill="#EAFBF7"/>
+  <text x="424" y="446" fill="#0F766E" font-family="Arial, sans-serif" font-size="15" font-weight="700">Evidence first</text>
+
+  <text x="634" y="322" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">Route</text>
+  <text x="634" y="354" fill="#78716C" font-family="Arial, sans-serif" font-size="17">`allow`, `review`,</text>
+  <text x="634" y="378" fill="#78716C" font-family="Arial, sans-serif" font-size="17">`deep` map to FAST,</text>
+  <text x="634" y="402" fill="#78716C" font-family="Arial, sans-serif" font-size="17">STANDARD, and DEEP.</text>
+  <rect x="634" y="424" width="110" height="34" rx="17" fill="#EEF2FF"/>
+  <text x="654" y="446" fill="#334155" font-family="Arial, sans-serif" font-size="15" font-weight="700">Earn depth</text>
+
+  <text x="850" y="322" fill="#1D4ED8" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">Judge</text>
+  <text x="850" y="354" fill="#78716C" font-family="Arial, sans-serif" font-size="17">Optional remote pass</text>
+  <text x="850" y="378" fill="#78716C" font-family="Arial, sans-serif" font-size="17">after evidence building</text>
+  <text x="850" y="402" fill="#78716C" font-family="Arial, sans-serif" font-size="17">and route-aware context.</text>
+  <rect x="850" y="424" width="106" height="34" rx="17" fill="#EAF2FF"/>
+  <text x="870" y="446" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="15" font-weight="700">Optional only</text>
+
+  <text x="1062" y="322" fill="#B45309" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">Validate + Emit</text>
+  <text x="1062" y="354" fill="#78716C" font-family="Arial, sans-serif" font-size="17">Validate verdict shape,</text>
+  <text x="1062" y="378" fill="#78716C" font-family="Arial, sans-serif" font-size="17">merge or fallback, then</text>
+  <text x="1062" y="402" fill="#78716C" font-family="Arial, sans-serif" font-size="17">emit operator-usable output.</text>
+  <rect x="1062" y="424" width="128" height="34" rx="17" fill="#FFF3E6"/>
+  <text x="1082" y="446" fill="#B45309" font-family="Arial, sans-serif" font-size="15" font-weight="700">Visible runtime state</text>
+
+  <path d="M340 380H374" stroke="#C97316" stroke-width="7" stroke-linecap="round"/>
+  <path d="M570 380H604" stroke="#0F766E" stroke-width="7" stroke-linecap="round"/>
+  <path d="M790 380H824" stroke="#0F172A" stroke-width="7" stroke-linecap="round"/>
+  <path d="M1000 380H1034" stroke="#2563EB" stroke-width="7" stroke-linecap="round"/>
+  <path d="M374 380L360 370V390L374 380Z" fill="#C97316"/>
+  <path d="M604 380L590 370V390L604 380Z" fill="#0F766E"/>
+  <path d="M824 380L810 370V390L824 380Z" fill="#0F172A"/>
+  <path d="M1034 380L1020 370V390L1034 380Z" fill="#2563EB"/>
+
+  <rect x="232" y="518" width="936" height="108" rx="26" fill="#FFFFFF" fill-opacity="0.74" stroke="#CBD5E1"/>
+  <text x="700" y="560" text-anchor="middle" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">Final Output</text>
+  <text x="700" y="592" text-anchor="middle" fill="#475569" font-family="Arial, sans-serif" font-size="19">Verdict, risk score, selected evidence, `path`, `provider_used`, `fallback_reason`, and runtime metadata.</text>
+
+  <text x="700" y="690" text-anchor="middle" fill="#475569" font-family="Arial, sans-serif" font-size="22">Argis does not ask the model to ingest the whole incident blindly. It stages the case before judgment.</text>
+</svg>

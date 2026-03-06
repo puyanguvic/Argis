@@ -125,6 +125,47 @@
   color: var(--vp-c-text-1);
 }
 
+.vp-doc .article-figure {
+  margin: 1.5rem 0 2rem;
+}
+
+.vp-doc .article-figure img {
+  display: block;
+  width: 100%;
+  border-radius: 22px;
+  border: 1px solid rgba(15, 118, 110, 0.10);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.98)),
+    linear-gradient(135deg, rgba(15, 118, 110, 0.05), rgba(180, 83, 9, 0.05));
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+}
+
+.dark .vp-doc .article-figure img {
+  border-color: rgba(20, 184, 166, 0.14);
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.78), rgba(15, 23, 42, 0.92)),
+    linear-gradient(135deg, rgba(20, 184, 166, 0.08), rgba(245, 158, 11, 0.05));
+  box-shadow: none;
+}
+
+.vp-doc .article-figure figcaption {
+  max-width: 56rem;
+  margin: 0.7rem auto 0;
+  text-align: center;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--vp-c-text-2);
+}
+
+.vp-doc .article-figure--hero {
+  margin-top: 1rem;
+  margin-bottom: 2.2rem;
+}
+
+.vp-doc .article-figure--hero figcaption {
+  font-size: 1rem;
+}
+
 .VPHome .VPFeatures .box {
   border-radius: 20px;
   border: 1px solid rgba(15, 118, 110, 0.12);

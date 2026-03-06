@@ -1,87 +1,86 @@
-<svg width="1400" height="760" viewBox="0 0 1400 760" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+<svg width="1400" height="820" viewBox="0 0 1400 820" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">Generic classifier versus Argis runtime</title>
   <desc id="desc">A side-by-side comparison showing how a generic LLM classifier differs from the Argis phishing-analysis runtime.</desc>
   <defs>
-    <linearGradient id="bg2" x1="70" y1="40" x2="1330" y2="720" gradientUnits="userSpaceOnUse">
+    <linearGradient id="bg" x1="70" y1="40" x2="1330" y2="780" gradientUnits="userSpaceOnUse">
       <stop stop-color="#FBF7EE"/>
       <stop offset="1" stop-color="#F2F7F7"/>
     </linearGradient>
-    <linearGradient id="leftPane" x1="106" y1="126" x2="632" y2="640" gradientUnits="userSpaceOnUse">
+    <linearGradient id="leftPanel" x1="104" y1="188" x2="624" y2="708" gradientUnits="userSpaceOnUse">
       <stop stop-color="#FFF8F1"/>
-      <stop offset="1" stop-color="#FDEFE5"/>
+      <stop offset="1" stop-color="#FDEEDF"/>
     </linearGradient>
-    <linearGradient id="rightPane" x1="768" y1="126" x2="1294" y2="640" gradientUnits="userSpaceOnUse">
+    <linearGradient id="rightPanel" x1="776" y1="188" x2="1296" y2="708" gradientUnits="userSpaceOnUse">
       <stop stop-color="#F4FFFC"/>
-      <stop offset="1" stop-color="#EEF6FF"/>
+      <stop offset="1" stop-color="#ECF5FF"/>
     </linearGradient>
-    <filter id="paneShadow" x="80" y="100" width="1240" height="590" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+    <filter id="panelShadow" x="76" y="160" width="1248" height="584" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
       <feFlood flood-opacity="0" result="BackgroundImageFix"/>
       <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
       <feOffset dy="16"/>
       <feGaussianBlur stdDeviation="18"/>
       <feColorMatrix type="matrix" values="0 0 0 0 0.0588235 0 0 0 0 0.0901961 0 0 0 0 0.164706 0 0 0 0.10 0"/>
-      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_3"/>
-      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_0_3" result="shape"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_1"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_0_1" result="shape"/>
     </filter>
   </defs>
 
-  <rect width="1400" height="760" rx="30" fill="url(#bg2)"/>
-  <rect x="518" y="56" width="364" height="34" rx="17" fill="#FFFFFF" fill-opacity="0.78" stroke="#CBD5E1"/>
-  <text x="700" y="78" text-anchor="middle" fill="#0F766E" font-family="Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="2">ARGIS TECH DOC  •  SYSTEM COMPARISON</text>
-  <text x="700" y="122" text-anchor="middle" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="38" font-weight="700">Two Very Different Ways To Build A Phishing Detector</text>
-  <text x="700" y="156" text-anchor="middle" fill="#64748B" font-family="Arial, sans-serif" font-size="20">The visual difference is not cosmetic. It changes evidence quality, safety posture, and operator trust.</text>
+  <rect width="1400" height="820" rx="30" fill="url(#bg)"/>
 
-  <g filter="url(#paneShadow)">
-    <rect x="104" y="188" width="540" height="520" rx="28" fill="url(#leftPane)" stroke="#EA580C" stroke-width="1.6"/>
-    <rect x="756" y="188" width="540" height="520" rx="28" fill="url(#rightPane)" stroke="#0F766E" stroke-width="1.6"/>
+  <rect x="518" y="58" width="364" height="34" rx="17" fill="#FFFFFF" fill-opacity="0.78" stroke="#CBD5E1"/>
+  <text x="700" y="80" text-anchor="middle" fill="#0F766E" font-family="Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="2">ARGIS TECH DOC  •  SYSTEM COMPARISON</text>
+  <text x="700" y="126" text-anchor="middle" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="38" font-weight="700">Two Very Different Ways To Build A Phishing Detector</text>
+  <text x="700" y="160" text-anchor="middle" fill="#64748B" font-family="Arial, sans-serif" font-size="20">The difference is structural. It changes evidence quality, safety posture, and operator trust.</text>
+
+  <g filter="url(#panelShadow)">
+    <rect x="104" y="188" width="520" height="588" rx="28" fill="url(#leftPanel)" stroke="#EA580C" stroke-width="1.6"/>
+    <rect x="776" y="188" width="520" height="588" rx="28" fill="url(#rightPanel)" stroke="#0F766E" stroke-width="1.6"/>
   </g>
 
   <text x="148" y="244" fill="#9A3412" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700">Generic LLM Classifier</text>
   <text x="800" y="244" fill="#0F766E" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700">Argis Runtime</text>
 
-  <rect x="148" y="284" width="452" height="92" rx="20" fill="#FFFFFF" fill-opacity="0.78"/>
-  <text x="176" y="318" fill="#7C2D12" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">Raw email and artifacts</text>
-  <text x="176" y="344" fill="#78716C" font-family="Arial, sans-serif" font-size="16">Large prompt, implicit assumptions,</text>
-  <text x="176" y="366" fill="#78716C" font-family="Arial, sans-serif" font-size="16">and unclear evidence boundaries.</text>
+  <rect x="148" y="286" width="432" height="88" rx="20" fill="#FFFFFF" fill-opacity="0.80"/>
+  <text x="176" y="320" fill="#9A3412" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">1. Raw email and artifacts</text>
+  <text x="176" y="350" fill="#78716C" font-family="Arial, sans-serif" font-size="16">Large prompt, implicit assumptions, and weak evidence boundaries.</text>
 
-  <line x1="374" y1="378" x2="374" y2="414" stroke="#EA580C" stroke-width="6" stroke-linecap="round"/>
-  <polygon points="374,430 360,410 388,410" fill="#EA580C"/>
+  <line x1="364" y1="388" x2="364" y2="424" stroke="#EA580C" stroke-width="6" stroke-linecap="round"/>
+  <polygon points="364,440 350,420 378,420" fill="#EA580C"/>
 
-  <rect x="148" y="438" width="452" height="112" rx="20" fill="#FFF4ED"/>
-  <text x="176" y="472" fill="#9A3412" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">Single-shot model judgment</text>
-  <text x="176" y="500" fill="#78716C" font-family="Arial, sans-serif" font-size="16">Reasoning quality stays tightly coupled</text>
-  <text x="176" y="522" fill="#78716C" font-family="Arial, sans-serif" font-size="16">to prompt volume and prompt shape.</text>
-  <text x="176" y="544" fill="#78716C" font-family="Arial, sans-serif" font-size="16">Evidence remains mostly narrative.</text>
+  <rect x="148" y="448" width="432" height="96" rx="20" fill="#FFF4ED"/>
+  <text x="176" y="482" fill="#9A3412" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">2. Single-shot model judgment</text>
+  <text x="176" y="512" fill="#78716C" font-family="Arial, sans-serif" font-size="16">Reasoning stays tightly coupled to prompt volume and prompt shape.</text>
 
-  <line x1="374" y1="550" x2="374" y2="586" stroke="#EA580C" stroke-width="6" stroke-linecap="round"/>
-  <polygon points="374,602 360,582 388,582" fill="#EA580C"/>
+  <line x1="364" y1="558" x2="364" y2="594" stroke="#EA580C" stroke-width="6" stroke-linecap="round"/>
+  <polygon points="364,610 350,590 378,590" fill="#EA580C"/>
 
-  <rect x="148" y="604" width="452" height="78" rx="20" fill="#FFE7DA"/>
-  <text x="176" y="636" fill="#9A3412" font-family="Arial, sans-serif" font-size="18" font-weight="700">Output: fluent answer, but weaker control</text>
-  <text x="176" y="660" fill="#9A3412" font-family="Arial, sans-serif" font-size="18" font-weight="700">over provenance, routing, and fallback.</text>
+  <rect x="148" y="618" width="432" height="82" rx="20" fill="#FCE0D1"/>
+  <text x="176" y="650" fill="#9A3412" font-family="Arial, sans-serif" font-size="18" font-weight="700">3. Output is fluent, but weaker on</text>
+  <text x="176" y="676" fill="#9A3412" font-family="Arial, sans-serif" font-size="18" font-weight="700">provenance, routing, and fallback.</text>
 
-  <rect x="800" y="284" width="452" height="64" rx="18" fill="#FFFFFF" fill-opacity="0.82"/>
-  <text x="828" y="326" fill="#134E4A" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">1. Normalize caller input</text>
+  <circle cx="700" cy="448" r="56" fill="#0F172A"/>
+  <text x="700" y="456" text-anchor="middle" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="20" font-weight="700">vs</text>
 
-  <line x1="1026" y1="348" x2="1026" y2="382" stroke="#0F766E" stroke-width="6" stroke-linecap="round"/>
-  <polygon points="1026,398 1012,378 1040,378" fill="#0F766E"/>
+  <rect x="820" y="286" width="432" height="64" rx="18" fill="#FFFFFF" fill-opacity="0.82"/>
+  <text x="848" y="326" fill="#0F766E" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">1. Normalize caller input</text>
 
-  <rect x="800" y="390" width="452" height="64" rx="18" fill="#ECFDF5"/>
-  <text x="828" y="430" fill="#065F46" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">2. Build EvidencePack and precheck</text>
+  <line x1="1036" y1="364" x2="1036" y2="396" stroke="#0F766E" stroke-width="6" stroke-linecap="round"/>
+  <polygon points="1036,412 1022,392 1050,392" fill="#0F766E"/>
 
-  <line x1="1026" y1="454" x2="1026" y2="488" stroke="#0F766E" stroke-width="6" stroke-linecap="round"/>
-  <polygon points="1026,504 1012,484 1040,484" fill="#0F766E"/>
+  <rect x="820" y="424" width="432" height="64" rx="18" fill="#ECFDF5"/>
+  <text x="848" y="464" fill="#065F46" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">2. Build EvidencePack and precheck</text>
 
-  <rect x="800" y="496" width="452" height="64" rx="18" fill="#F0FDFA"/>
-  <text x="828" y="536" fill="#0F766E" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">3. Route FAST, STANDARD, or DEEP</text>
+  <line x1="1036" y1="502" x2="1036" y2="534" stroke="#0F766E" stroke-width="6" stroke-linecap="round"/>
+  <polygon points="1036,550 1022,530 1050,530" fill="#0F766E"/>
 
-  <line x1="1026" y1="560" x2="1026" y2="594" stroke="#0F766E" stroke-width="6" stroke-linecap="round"/>
-  <polygon points="1026,610 1012,590 1040,590" fill="#0F766E"/>
+  <rect x="820" y="562" width="432" height="64" rx="18" fill="#F0FDFA"/>
+  <text x="848" y="602" fill="#0F766E" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">3. Route FAST, STANDARD, or DEEP</text>
 
-  <rect x="800" y="602" width="452" height="92" rx="18" fill="#E0F2FE"/>
-  <text x="828" y="632" fill="#1D4ED8" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">4. Optional judge plus</text>
-  <text x="828" y="658" fill="#1D4ED8" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">validation and fallback</text>
-  <text x="828" y="684" fill="#64748B" font-family="Arial, sans-serif" font-size="16">Output carries path, evidence references, and runtime state.</text>
+  <line x1="1036" y1="640" x2="1036" y2="672" stroke="#0F766E" stroke-width="6" stroke-linecap="round"/>
+  <polygon points="1036,688 1022,668 1050,668" fill="#0F766E"/>
 
-  <rect x="654" y="256" width="82" height="452" rx="28" fill="#0F172A"/>
+  <rect x="820" y="680" width="432" height="82" rx="18" fill="#DDEBFA"/>
+  <text x="848" y="710" fill="#1D4ED8" font-family="Georgia, 'Times New Roman', serif" font-size="21" font-weight="700">4. Validate, merge, and emit</text>
+  <text x="848" y="736" fill="#1D4ED8" font-family="Georgia, 'Times New Roman', serif" font-size="21" font-weight="700">runtime state</text>
+  <text x="848" y="756" fill="#64748B" font-family="Arial, sans-serif" font-size="15">Output carries path, evidence references, and fallback semantics.</text>
 </svg>

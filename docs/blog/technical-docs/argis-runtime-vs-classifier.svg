@@ -28,56 +28,60 @@
   <rect width="1400" height="760" rx="30" fill="url(#bg2)"/>
   <rect x="518" y="56" width="364" height="34" rx="17" fill="#FFFFFF" fill-opacity="0.78" stroke="#CBD5E1"/>
   <text x="700" y="78" text-anchor="middle" fill="#0F766E" font-family="Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="2">ARGIS TECH DOC  •  SYSTEM COMPARISON</text>
-  <text x="700" y="126" text-anchor="middle" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="42" font-weight="700">Two Very Different Ways To Build A Phishing Detector</text>
-  <text x="700" y="162" text-anchor="middle" fill="#64748B" font-family="Arial, sans-serif" font-size="22">The visual difference is not cosmetic. It changes evidence quality, safety posture, and operator trust.</text>
+  <text x="700" y="122" text-anchor="middle" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="38" font-weight="700">Two Very Different Ways To Build A Phishing Detector</text>
+  <text x="700" y="156" text-anchor="middle" fill="#64748B" font-family="Arial, sans-serif" font-size="20">The visual difference is not cosmetic. It changes evidence quality, safety posture, and operator trust.</text>
 
   <g filter="url(#paneShadow)">
     <rect x="104" y="188" width="540" height="472" rx="28" fill="url(#leftPane)" stroke="#EA580C" stroke-width="1.6"/>
     <rect x="756" y="188" width="540" height="472" rx="28" fill="url(#rightPane)" stroke="#0F766E" stroke-width="1.6"/>
   </g>
 
-  <text x="148" y="246" fill="#9A3412" font-family="Georgia, 'Times New Roman', serif" font-size="32" font-weight="700">Generic LLM Classifier</text>
-  <text x="800" y="246" fill="#0F766E" font-family="Georgia, 'Times New Roman', serif" font-size="32" font-weight="700">Argis Runtime</text>
+  <text x="148" y="244" fill="#9A3412" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700">Generic LLM Classifier</text>
+  <text x="800" y="244" fill="#0F766E" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700">Argis Runtime</text>
 
   <rect x="148" y="284" width="452" height="82" rx="20" fill="#FFFFFF" fill-opacity="0.78"/>
-  <text x="176" y="318" fill="#7C2D12" font-family="Georgia, 'Times New Roman', serif" font-size="24" font-weight="700">Raw email and artifacts</text>
-  <text x="176" y="346" fill="#78716C" font-family="Arial, sans-serif" font-size="17">Large prompt, implicit assumptions, unclear evidence boundaries.</text>
+  <text x="176" y="318" fill="#7C2D12" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">Raw email and artifacts</text>
+  <text x="176" y="344" fill="#78716C" font-family="Arial, sans-serif" font-size="16">Large prompt, implicit assumptions,</text>
+  <text x="176" y="366" fill="#78716C" font-family="Arial, sans-serif" font-size="16">and unclear evidence boundaries.</text>
 
   <path d="M374 366V410" stroke="#EA580C" stroke-width="6" stroke-linecap="round"/>
   <path d="M374 410L360 394V426L374 410Z" fill="#EA580C"/>
 
-  <rect x="148" y="426" width="452" height="102" rx="20" fill="#FFF4ED"/>
-  <text x="176" y="462" fill="#9A3412" font-family="Georgia, 'Times New Roman', serif" font-size="24" font-weight="700">Single-shot model judgment</text>
-  <text x="176" y="490" fill="#78716C" font-family="Arial, sans-serif" font-size="17">Context volume and reasoning quality are tightly coupled.</text>
-  <text x="176" y="516" fill="#78716C" font-family="Arial, sans-serif" font-size="17">Evidence references often exist only inside prompt narrative.</text>
+  <rect x="148" y="426" width="452" height="104" rx="20" fill="#FFF4ED"/>
+  <text x="176" y="460" fill="#9A3412" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">Single-shot model judgment</text>
+  <text x="176" y="486" fill="#78716C" font-family="Arial, sans-serif" font-size="16">Context volume and reasoning quality</text>
+  <text x="176" y="508" fill="#78716C" font-family="Arial, sans-serif" font-size="16">are tightly coupled to the prompt.</text>
+  <text x="176" y="530" fill="#78716C" font-family="Arial, sans-serif" font-size="16">Evidence references remain mostly narrative.</text>
 
   <path d="M374 528V572" stroke="#EA580C" stroke-width="6" stroke-linecap="round"/>
   <path d="M374 572L360 556V588L374 572Z" fill="#EA580C"/>
 
-  <rect x="148" y="588" width="452" height="72" rx="20" fill="#FFE7DA"/>
-  <text x="176" y="630" fill="#9A3412" font-family="Arial, sans-serif" font-size="21" font-weight="700">Output: fluent answer, weaker control over provenance and fallback</text>
+  <rect x="148" y="588" width="452" height="86" rx="20" fill="#FFE7DA"/>
+  <text x="176" y="622" fill="#9A3412" font-family="Arial, sans-serif" font-size="19" font-weight="700">Output: fluent answer, but weaker control</text>
+  <text x="176" y="648" fill="#9A3412" font-family="Arial, sans-serif" font-size="19" font-weight="700">over provenance, routing, and fallback.</text>
 
   <rect x="800" y="284" width="452" height="68" rx="18" fill="#FFFFFF" fill-opacity="0.82"/>
-  <text x="828" y="326" fill="#134E4A" font-family="Georgia, 'Times New Roman', serif" font-size="24" font-weight="700">1. Normalize caller input</text>
+  <text x="828" y="326" fill="#134E4A" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">1. Normalize caller input</text>
 
   <path d="M1026 352V380" stroke="#0F766E" stroke-width="6" stroke-linecap="round"/>
   <path d="M1026 380L1012 364V396L1026 380Z" fill="#0F766E"/>
 
   <rect x="800" y="396" width="452" height="68" rx="18" fill="#ECFDF5"/>
-  <text x="828" y="438" fill="#065F46" font-family="Georgia, 'Times New Roman', serif" font-size="24" font-weight="700">2. Build `EvidencePack` and `precheck`</text>
+  <text x="828" y="438" fill="#065F46" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">2. Build EvidencePack and precheck</text>
 
   <path d="M1026 464V492" stroke="#0F766E" stroke-width="6" stroke-linecap="round"/>
   <path d="M1026 492L1012 476V508L1026 492Z" fill="#0F766E"/>
 
   <rect x="800" y="508" width="452" height="68" rx="18" fill="#F0FDFA"/>
-  <text x="828" y="550" fill="#0F766E" font-family="Georgia, 'Times New Roman', serif" font-size="24" font-weight="700">3. Route FAST, STANDARD, or DEEP</text>
+  <text x="828" y="550" fill="#0F766E" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">3. Route FAST, STANDARD, or DEEP</text>
 
   <path d="M1026 576V604" stroke="#0F766E" stroke-width="6" stroke-linecap="round"/>
   <path d="M1026 604L1012 588V620L1026 604Z" fill="#0F766E"/>
 
-  <rect x="800" y="620" width="452" height="72" rx="18" fill="#E0F2FE"/>
-  <text x="828" y="650" fill="#1D4ED8" font-family="Georgia, 'Times New Roman', serif" font-size="24" font-weight="700">4. Optional judge plus validation and fallback</text>
-  <text x="828" y="676" fill="#64748B" font-family="Arial, sans-serif" font-size="17">Output carries path, evidence references, and operational runtime state.</text>
+  <rect x="800" y="620" width="452" height="94" rx="18" fill="#E0F2FE"/>
+  <text x="828" y="650" fill="#1D4ED8" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">4. Optional judge plus</text>
+  <text x="828" y="676" fill="#1D4ED8" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700">validation and fallback</text>
+  <text x="828" y="702" fill="#64748B" font-family="Arial, sans-serif" font-size="16">Output carries path, evidence references, and runtime state.</text>
 
   <rect x="650" y="256" width="90" height="404" rx="28" fill="#0F172A"/>
   <text x="695" y="398" text-anchor="middle" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700" transform="rotate(90 695 398)">Different system shape</text>

@@ -157,6 +157,10 @@ export default withMermaid(
             text: "Tech Docs",
             items: [
               {
+                text: "Why Argis Treats Phishing Email Detection As A Control Stack",
+                link: "/blog/technical-docs/phishing-email-detection-from-two-perspectives"
+              },
+              {
                 text: "Context Engineering In Argis",
                 link: "/blog/technical-docs/context-engineering-for-deterministic-agents"
               },

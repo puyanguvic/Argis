@@ -52,60 +52,60 @@
   <text x="700" y="162" text-anchor="middle" fill="#64748B" font-family="Arial, sans-serif" font-size="19">A deterministic-first control flow that expands only when risk, policy, and evidence justify more work.</text>
 
   <g filter="url(#shadow)">
-    <rect x="118" y="232" width="1164" height="372" rx="32" fill="url(#band)"/>
+    <rect x="100" y="232" width="1200" height="372" rx="32" fill="url(#band)"/>
   </g>
 
   <g filter="url(#shadow)">
-    <rect x="160" y="276" width="180" height="208" rx="26" fill="url(#card1)" stroke="#B45309" stroke-width="1.6"/>
-    <rect x="374" y="276" width="196" height="208" rx="26" fill="url(#card1)" stroke="#0F766E" stroke-width="1.6"/>
-    <rect x="604" y="276" width="186" height="208" rx="26" fill="url(#card1)" stroke="#0F172A" stroke-width="1.6"/>
-    <rect x="824" y="276" width="176" height="208" rx="26" fill="url(#card1)" stroke="#2563EB" stroke-width="1.6"/>
-    <rect x="1034" y="276" width="200" height="208" rx="26" fill="url(#card1)" stroke="#D97706" stroke-width="1.6"/>
+    <rect x="116" y="276" width="196" height="208" rx="26" fill="url(#card1)" stroke="#B45309" stroke-width="1.6"/>
+    <rect x="350" y="276" width="196" height="208" rx="26" fill="url(#card1)" stroke="#0F766E" stroke-width="1.6"/>
+    <rect x="584" y="276" width="196" height="208" rx="26" fill="url(#card1)" stroke="#0F172A" stroke-width="1.6"/>
+    <rect x="818" y="276" width="196" height="208" rx="26" fill="url(#card1)" stroke="#2563EB" stroke-width="1.6"/>
+    <rect x="1052" y="276" width="196" height="208" rx="26" fill="url(#card1)" stroke="#D97706" stroke-width="1.6"/>
   </g>
 
-  <text x="188" y="322" fill="#9A3412" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">Input</text>
-  <text x="188" y="352" fill="#78716C" font-family="Arial, sans-serif" font-size="15">Text, JSON, EML fields,</text>
-  <text x="188" y="374" fill="#78716C" font-family="Arial, sans-serif" font-size="15">headers, URLs, attachments,</text>
-  <text x="188" y="396" fill="#78716C" font-family="Arial, sans-serif" font-size="15">and caller mode.</text>
-  <rect x="188" y="424" width="112" height="34" rx="17" fill="#FFF3E6"/>
-  <text x="208" y="446" fill="#9A3412" font-family="Arial, sans-serif" font-size="15" font-weight="700">Normalize first</text>
+  <text x="146" y="322" fill="#9A3412" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">Input</text>
+  <text x="146" y="352" fill="#78716C" font-family="Arial, sans-serif" font-size="15">Normalize body, headers,</text>
+  <text x="146" y="374" fill="#78716C" font-family="Arial, sans-serif" font-size="15">URLs, attachments, and</text>
+  <text x="146" y="396" fill="#78716C" font-family="Arial, sans-serif" font-size="15">caller mode.</text>
+  <rect x="146" y="424" width="112" height="34" rx="17" fill="#FFF3E6"/>
+  <text x="166" y="446" fill="#9A3412" font-family="Arial, sans-serif" font-size="15" font-weight="700">Normalize first</text>
 
-  <text x="404" y="322" fill="#0F766E" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">EvidencePack</text>
-  <text x="404" y="352" fill="#78716C" font-family="Arial, sans-serif" font-size="15">Deterministic signals,</text>
-  <text x="404" y="374" fill="#78716C" font-family="Arial, sans-serif" font-size="15">provenance, limits, and</text>
-  <text x="404" y="396" fill="#78716C" font-family="Arial, sans-serif" font-size="15">precheck inputs.</text>
-  <rect x="404" y="424" width="130" height="34" rx="17" fill="#EAFBF7"/>
-  <text x="424" y="446" fill="#0F766E" font-family="Arial, sans-serif" font-size="15" font-weight="700">Evidence first</text>
+  <text x="380" y="322" fill="#0F766E" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">EvidencePack</text>
+  <text x="380" y="352" fill="#78716C" font-family="Arial, sans-serif" font-size="15">Collect deterministic signals,</text>
+  <text x="380" y="374" fill="#78716C" font-family="Arial, sans-serif" font-size="15">provenance, limits, and</text>
+  <text x="380" y="396" fill="#78716C" font-family="Arial, sans-serif" font-size="15">precheck context.</text>
+  <rect x="380" y="424" width="130" height="34" rx="17" fill="#EAFBF7"/>
+  <text x="400" y="446" fill="#0F766E" font-family="Arial, sans-serif" font-size="15" font-weight="700">Evidence first</text>
 
-  <text x="634" y="322" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">Route</text>
-  <text x="634" y="352" fill="#78716C" font-family="Arial, sans-serif" font-size="15">Allow, review, and deep</text>
-  <text x="634" y="374" fill="#78716C" font-family="Arial, sans-serif" font-size="15">map to FAST, STANDARD,</text>
-  <text x="634" y="396" fill="#78716C" font-family="Arial, sans-serif" font-size="15">and DEEP execution paths.</text>
-  <rect x="634" y="424" width="110" height="34" rx="17" fill="#EEF2FF"/>
-  <text x="654" y="446" fill="#334155" font-family="Arial, sans-serif" font-size="15" font-weight="700">Earn depth</text>
+  <text x="614" y="322" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">Route</text>
+  <text x="614" y="352" fill="#78716C" font-family="Arial, sans-serif" font-size="15">Map risk to FAST,</text>
+  <text x="614" y="374" fill="#78716C" font-family="Arial, sans-serif" font-size="15">STANDARD, or DEEP</text>
+  <text x="614" y="396" fill="#78716C" font-family="Arial, sans-serif" font-size="15">execution paths.</text>
+  <rect x="614" y="424" width="110" height="34" rx="17" fill="#EEF2FF"/>
+  <text x="634" y="446" fill="#334155" font-family="Arial, sans-serif" font-size="15" font-weight="700">Earn depth</text>
 
-  <text x="850" y="322" fill="#1D4ED8" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">Judge</text>
-  <text x="850" y="352" fill="#78716C" font-family="Arial, sans-serif" font-size="15">Optional remote pass</text>
-  <text x="850" y="374" fill="#78716C" font-family="Arial, sans-serif" font-size="15">after evidence building</text>
-  <text x="850" y="396" fill="#78716C" font-family="Arial, sans-serif" font-size="15">with route-aware context.</text>
-  <rect x="850" y="424" width="106" height="34" rx="17" fill="#EAF2FF"/>
-  <text x="870" y="446" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="15" font-weight="700">Optional only</text>
+  <text x="848" y="322" fill="#1D4ED8" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">Judge</text>
+  <text x="848" y="352" fill="#78716C" font-family="Arial, sans-serif" font-size="15">Run optional remote</text>
+  <text x="848" y="374" fill="#78716C" font-family="Arial, sans-serif" font-size="15">evaluation on prepared,</text>
+  <text x="848" y="396" fill="#78716C" font-family="Arial, sans-serif" font-size="15">route-aware context.</text>
+  <rect x="848" y="424" width="106" height="34" rx="17" fill="#EAF2FF"/>
+  <text x="868" y="446" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="15" font-weight="700">Optional only</text>
 
-  <text x="1062" y="322" fill="#B45309" font-family="Georgia, 'Times New Roman', serif" font-size="24" font-weight="700">Validate + Emit</text>
-  <text x="1062" y="352" fill="#78716C" font-family="Arial, sans-serif" font-size="15">Validate verdict shape,</text>
-  <text x="1062" y="374" fill="#78716C" font-family="Arial, sans-serif" font-size="15">merge or fallback, then</text>
-  <text x="1062" y="396" fill="#78716C" font-family="Arial, sans-serif" font-size="15">emit runtime-visible output.</text>
-  <rect x="1062" y="424" width="128" height="34" rx="17" fill="#FFF3E6"/>
-  <text x="1082" y="446" fill="#B45309" font-family="Arial, sans-serif" font-size="15" font-weight="700">Visible runtime state</text>
+  <text x="1078" y="322" fill="#B45309" font-family="Georgia, 'Times New Roman', serif" font-size="24" font-weight="700">Validate + Emit</text>
+  <text x="1078" y="352" fill="#78716C" font-family="Arial, sans-serif" font-size="15">Merge, validate, and</text>
+  <text x="1078" y="374" fill="#78716C" font-family="Arial, sans-serif" font-size="15">expose runtime-visible</text>
+  <text x="1078" y="396" fill="#78716C" font-family="Arial, sans-serif" font-size="15">output and fallback state.</text>
+  <rect x="1078" y="424" width="128" height="34" rx="17" fill="#FFF3E6"/>
+  <text x="1098" y="446" fill="#B45309" font-family="Arial, sans-serif" font-size="15" font-weight="700">Visible runtime state</text>
 
-  <path d="M340 380H374" stroke="#C97316" stroke-width="7" stroke-linecap="round"/>
-  <path d="M570 380H604" stroke="#0F766E" stroke-width="7" stroke-linecap="round"/>
-  <path d="M790 380H824" stroke="#0F172A" stroke-width="7" stroke-linecap="round"/>
-  <path d="M1000 380H1034" stroke="#2563EB" stroke-width="7" stroke-linecap="round"/>
-  <path d="M374 380L360 370V390L374 380Z" fill="#C97316"/>
-  <path d="M604 380L590 370V390L604 380Z" fill="#0F766E"/>
-  <path d="M824 380L810 370V390L824 380Z" fill="#0F172A"/>
-  <path d="M1034 380L1020 370V390L1034 380Z" fill="#2563EB"/>
+  <path d="M312 380H350" stroke="#C97316" stroke-width="7" stroke-linecap="round"/>
+  <path d="M546 380H584" stroke="#0F766E" stroke-width="7" stroke-linecap="round"/>
+  <path d="M780 380H818" stroke="#0F172A" stroke-width="7" stroke-linecap="round"/>
+  <path d="M1014 380H1052" stroke="#2563EB" stroke-width="7" stroke-linecap="round"/>
+  <path d="M350 380L336 370V390L350 380Z" fill="#C97316"/>
+  <path d="M584 380L570 370V390L584 380Z" fill="#0F766E"/>
+  <path d="M818 380L804 370V390L818 380Z" fill="#0F172A"/>
+  <path d="M1052 380L1038 370V390L1052 380Z" fill="#2563EB"/>
 
   <rect x="232" y="518" width="936" height="108" rx="26" fill="#FFFFFF" fill-opacity="0.74" stroke="#CBD5E1"/>
   <text x="700" y="560" text-anchor="middle" fill="#0F172A" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700">Final Output</text>

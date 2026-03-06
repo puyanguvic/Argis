@@ -140,12 +140,7 @@ def _sanitize_precheck(precheck: Any) -> Any:
 def _sanitize_result_for_api(result: dict[str, Any]) -> dict[str, Any]:
     clean = dict(result)
     clean["precheck"] = _sanitize_precheck(clean.get("precheck"))
-
-    evidence = clean.get("evidence")
-    if isinstance(evidence, dict):
-        evidence_clean = dict(evidence)
-        evidence_clean["precheck"] = _sanitize_precheck(evidence_clean.get("precheck"))
-        clean["evidence"] = evidence_clean
+    clean.pop("evidence", None)
     return clean
 
 

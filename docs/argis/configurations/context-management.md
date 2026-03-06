@@ -14,6 +14,8 @@ Context management in Argis should preserve determinism, traceability, and safet
 - avoid opaque conclusions without indicators
 - bound external fetch/analysis with explicit limits
 
+The runtime now emits stable `evidence_id` references for selected judge-context evidence so downstream citations do not have to rely only on array-index paths.
+
 ## What “Context” Means Here
 
 In Argis, context is not only model prompt text. It includes:
@@ -28,7 +30,7 @@ Managing context well means keeping enough detail to explain the verdict, withou
 
 ## API Context Rules
 
-- default API responses sanitize sensitive evidence
+- default API responses expose `precheck` as the public summary and omit full internal `evidence`
 - `debug_evidence=true` is for trusted debugging only
 
 ## Storage Guidance

@@ -80,7 +80,7 @@ Fallback case behavior:
 
 Evidence behavior:
 
-- default: sensitive evidence fields are sanitized
+- default: `precheck` remains available as the public summary, but full internal `evidence` is omitted
 - `debug_evidence=true`: full evidence is included
 
 ### Representative Response Shape

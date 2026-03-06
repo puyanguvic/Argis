@@ -698,25 +698,44 @@ def compute_pre_score(
     }
 
 
-def should_collect_deep_context(
+def _context_decision(*, collect: bool, reason: str) -> dict[str, Any]:
+    return {"collect": bool(collect), "reason": str(reason or "").strip()}
+
+
+def should_collect_web_context(
     pre_score: dict[str, Any],
     url_signals: list[dict[str, Any]],
-    attachment_signals: list[dict[str, Any]],
     context_trigger_score: int,
-) -> bool:
+) -> dict[str, Any]:
+    if not url_signals:
+        return _context_decision(collect=False, reason="no_url_signals")
     if int(pre_score.get("risk_score", 0)) >= max(0, int(context_trigger_score)):
-        return True
+        return _context_decision(collect=True, reason="risk_score_threshold")
     risky_url_flags = {"shortlink", "brand-spoof", "login-intent"}
     for signal in url_signals:
         flags = set(str(item) for item in signal.get("risk_flags", []))
-        if risky_url_flags.intersection(flags):
-            return True
+        matched = sorted(risky_url_flags.intersection(flags))
+        if matched:
+            return _context_decision(collect=True, reason=f"url_flag:{matched[0]}")
+    return _context_decision(collect=False, reason="no_web_trigger")
+
+
+def should_collect_attachment_context(
+    pre_score: dict[str, Any],
+    attachment_signals: list[dict[str, Any]],
+    context_trigger_score: int,
+) -> dict[str, Any]:
+    if not attachment_signals:
+        return _context_decision(collect=False, reason="no_attachment_signals")
+    if int(pre_score.get("risk_score", 0)) >= max(0, int(context_trigger_score)):
+        return _context_decision(collect=True, reason="risk_score_threshold")
     risky_attachment_flags = {"macro-suspected", "extension-mismatch", "executable-like"}
     for signal in attachment_signals:
         flags = set(str(item) for item in signal.get("risk_flags", []))
-        if risky_attachment_flags.intersection(flags):
-            return True
-    return False
+        matched = sorted(risky_attachment_flags.intersection(flags))
+        if matched:
+            return _context_decision(collect=True, reason=f"attachment_flag:{matched[0]}")
+    return _context_decision(collect=False, reason="no_attachment_trigger")
 
 
 __all__ = [
@@ -727,5 +746,6 @@ __all__ = [
     "enrich_attachments_with_static_scan",
     "build_web_signals",
     "compute_pre_score",
-    "should_collect_deep_context",
+    "should_collect_web_context",
+    "should_collect_attachment_context",
 ]

@@ -114,7 +114,7 @@ def test_analyze_accepts_structured_attachment_identifiers(monkeypatch):
     assert result["verdict"] == "benign"
 
 
-def test_analyze_sanitizes_sensitive_evidence_by_default(monkeypatch):
+def test_analyze_hides_full_evidence_by_default_and_sanitizes_precheck(monkeypatch):
     runtime = {
         "profile": "ollama",
         "provider": "local",
@@ -186,10 +186,7 @@ def test_analyze_sanitizes_sensitive_evidence_by_default(monkeypatch):
     assert "stderr" not in fetch
     assert "command" not in fetch
 
-    evidence_report = result["evidence"]["precheck"]["attachment_reports"][0]
-    assert "exists" not in evidence_report
-    assert "sha256" not in evidence_report
-    assert "details" not in evidence_report
+    assert "evidence" not in result
 
 
 def test_analyze_keeps_full_evidence_in_debug_mode(monkeypatch):
@@ -217,6 +214,20 @@ def test_analyze_keeps_full_evidence_in_debug_mode(monkeypatch):
                         }
                     ],
                 },
+                "evidence": {
+                    "evidence_pack": {"pre_score": {"risk_score": 80, "route": "deep"}},
+                    "precheck": {
+                        "attachment_reports": [
+                            {
+                                "name": "invoice.pdf",
+                                "risk_score": 80,
+                                "exists": True,
+                                "sha256": "abc123",
+                                "details": {"macro": True},
+                            }
+                        ]
+                    },
+                },
             }
 
     def _fake_create_agent(*, model_override=None):
@@ -229,3 +240,4 @@ def test_analyze_keeps_full_evidence_in_debug_mode(monkeypatch):
     assert report["exists"] is True
     assert report["sha256"] == "abc123"
     assert report["details"] == {"macro": True}
+    assert result["evidence"]["precheck"]["attachment_reports"][0]["exists"] is True

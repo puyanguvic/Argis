@@ -7,6 +7,7 @@ import json
 from typing import Any
 
 from phish_email_detection_agent.orchestrator.contracts import JudgeOutput, TriageResult
+from phish_email_detection_agent.orchestrator.judge_context import build_judge_context, resolve_evidence_id
 from phish_email_detection_agent.orchestrator.prompts import JUDGE_PROMPT
 from phish_email_detection_agent.evidence.redact import redact_value
 from phish_email_detection_agent.orchestrator.validator import OnlineValidator, ValidationIssue
@@ -58,13 +59,32 @@ class JudgeEngine:
                 output_type=AgentOutputSchema(JudgeOutput, strict_json_schema=False),
                 **common,
             )
-            redacted_pack = redact_value(evidence_pack.model_dump(mode="json"))
+            judge_context = build_judge_context(evidence_pack=evidence_pack, precheck=precheck)
+            redacted_pack = redact_value(judge_context)
             judge_run = Runner.run_sync(
                 judge_agent,
-                json.dumps({"evidence_pack": redacted_pack}, ensure_ascii=True),
+                json.dumps({"judge_context": redacted_pack}, ensure_ascii=True),
                 max_turns=service.max_turns,
             )
-            judge_output = JudgeOutput.model_validate(getattr(judge_run, "final_output", {}))
+            raw_output = getattr(judge_run, "final_output", {})
+            if isinstance(raw_output, dict):
+                top_evidence = raw_output.get("top_evidence")
+                if isinstance(top_evidence, list):
+                    normalized_top_evidence: list[dict[str, Any]] = []
+                    for item in top_evidence:
+                        if not isinstance(item, dict):
+                            normalized_top_evidence.append(item)
+                            continue
+                        entry = dict(item)
+                        if not str(entry.get("evidence_id", "")).strip():
+                            entry["evidence_id"] = resolve_evidence_id(
+                                judge_context=judge_context,
+                                evidence_path=str(entry.get("evidence_path", "")),
+                            )
+                        normalized_top_evidence.append(entry)
+                    raw_output = dict(raw_output)
+                    raw_output["top_evidence"] = normalized_top_evidence
+            judge_output = JudgeOutput.model_validate(raw_output)
 
             deterministic_score = int(evidence_pack.pre_score.risk_score)
             judge_score = max(0, min(100, int(judge_output.risk_score)))
@@ -134,6 +154,8 @@ class JudgeEngine:
                 provider_used=service.provider,
                 evidence={
                     "evidence_pack": evidence_pack.model_dump(mode="json"),
+                    "evidence_refs": judge_context.get("evidence_refs", []),
+                    "judge_context": judge_context,
                     "judge": judge_output.model_dump(mode="json"),
                     "precheck": precheck,
                 },

@@ -33,6 +33,8 @@ The evidence stage executes a fixed skill chain to collect:
 
 This stage also builds the `precheck` payload used in outputs. That payload includes combined URLs, hidden links, domain reports, attachment checks, component scores, fetch policy, and skill trace metadata.
 
+Web context admission and attachment-deep admission are evaluated separately. A risky URL does not automatically force attachment-deep analysis, and a risky attachment does not automatically force web fetch.
+
 ### 3. Pre-score and route selection
 
 The evidence stage produces a bounded `risk_score`, a route, and a list of reasons. The route is one of:
@@ -56,6 +58,14 @@ The skill router decides whether the judge should run. Judge execution requires:
 - policy that permits judge usage for the selected route
 
 `review` and `deep` routes are judge-eligible by default. `allow` routes can remain deterministic, or be sampled/always judged depending on `judge_allow_mode`.
+
+When the judge runs, it does not receive the full raw `EvidencePack`. The orchestrator first builds a route-aware `judge_context`:
+
+- `FAST`: minimal pre-score, selected surface signals, and precheck summary
+- `STANDARD`: selected URL/domain/text evidence plus bounded web-signal summaries
+- `DEEP`: expanded but still capped web and attachment-deep summaries
+
+This keeps the judge input aligned with the path-specific context budget instead of treating all routes as full-context prompts.
 
 ### 5. Fallback handling
 

@@ -56,6 +56,7 @@ Additional checks:
 
 5. confirm the active `runtime.profile` and `runtime.model`
 6. confirm whether recent config changes altered judge eligibility or capability flags
+7. inspect `precheck.context_admissions` to see whether deep context was admitted, skipped by policy, or skipped by score
 
 ## Incident: Docs Site Not Updated
 

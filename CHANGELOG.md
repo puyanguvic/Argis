@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 ## 2026-03-05
 
 ### Added
+- Route-aware judge context and stable evidence references:
+  - introduced bounded `judge_context` payloads for `FAST`, `STANDARD`, and `DEEP`
+  - added stable `evidence_id` references for selected judge-context evidence
+  - backfilled `top_evidence.evidence_id` from cited context paths when available
+  - surfaced `evidence_refs` and route-aware `judge_context` in internal evidence payloads
+  - Related issues: #13, #15
+
 - API input hardening for `/analyze`:
   - rejected `eml_path` in API JSON requests
   - enforced structured attachment schema (`name`/`filename`)
@@ -45,6 +52,13 @@ All notable changes to this project are documented in this file.
   - documented API input boundaries, evidence sanitization, and fallback taxonomy
   - Related issue: #12
   - Commit: `8e3459f`
+
+- Context-engineering runtime alignment:
+  - split deep-context admission into independent web and attachment gates
+  - added structured `context_admissions` metadata with admitted/skipped/capped states
+  - tightened API default output to omit full internal `evidence` unless `debug_evidence=true`
+  - updated architecture, blog, API, observability, and runbook docs to match shipped behavior
+  - Related issues: #14, #16, #17
 
 ### Validation
 - `ruff check src tests docs scripts`

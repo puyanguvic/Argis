@@ -121,6 +121,7 @@ class Provenance(BaseModel):
     timing_ms: dict[str, int] = Field(default_factory=dict)
     limits_hit: list[str] = Field(default_factory=list)
     errors: list[str] = Field(default_factory=list)
+    context_admissions: dict[str, object] = Field(default_factory=dict)
 
 
 class EvidencePack(BaseModel):
@@ -137,6 +138,7 @@ class EvidencePack(BaseModel):
 class TopEvidence(BaseModel):
     claim: str = Field(min_length=2)
     evidence_path: str = Field(min_length=2)
+    evidence_id: str = ""
     confidence: float = Field(default=0.0, ge=0.0, le=1.0)
 
 

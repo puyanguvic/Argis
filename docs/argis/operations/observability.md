@@ -51,6 +51,7 @@ Log per request:
 - verdict and risk score
 - fallback flags and reasons
 - duration/stage timing
+- context-admission status (`admitted`, `skipped_by_policy`, `skipped_by_score`, `skipped_by_signal`)
 
 Avoid logging raw sensitive email content unless explicitly allowed by security policy.
 
@@ -64,6 +65,7 @@ If you only have room to build a small dashboard, prioritize:
 - fallback count by `fallback_reason`
 - `provider_used` distribution
 - `path` distribution (`FAST`, `STANDARD`, `DEEP`)
+- context-admission breakdown for web and attachment-deep collection
 
 ## Useful Derived Views
 

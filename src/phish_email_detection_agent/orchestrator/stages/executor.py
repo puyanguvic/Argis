@@ -291,6 +291,9 @@ class PipelineExecutor:
         )
 
         if evidence_pack.web_signals or precheck.get("attachment_reports"):
+            context_decisions = precheck.get("context_decisions", {})
+            web_decision = context_decisions.get("web", {}) if isinstance(context_decisions, dict) else {}
+            attachment_decision = context_decisions.get("attachment", {}) if isinstance(context_decisions, dict) else {}
             yield service.event(
                 "deep_context",
                 "done",
@@ -298,6 +301,8 @@ class PipelineExecutor:
                 data={
                     "web_signals": len(evidence_pack.web_signals),
                     "attachment_reports": len(precheck.get("attachment_reports", [])),
+                    "web_reason": str(web_decision.get("reason", "")),
+                    "attachment_reason": str(attachment_decision.get("reason", "")),
                 },
             )
 

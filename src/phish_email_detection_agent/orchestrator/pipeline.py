@@ -14,6 +14,7 @@ from phish_email_detection_agent.orchestrator.contracts import (
     TriageResult,
 )
 from phish_email_detection_agent.orchestrator.pipeline_policy import PipelinePolicy
+from phish_email_detection_agent.orchestrator.judge_context import build_judge_context
 from phish_email_detection_agent.orchestrator.stages.evidence_builder import EvidenceBuilder
 from phish_email_detection_agent.orchestrator.stages.evidence_stage import EvidenceStage
 from phish_email_detection_agent.orchestrator.stages.executor import PipelineExecutor
@@ -33,7 +34,8 @@ from phish_email_detection_agent.orchestrator.precheck import (
     compute_pre_score as _compute_pre_score,
     enrich_attachments_with_static_scan as _enrich_attachments_with_static_scan,
     infer_url_signals as _infer_url_signals,
-    should_collect_deep_context as _should_collect_deep_context,
+    should_collect_attachment_context as _should_collect_attachment_context,
+    should_collect_web_context as _should_collect_web_context,
 )
 from phish_email_detection_agent.orchestrator.skill_router import SkillRouter
 from phish_email_detection_agent.orchestrator.tracing import TraceEvent, make_event
@@ -161,7 +163,8 @@ _EVIDENCE_STAGE = EvidenceStage(
     build_nlp_cues_fn=_build_nlp_cues,
     build_attachment_signals_fn=_build_attachment_signals,
     compute_pre_score_fn=_compute_pre_score,
-    should_collect_deep_context_fn=_should_collect_deep_context,
+    should_collect_web_context_fn=_should_collect_web_context,
+    should_collect_attachment_context_fn=_should_collect_attachment_context,
     build_web_signals_fn=_build_web_signals,
     analyze_attachments_fn=analyze_attachments,
     enrich_attachments_with_static_scan_fn=_enrich_attachments_with_static_scan,
@@ -182,6 +185,7 @@ def _fallback_result(
     pipeline_policy: PipelinePolicy,
 ) -> TriageResult:
     policy = pipeline_policy.normalized()
+    judge_context = build_judge_context(evidence_pack=evidence_pack, precheck=precheck)
     phishing_min_score = max(1, int(policy.suspicious_max_score) + 1)
     score = int(evidence_pack.pre_score.risk_score)
     verdict = _verdict_from_score(
@@ -242,6 +246,8 @@ def _fallback_result(
         provider_used=f"{provider}:fallback",
         evidence={
             "evidence_pack": evidence_pack.model_dump(mode="json"),
+            "evidence_refs": judge_context.get("evidence_refs", []),
+            "judge_context": judge_context,
             "precheck": precheck,
         },
     )

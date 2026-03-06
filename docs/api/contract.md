@@ -98,7 +98,8 @@ The `fallback_reason` field is part of the observable runtime contract for degra
 
 Default behavior:
 
-- sensitive evidence fields are sanitized in API responses
+- `precheck` remains available as the public summary
+- full internal `evidence` payloads are omitted from API responses
 
 Debug behavior with `debug_evidence=true`:
 

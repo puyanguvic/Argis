@@ -155,6 +155,8 @@ The evidence stage runs a fixed skill chain that can collect:
 
 This is the first major control point in context engineering. The system is not asking "what else can we fetch?" It is asking "what evidence is warranted under current policy and current score pressure?"
 
+That admission is artifact-specific rather than a single all-or-nothing deep-mode switch. URL-driven pressure can justify bounded web context without automatically unlocking attachment-deep analysis, and attachment-driven pressure can justify deep attachment inspection without automatically forcing web fetch.
+
 ### Stage 3: Pre-Score And Route Selection
 
 From that evidence, Argis derives a deterministic risk score, a route, and a set of reasons. This is not only a classification step. It is also a context-budgeting step.
@@ -190,6 +192,10 @@ Good context engineering is therefore not about maximizing information throughpu
 ### Stage 5: Optional Judge Usage
 
 The judge is intentionally downstream and policy-controlled. That means the judge receives bounded, curated context rather than raw world state.
+
+In the current runtime, that judge input is shaped into a route-aware `judge_context` rather than passing the full `EvidencePack` through unchanged. `FAST` keeps the payload minimal, `STANDARD` carries selected evidence summaries, and `DEEP` is the only path that admits bounded deep-artifact summaries such as fetched-page or attachment-deep findings.
+
+Selected evidence in that working set also carries stable `evidence_id` references so citations do not depend only on fragile array positions inside a transient prompt-shaped payload.
 
 This matters in phishing detection because a judge presented with unfiltered artifacts can fail in predictable ways:
 

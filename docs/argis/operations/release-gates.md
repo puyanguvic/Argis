@@ -45,3 +45,11 @@ This gate exists because external callers are more expensive to break than inter
 - did it change fallback behavior or runtime metadata?
 - did it widen side-effect or trust-boundary assumptions?
 - did it move a threshold or routing rule that operators depend on?
+
+## Issue And Commit Hygiene
+
+When work is tracked in GitHub issues:
+
+1. reference the issue from the commit history or merge commit
+2. verify the shipped change actually satisfies the issue scope
+3. close the issue after the implementation is merged or shipped, with a pointer to the resolving commit or PR

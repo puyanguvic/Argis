@@ -159,6 +159,8 @@ A change is done only if all are true:
 3. Relevant tests were added/updated and pass.
 4. `README.md`, relevant pages under `docs/argis/`, and relevant pages under `docs/api/` reflect behavior changes.
 5. Deprecated or compatibility-only code introduced by the change is tracked and time-bounded.
+6. `CHANGELOG.md` is updated when behavior, interfaces, or operator-visible runtime semantics change.
+7. If the work is tracked by a GitHub issue, the commit history should reference that issue and the issue should be closed when the implementation is merged/shipped.
 
 ## 11. Prohibited Changes
 

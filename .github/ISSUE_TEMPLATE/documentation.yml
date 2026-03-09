@@ -1,0 +1,56 @@
+name: Documentation improvement
+description: Report missing, incorrect, or unclear documentation.
+title: "[Docs]: "
+labels:
+  - documentation
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for README, docs site, API docs, examples, or release-note gaps.
+  - type: input
+    id: page
+    attributes:
+      label: Affected page or file
+      description: Link the page or list the file path if known.
+      placeholder: docs/argis/operations/release-gates.md
+    validations:
+      required: true
+  - type: dropdown
+    id: type
+    attributes:
+      label: Documentation issue type
+      options:
+        - Incorrect information
+        - Missing documentation
+        - Outdated after code change
+        - Unclear explanation
+        - Broken example or command
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is wrong or missing?
+      description: Describe the gap and why it matters.
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested fix
+      description: Describe the wording, example, section, or page you think should be added or corrected.
+  - type: textarea
+    id: code_impact
+    attributes:
+      label: Related code or behavior
+      description: Reference the relevant module, command, or API behavior if this docs issue was caused by a product change.
+      placeholder: src/phish_email_detection_agent/orchestrator/pipeline.py
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-flight checks
+      options:
+        - label: I searched for existing docs issues covering the same gap.
+        - label: I identified the specific page or file that should change.
+        - label: I noted whether README, `docs/argis/`, `docs/api/`, or `CHANGELOG.md` should be updated together.

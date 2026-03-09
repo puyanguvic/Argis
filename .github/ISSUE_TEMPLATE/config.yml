@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Argis documentation
+    url: https://github.com/cnlab-pu/Argis/tree/main/docs
+    about: Start with the docs for architecture, runtime flow, configuration, and release expectations.
+  - name: README and quickstart
+    url: https://github.com/cnlab-pu/Argis/blob/main/README.md
+    about: Check setup, CLI usage, provider profiles, and local verification commands before opening an issue.

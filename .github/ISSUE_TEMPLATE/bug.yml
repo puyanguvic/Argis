@@ -1,0 +1,93 @@
+name: Bug report
+description: Report a defect in runtime behavior, API responses, tooling, or documentation.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for reproducible defects. Include concrete inputs, observed output, and the smallest path to reproduce.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe the defect and the impact in 1-3 sentences.
+      placeholder: The pipeline returns `allow` for a known phishing sample after the latest precheck refactor.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: Provide exact steps, commands, sample inputs, and configuration needed to reproduce the issue.
+      placeholder: |
+        1. Run `uv run python -m phish_email_detection_agent --text '{"text":"..."}'`
+        2. Set `MY_AGENT_APP_ENABLE_DEEP_ANALYSIS=true`
+        3. Observe the returned verdict and evidence payload
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: Describe the expected result, including verdict, evidence, API shape, or safety behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Describe what happened instead. Include errors, regressions, missing evidence, or incorrect routing.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      description: Pick the primary subsystem involved.
+      options:
+        - policy
+        - tools
+        - orchestrator
+        - api
+        - ui
+        - cli
+        - docs
+        - ci/release
+    validations:
+      required: true
+  - type: textarea
+    id: architecture
+    attributes:
+      label: Architecture impact
+      description: Note any boundary violations, import-cycle risks, or runtime-flow regressions.
+      placeholder: The tool implementation now imports policy metadata directly, which violates the layer rules in AGENTS.md.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence and logs
+      description: Paste relevant traces, evidence IDs, screenshots, stack traces, or sanitized payloads.
+      render: shell
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include commit, branch, OS, Python version, and provider/runtime settings if relevant.
+      placeholder: |
+        commit: <sha>
+        branch: main
+        os: Ubuntu 24.04
+        python: 3.12
+        profile: ollama
+        model: ollama/qwen2.5:7b
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-flight checks
+      description: Confirm what you already verified before filing.
+      options:
+        - label: I searched for existing issues covering the same defect.
+        - label: I can reproduce this on the current main branch or a specific commit I listed above.
+        - label: I included enough detail for someone else to reproduce the issue.
+        - label: I noted whether the defect affects tests, docs, API contract, or changelog expectations.

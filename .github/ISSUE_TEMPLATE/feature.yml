@@ -1,0 +1,78 @@
+name: Feature request
+description: Propose a new capability or a meaningful improvement to an existing flow.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Request changes that fit the project's control-stack architecture. Proposals should state the user problem first, then the implementation direction.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What user or operator problem is not handled today?
+      placeholder: Operators cannot inspect why a borderline sample was routed to `review` without enabling full debug evidence.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: Describe the feature or behavior you want added.
+    validations:
+      required: true
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Primary layer
+      description: Where should this change mainly live?
+      options:
+        - policy
+        - tools
+        - orchestrator
+        - api
+        - ui
+        - cli
+        - docs
+        - unknown
+    validations:
+      required: true
+  - type: textarea
+    id: boundaries
+    attributes:
+      label: Architecture and safety considerations
+      description: Call out dependency direction, side-effect boundaries, runtime-flow impact, and security constraints.
+      placeholder: |
+        This should stay in `orchestrator` because it changes routing metadata.
+        It must not introduce direct tool execution from `policy`.
+        It should preserve bounded fetch and evidence traceability guarantees.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Describe competing approaches, workarounds, or reasons to avoid a broader change.
+  - type: textarea
+    id: contract
+    attributes:
+      label: API, docs, and migration impact
+      description: Note request/response changes, compatibility concerns, docs updates, and whether `CHANGELOG.md` should change.
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation plan
+      description: Which tests, docs, or acceptance checks should prove the feature is complete?
+      placeholder: |
+        - Add/extend unit tests in `tests/orchestrator/`
+        - Run `ruff check src tests docs scripts`
+        - Run `pytest -k 'not hf_phishing_email_balanced_sample'`
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-flight checks
+      options:
+        - label: I searched for existing feature requests and roadmap items first.
+        - label: I described the user problem, not only an implementation preference.
+        - label: I considered architecture boundaries and safety constraints from `AGENTS.md`.
+        - label: I noted expected test, documentation, and migration work.

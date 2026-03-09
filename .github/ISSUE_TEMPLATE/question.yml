@@ -1,0 +1,51 @@
+name: Question
+description: Ask for clarification about architecture, usage, behavior, or contribution expectations.
+title: "[Question]: "
+labels:
+  - question
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for focused project questions. For defects or change requests, use the bug or feature templates instead.
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: Ask the specific question you need answered.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Explain what you are trying to do and what you already checked.
+      placeholder: I read `docs/argis/architecture/runtime-flow.md` and `AGENTS.md`, but I still do not know where a new calibration rule should live.
+  - type: dropdown
+    id: topic
+    attributes:
+      label: Topic
+      options:
+        - Architecture
+        - API usage
+        - CLI usage
+        - Tooling and tests
+        - Documentation
+        - Release process
+        - Security and safety
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: Relevant references
+      description: Link docs pages, code paths, issues, or PRs that frame the question.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-flight checks
+      options:
+        - label: I searched existing issues and docs first.
+        - label: This is not a bug report or feature request in disguise.
+        - label: I included enough context for a precise answer.
